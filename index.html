@@ -50,7 +50,7 @@
         let dicoMots = [];
         let map;
         let gridSquareLayer;
-        let gridLayerGroup;
+        let gridCanvasLayer;
 
         const EARTH_CIRCUMFERENCE = 40075016.686;
         const ORIGIN_SHIFT = EARTH_CIRCUMFERENCE / 2.0;
@@ -95,46 +95,74 @@
             }, 3000);
         }
 
-        function drawGrid() {
-            gridLayerGroup.clearLayers();
-            
-            // Ne dessine rien si le calque n'est pas actif
-            if (!map.hasLayer(gridLayerGroup)) return;
+        // Calque personnalisé Canvas pour des performances ultra rapides
+        const CanvasGridLayer = L.Layer.extend({
+            onAdd: function() {
+                this._canvas = L.DomUtil.create('canvas', 'leaflet-grid-layer leaflet-zoom-animated');
+                this._canvas.style.pointerEvents = 'none'; // Laisse passer les clics vers la carte
+                this._ctx = this._canvas.getContext('2d');
+                this.getPane().appendChild(this._canvas);
+                
+                // Dessine en temps réel pendant le déplacement
+                map.on('move', this._reset, this);
+                this._reset();
+            },
+            onRemove: function() {
+                L.DomUtil.remove(this._canvas);
+                map.off('move', this._reset, this);
+            },
+            _reset: function() {
+                const size = map.getSize();
+                const topLeft = map.containerPointToLayerPoint([0, 0]);
+                L.DomUtil.setPosition(this._canvas, topLeft);
+                this._canvas.width = size.x;
+                this._canvas.height = size.y;
+                this._draw();
+            },
+            _draw: function() {
+                // Ne dessine rien si dézoomé, vide juste le canvas
+                if (map.getZoom() < 19) {
+                    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                    return;
+                }
 
-            // Protection anti-crash : seulement aux zooms profonds
-            if (map.getZoom() < 19) {
-                return;
+                const bounds = map.getBounds();
+                const swMeters = latLonToMeters(bounds.getSouth(), bounds.getWest());
+                const neMeters = latLonToMeters(bounds.getNorth(), bounds.getEast());
+
+                const startX = Math.floor(swMeters.x / 3) * 3;
+                const endX = Math.ceil(neMeters.x / 3) * 3;
+                const startY = Math.floor(swMeters.y / 3) * 3;
+                const endY = Math.ceil(neMeters.y / 3) * 3;
+
+                this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                this._ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Blanc semi-transparent visible sur sat et map
+                this._ctx.lineWidth = 1;
+                this._ctx.beginPath();
+
+                // Lignes verticales
+                for (let x = startX; x <= endX; x += 3) {
+                    const bottom = metersToLatLon(x, startY);
+                    const top = metersToLatLon(x, endY);
+                    const p1 = map.latLngToContainerPoint([bottom.lat, bottom.lon]);
+                    const p2 = map.latLngToContainerPoint([top.lat, top.lon]);
+                    this._ctx.moveTo(p1.x, p1.y);
+                    this._ctx.lineTo(p2.x, p2.y);
+                }
+
+                // Lignes horizontales
+                for (let y = startY; y <= endY; y += 3) {
+                    const left = metersToLatLon(startX, y);
+                    const right = metersToLatLon(endX, y);
+                    const p1 = map.latLngToContainerPoint([left.lat, left.lon]);
+                    const p2 = map.latLngToContainerPoint([right.lat, right.lon]);
+                    this._ctx.moveTo(p1.x, p1.y);
+                    this._ctx.lineTo(p2.x, p2.y);
+                }
+
+                this._ctx.stroke();
             }
-
-            const bounds = map.getBounds();
-            const swMeters = latLonToMeters(bounds.getSouth(), bounds.getWest());
-            const neMeters = latLonToMeters(bounds.getNorth(), bounds.getEast());
-
-            // Arrondir aux multiples de 3 mètres
-            const startX = Math.floor(swMeters.x / 3) * 3;
-            const endX = Math.ceil(neMeters.x / 3) * 3;
-            const startY = Math.floor(swMeters.y / 3) * 3;
-            const endY = Math.ceil(neMeters.y / 3) * 3;
-
-            const lines = [];
-
-            // Lignes verticales
-            for (let x = startX; x <= endX; x += 3) {
-                const bottom = metersToLatLon(x, startY);
-                const top = metersToLatLon(x, endY);
-                lines.push([[bottom.lat, bottom.lon], [top.lat, top.lon]]);
-            }
-
-            // Lignes horizontales
-            for (let y = startY; y <= endY; y += 3) {
-                const left = metersToLatLon(startX, y);
-                const right = metersToLatLon(endX, y);
-                lines.push([[left.lat, left.lon], [right.lat, right.lon]]);
-            }
-
-            // Création d'une multi-polyline unique pour de très hautes performances
-            L.polyline(lines, { color: 'rgba(120, 120, 120, 0.6)', weight: 1 }).addTo(gridLayerGroup);
-        }
+        });
 
         async function initApp() {
             try {
@@ -180,7 +208,7 @@
                     attribution: '© Esri'
                 });
 
-                gridLayerGroup = L.layerGroup();
+                gridCanvasLayer = new CanvasGridLayer();
 
                 map = L.map('map', { 
                     zoomControl: false,
@@ -194,14 +222,10 @@
                     "Satellite (Esri)": satelliteLayer
                 };
                 const overlayMaps = {
-                    "Grille de référence (3x3m)": gridLayerGroup
+                    "Grille de référence (3x3m)": gridCanvasLayer
                 };
                 L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
                 L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-                // Événements pour redessiner la grille
-                map.on('moveend', drawGrid);
-                map.on('zoomend', drawGrid);
                 
                 // Alerte quand on active la grille et qu'on est dézoomé
                 map.on('overlayadd', function(e) {
@@ -209,7 +233,6 @@
                         if (map.getZoom() < 19) {
                             showToast("Zoomez davantage pour voir la grille (Zoom >= 19)");
                         }
-                        drawGrid();
                     }
                 });
 
