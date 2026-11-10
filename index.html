@@ -32,7 +32,7 @@ function addEmbeddedManifest() {
 }
 if (location.protocol.startsWith('http')) addEmbeddedManifest();
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); window.__installPrompt = e; const b = document.getElementById('bInstall'); if (b) b.classList.add('ready'); });
-window.addEventListener('appinstalled', () => { window.__installPrompt = null; const b = document.getElementById('bInstall'); if (b) b.classList.remove('ready'); });
+window.addEventListener('appinstalled', () => { window.__installPrompt = null; const b = document.getElementById('bInstall'); if (b) b.classList.add('gone'); });
 </script>
 <meta name="theme-color" content="#0f1115">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,6 +93,8 @@ svg{display:block}
 .ib.on[data-tip]:hover:after{display:none}
 .ib[data-tip]:hover:after{content:attr(data-tip);position:absolute;left:46px;top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:4px 9px;border-radius:7px;font-size:12px;pointer-events:none}
 #topright .ib{background:var(--panel);border:1px solid var(--line);width:44px;height:44px;border-radius:12px}
+@media (display-mode: standalone), (display-mode: window-controls-overlay), (display-mode: minimal-ui){#bInstall{display:none!important}}
+#bInstall.gone{display:none!important}
 #bInstall.ready{background:var(--acc2);border-color:var(--acc2);color:#14161b}
 #topright .ib[data-tip]:hover:after{left:auto;right:0;top:52px;transform:none}
 
@@ -118,8 +120,47 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .tg.on{background:var(--acc2)}.tg.on:after{left:19px;background:#14161b}
 
 /* ---------- panneau carré ---------- */
-#card{position:absolute;right:12px;top:68px;width:340px;max-height:calc(100% - 110px);overflow:auto;z-index:880;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:none}
-#card.on{display:block}
+#card,.card{position:absolute;right:12px;top:68px;width:340px;max-height:calc(100% - 110px);overflow:auto;z-index:880;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:none}
+#card.on,.card.on{display:block}
+#pcard{width:380px}
+.pt-t{padding:2px 16px 0;font-size:21px;font-weight:600}
+.pt-s{padding:2px 16px 0;color:var(--mut);font-size:13px}
+.sb{font-size:13px}
+.sb .ld{color:var(--dim);font-size:12.5px}
+.sb .mu{color:var(--mut);font-size:12.5px;display:block}
+.li{padding:5px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.li:first-child{border-top:0}
+.li b{font-weight:500}
+.li span{color:var(--mut);font-size:12.5px}
+.li.zone b{color:var(--acc);font-size:15px}
+.sub{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--dim);margin:10px 0 2px}
+.xl{display:inline-block;margin-top:8px;color:var(--acc);font-size:12.5px;text-decoration:none}
+.xl:hover{text-decoration:underline}
+.leaflet-container.qmode{cursor:help}
+#ctxm{position:absolute;z-index:1500;display:none;flex-direction:column;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:4px;min-width:210px}
+#ctxm.on{display:flex}
+#ctxm button{background:none;border:0;text-align:left;padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px}
+#ctxm button:hover{background:var(--panel2)}
+#ptMe{margin-bottom:4px}
+.tr{display:flex;align-items:center;gap:6px;padding:5px 4px 5px calc(4px + var(--d) * 18px);border-radius:8px;border:1px solid transparent;cursor:grab;position:relative}
+.tr:hover{background:var(--panel2)}
+.tr.off .m{opacity:.45}
+.tr .m{flex:1;min-width:0}
+.tr .n{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr .w{font-size:11.5px;color:var(--mut)}
+.tr .ib{width:26px;height:26px;flex:none}.tr .ib svg{width:14px;height:14px}
+.tr .sw{width:14px;height:14px;border-radius:4px;flex:none;cursor:pointer;position:relative;overflow:hidden}
+.tr .sw input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tr .fi{width:16px;height:16px;color:var(--acc);flex:none}
+.tr .tw{width:20px;height:20px}.tr .tw svg{width:12px;height:12px;transition:transform .15s}
+.tr .tw.op svg{transform:rotate(90deg)}
+.tr.drag{opacity:.4}
+.tr.over-in{border-color:var(--acc);background:var(--accbg)}
+.tr.over-b{box-shadow:inset 0 2px 0 var(--acc)}
+.tr.over-a{box-shadow:inset 0 -2px 0 var(--acc)}
+.tr-end{font-size:11.5px;color:var(--dim);text-align:center;padding:6px;border:1px dashed var(--line);border-radius:8px;margin-top:6px;display:none}
+#lyList:has(.tr.drag) .tr-end{display:block}
+.tr-end.over-in{border-color:var(--acc);color:var(--acc)}
 .ch{padding:14px 16px 4px;display:flex;justify-content:space-between;align-items:center}
 .ch .k{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut)}
 #words{padding:4px 16px 2px;font-size:25px;font-weight:600;line-height:1.25;overflow-wrap:anywhere;word-break:normal;cursor:copy}
@@ -315,7 +356,7 @@ setTimeout(done,4700);
   <div id="searchwrap">
     <div id="search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a92a6" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, ///trois.mots.ici, ou coordonnées…">
+      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, coordonnées ou ///trois.mots.ici…">
       <button class="ib" id="qclear" title="Effacer" style="width:32px;height:32px;display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="sugg"></div>
@@ -326,16 +367,18 @@ setTimeout(done,4700);
 </div>
 
 <div id="tools">
-  <button class="ib" id="tLayers" data-tip="Fonds de carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
-  <button class="ib" id="tXchg" data-tip="Importer / exporter (KML, KMZ, DXF)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12M3 12l4 4 4-4M17 20V8M13 12l4-4 4 4"/></svg></button>
-  <button class="ib" id="tLocate" data-tip="Ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
-  <button class="ib" id="tPoints" data-tip="Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
+  <button class="ib" id="tLayers" data-tip="Fonds de carte et superpositions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
+  <button class="ib" id="tPoints" data-tip="Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
   <div class="sep"></div>
-  <button class="ib" id="tOpen" data-tip="Ouvrir (Ctrl+O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></button>
-  <button class="ib" id="tSave" data-tip="Enregistrer (Ctrl+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
-  <button class="ib" id="tSaveAs" data-tip="Enregistrer sous (Ctrl+Maj+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M13 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9l4 4v5"/><path d="M8 3v5h6M18 15v6M15 18h6"/></svg></button>
+  <button class="ib" id="tParcel" data-tip="Interroger la parcelle (PLU, risques, géologie…)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l6-2 6 2 4-1.5V18l-4 1.5-6-2-6 2V7.5z" opacity=".55"/><circle cx="12" cy="11" r="3.6"/><path d="M14.6 13.6L18 17"/></svg></button>
   <div class="sep"></div>
-  <button class="ib" id="tSettings" data-tip="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+  <button class="ib" id="tXchg" data-tip="Import / export et calques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12M3 12l4 4 4-4M17 20V8M13 12l4-4 4 4"/></svg></button>
+  <div class="sep"></div>
+  <button class="ib" id="tOpen" data-tip="Ouvrir (Ctrl+O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></button>
+  <button class="ib" id="tSave" data-tip="Enregistrer (Ctrl+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
+  <button class="ib" id="tSaveAs" data-tip="Enregistrer sous (Ctrl+Maj+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9l4 4v5"/><path d="M8 3v5h6M18 15v6M15 18h6"/></svg></button>
+  <div class="sep"></div>
+  <button class="ib" id="tSettings" data-tip="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   <button class="ib" id="tGuide" data-tip="Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13M9 8h6"/></svg></button>
 </div>
 
@@ -346,22 +389,24 @@ setTimeout(done,4700);
     <div class="lbl">Fond</div>
     <div id="baseList"></div>
     <div class="lbl">Superpositions</div>
-    <div class="row"><label>Grille 3×3 m <span style="color:var(--dim)">(G)</span></label><button class="tg" id="ovGrid"></button></div>
-    <div class="row"><label>Mots dans les carrés <span style="color:var(--dim)">(L)</span></label><button class="tg" id="ovLabels"></button></div>
+    <div class="row"><label>Grille de mots 3×3 m <span style="color:var(--dim)">(G)</span></label><button class="tg" id="ovGrid"></button></div>
+    <div class="row"><label>Afficher les 3 mots <span style="color:var(--dim)">(L)</span></label><button class="tg" id="ovLabels"></button></div>
     <div class="row"><label>Parcelles cadastrales (IGN)</label><button class="tg" id="ovCad"></button></div>
+    <div class="row"><label>Carte géologique (BRGM)</label><button class="tg" id="ovGeol"></button></div>
   </div>
 </div>
 
 <!-- Tiroir : échanges -->
 <div class="drawer" id="dXchg">
-  <div class="dh">Importer / exporter <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh">Import / export <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Importer</div>
     <button class="btn pri" id="xImport" style="width:100%">Choisir un fichier KML, KMZ, DXF, GeoJSON…</button>
     <p class="hint">Ou glissez-déposez le fichier sur la carte.</p>
     <div class="row"><label>Projection du DXF</label></div><select id="xCrsIn" style="width:100%"></select>
-    <div class="lbl">Calques importés</div>
+    <div class="lbl" style="display:flex;justify-content:space-between;align-items:center">Calques <button class="btn" id="lyFolder" style="flex:none;height:26px;padding:0 10px;font-size:12px;text-transform:none;letter-spacing:0">+ Dossier</button></div>
     <div id="lyList"></div>
+    <p class="hint">Glissez les calques pour les ranger dans un dossier ou changer leur ordre d'affichage. Double-clic sur un nom pour le renommer.</p>
     <div class="lbl">Exporter</div>
     <label class="chk"><input type="checkbox" id="xPts" checked> Mes points (nom + trois mots)</label>
     <label class="chk"><input type="checkbox" id="xSq" checked> Carrés 3×3 m des points</label>
@@ -375,7 +420,8 @@ setTimeout(done,4700);
 <!-- Tiroir : points -->
 <div class="drawer" id="dPoints">
   <div class="dh"><span>Mes points <span id="ptCount" style="color:var(--mut);font-weight:400"></span></span><button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <div class="db" id="ptList"></div>
+  <div class="db"><button class="btn" id="ptMe" style="width:100%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Centrer sur moi</button>
+    <div class="lbl">Mes points favoris</div><div id="ptList"></div><p class="hint">Clic droit sur la carte → « Ajouter aux favoris ici ».</p></div>
 </div>
 
 <!-- Tiroir : paramètres -->
@@ -419,6 +465,23 @@ setTimeout(done,4700);
     <div class="lbl" style="margin-top:0">Voisinage <span style="text-transform:none;letter-spacing:0">— flèches du clavier pour se déplacer</span></div>
     <div id="nb"></div>
   </div>
+</div>
+
+<!-- Fiche parcelle -->
+<div id="pcard" class="card">
+  <div class="ch"><span class="k">Interrogation de la parcelle</span><button class="ib" id="pClose" style="width:28px;height:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="pTitle" class="pt-t"></div><div id="pSub" class="pt-s"></div>
+  <div class="acts">
+    <button class="btn" id="pCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Référence</button>
+    <button class="btn" id="pFav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 7v5M9.5 9.5h5" stroke-linecap="round"/></svg>Favori</button>
+  </div>
+  <div id="pBody"></div>
+</div>
+<div id="ctxm">
+  <button data-c="parcel">Interroger la parcelle ici</button>
+  <button data-c="fav">Ajouter aux favoris ici</button>
+  <button data-c="words">Trois mots de ce point</button>
+  <button data-c="xy">Copier les coordonnées</button>
 </div>
 
 <div id="status"><span id="stZoom">z 19</span><span class="w" id="stHover">Survolez la carte</span></div>
@@ -535,10 +598,11 @@ if (typeof module !== 'undefined') module.exports = MM3;
 /* ======================= MomoMAP — interface ======================= */
 const $ = s => document.querySelector(s);
 const APP = 'MomoMAP', EXT = '.mmap', LS = 'momomap.';
-const DEF = { gridColor:'#ffffff', gridOp:0.45, gridMin:6, labMin:80, selColor:'#fff200', fly:true, l93:true, backup:5, base:'osm', cad:false, grid:true, labels:true };
+const DEF = { gridColor:'#ffffff', gridOp:0.45, gridMin:6, labMin:80, selColor:'#fff200', fly:true, l93:true, backup:5, base:'osm', cad:false, geol:false, grid:false, labels:true, v:2 };
 let S = Object.assign({}, DEF, load('settings') || {});
 if (S.selColor === '#2fd5a8') S.selColor = DEF.selColor;
 if (S.base === 'dark') S.base = 'osm';
+if ((S.v || 1) < 2) { S.grid = false; S.v = 2; }
 let points = load('points') || [];
 let sel = null, selInfo = null, hover = null, hoverKey = '';
 let fileHandle = null, fileName = load('fileName') || 'sans titre', dirty = false;
@@ -578,6 +642,10 @@ $('#baseList').onclick = e => { const o = e.target.closest('[data-b]'); if (o) s
 function setCad(on){ S.cad = on; $('#ovCad').classList.toggle('on', on); if (cadLayer) { map.removeLayer(cadLayer); cadLayer = null; }
   if (on) cadLayer = L.tileLayer(IGN('CADASTRALPARCELS.PARCELLAIRE_EXPRESS','image/png','PCI vecteur'), { maxNativeZoom:19, maxZoom:25, opacity:.85, attribution:'© IGN cadastre' }).addTo(map); saveSettings(); }
 $('#ovCad').onclick = () => setCad(!S.cad);
+let geolLayer = null;
+function setGeol(on){ S.geol = on; $('#ovGeol').classList.toggle('on', on); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
+  if (on) geolLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { layers: 'SCAN_H_GEOL50', format: 'image/png', transparent: true, opacity: .6, maxZoom: 25, attribution: '© BRGM' }).addTo(map); saveSettings(); }
+$('#ovGeol').onclick = () => setGeol(!S.geol);
 
 /* ---------- calque grille (canvas) ---------- */
 const cv = document.createElement('canvas'); cv.id = 'gridcv'; map.getContainer().appendChild(cv);
@@ -630,11 +698,16 @@ function drawLabels(bd, cpx){
 }
 
 /* ---------- survol & sélection ---------- */
-map.on('mousemove', e => { const c = MM3.cellAt(e.latlng.lat, e.latlng.lng), k = c.g + ':' + c.c;
-  if (k !== hoverKey) { hoverKey = k; hover = c; const w = MM3.wordsOfCell(c).words;
-    $('#stHover').innerHTML = `<b>///</b>${esc(w.join('.'))} &nbsp;<span style="color:var(--mut)">${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}</span>`; redraw(); } });
+map.on('mousemove', e => { const { lat, lng } = e.latlng, l = S.l93 && HAS_PROJ && inFranceBox(lat, lng) ? toL93(lat, lng) : null;
+  const xy = `<span style="color:var(--mut)">${lat.toFixed(6)}, ${lng.toFixed(6)}${l ? ` · L93 ${l[0].toFixed(1)} ${l[1].toFixed(1)}` : ''}</span>`;
+  if (!S.grid) { hover = null; $('#stHover').innerHTML = xy; return; }
+  const c = MM3.cellAt(lat, lng), k = c.g + ':' + c.c; hover = c;
+  if (k !== hoverKey) { hoverKey = k; redraw(); }
+  $('#stHover').innerHTML = `<b>///</b>${esc(MM3.wordsOfCell(c).words.join('.'))} &nbsp;${xy}`; });
 map.on('mouseout', () => { hover = null; hoverKey = ''; redraw(); });
-map.on('click', e => select(MM3.cellAt(e.latlng.lat, e.latlng.lng), { fly: S.fly }));
+map.on('click', e => { if (mode === 'parcel') return queryParcel(e.latlng.lat, e.latlng.lng);
+  if (S.grid) select(MM3.cellAt(e.latlng.lat, e.latlng.lng), { fly: S.fly }); });
+function closeCards(){ document.querySelectorAll('#card,.card').forEach(c => c.classList.remove('on')); }
 
 function select(cell, o = {}){
   sel = cell; selInfo = MM3.wordsOfCell(cell); const b = MM3.bounds(cell), lat = (b.s + b.n) / 2, lon = (b.w + b.e) / 2;
@@ -643,16 +716,14 @@ function select(cell, o = {}){
   $('#words').classList.toggle('long', w.join('.').length > 24);
   const zt = ['Zone France — 5 000 noms les plus courants', 'Zone Europe — noms courants', 'Terres émergées', 'Océans et pôles'][selInfo.zone];
   $('#zone').innerHTML = `<i></i>${zt}`;
-  const wm = (b.e - b.w) * 111195 * Math.cos(lat * Math.PI / 180), hm = (b.n - b.s) * 111195;
   const rows = [['WGS84', `${lat.toFixed(6)}, ${lon.toFixed(6)}`], ['DMS', `${dms(lat,'N','S')} ${dms(lon,'E','O')}`]];
   if (S.l93 && HAS_PROJ && inFranceBox(lat, lon)) { const p = toL93(lat, lon); rows.push(['Lambert 93', `X ${p[0].toFixed(2)}  Y ${p[1].toFixed(2)}`]); }
-  rows.push(['Taille', `${wm.toFixed(2)} × ${hm.toFixed(2)} m`]);
-  $('#coords').innerHTML = rows.map(([k, v], i) => `<span class="k">${k}</span><span class="v" title="${esc(v)}">${esc(v)}</span>${i < rows.length - 1 ? `<button class="ib c" data-cp="${esc(v)}" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>` : '<span></span>'}`).join('');
+  $('#coords').innerHTML = rows.map(([k, v], i) => `<span class="k">${k}</span><span class="v" title="${esc(v)}">${esc(v)}</span>${true ? `<button class="ib c" data-cp="${esc(v)}" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>` : '<span></span>'}`).join('');
   let nb = '';
   for (let dr = 1; dr >= -1; dr--) for (let dc = -1; dc <= 1; dc++) { const n = dr || dc ? MM3.neighbor(cell, dr, dc) : cell;
     nb += `<button class="${dr||dc?'':'me'}" data-g="${n.g}" data-c="${n.c}">${MM3.wordsOfCell(n).words.map(esc).join('<br>')}</button>`; }
   $('#nb').innerHTML = nb;
-  $('#card').classList.add('on'); $('#savebox').classList.remove('on');
+  closeCards(); $('#card').classList.add('on'); $('#savebox').classList.remove('on');
   history.replaceState(null, '', '#' + fmtW(w));
   if (o.fly) map.flyTo([lat, lon], Math.max(map.getZoom(), o.zoom || 19), { duration: .6 });
   else if (o.pan && !map.getBounds().pad(-.15).contains([lat, lon])) map.panTo([lat, lon]);
@@ -733,31 +804,35 @@ let ptLayer = L.layerGroup().addTo(map);
 function renderPoints(){
   ptLayer.clearLayers();
   points.forEach(p => L.marker([p.lat, p.lon], { icon: pinIcon() }).bindTooltip(`${esc(p.nom)}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(p.mots)}</span>`, { className:'pt-tip', direction:'top', offset:[0,-26] })
-    .on('click', () => { const r = MM3.cellOfWords(p.mots.split('.')); if (r.cell) select(r.cell, { fly: S.fly }); }).addTo(ptLayer));
+    .on('click', () => { const r = MM3.cellOfWords(p.mots.split('.')); if (r.cell) select(r.cell); }).addTo(ptLayer));
   $('#ptCount').textContent = points.length ? `(${points.length})` : '';
   $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><div class="m"><div class="n">${esc(p.nom)}</div><div class="w">///${esc(p.mots)}</div></div>
     <button class="ib" data-ren="${i}" title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
     <button class="ib" data-del="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`).join('')
-    : `<div class="empty">Aucun point.<br>Choisissez un carré puis « Point » pour l'ajouter.</div>`;
+    : `<div class="empty">Aucun point favori pour l'instant.</div>`;
 }
 $('#ptList').onclick = e => {
   const d = e.target.closest('[data-del]'), r = e.target.closest('[data-ren]'), it = e.target.closest('.pt');
   if (d) { const p = points[+d.dataset.del]; if (confirm(`Supprimer le point « ${p.nom} » ?`)) { points.splice(+d.dataset.del, 1); changed(); } return; }
   if (r) { const p = points[+r.dataset.ren], n = prompt('Nouveau nom :', p.nom); if (n && n.trim()) { p.nom = n.trim(); changed(); } return; }
-  if (it) { const p = points[+it.dataset.i], res = MM3.cellOfWords(p.mots.split('.')); if (res.cell) select(res.cell, { fly: true }); }
+  if (it) { const p = points[+it.dataset.i]; map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 18), { duration: .6 }); }
 };
 $('#cAdd').onclick = () => { if (!sel) return; $('#savebox').classList.add('on'); $('#ptName').value = ''; $('#ptName').focus(); };
 function addPoint(){ const b = MM3.bounds(sel), nom = $('#ptName').value.trim() || `Point ${points.length + 1}`;
   points.push({ id: Date.now().toString(36), nom, mots: selInfo.words.join('.'), lat: +((b.s + b.n) / 2).toFixed(7), lon: +((b.w + b.e) / 2).toFixed(7), date: new Date().toISOString() });
   $('#savebox').classList.remove('on'); changed(); toast(`Point « ${nom} » ajouté`); }
 $('#ptOk').onclick = addPoint; $('#ptName').onkeydown = e => { if (e.key === 'Enter') addPoint(); if (e.key === 'Escape') $('#savebox').classList.remove('on'); };
+function addFav(lat, lon, nom, silent){
+  if (!silent) { nom = prompt('Nom du point favori :', nom || `Point ${points.length + 1}`); if (nom === null) return; nom = nom.trim() || `Point ${points.length + 1}`; }
+  points.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), nom, mots: MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.'), lat: +lat.toFixed(7), lon: +lon.toFixed(7), date: new Date().toISOString() });
+  if (!silent) { changed(); toast(`« ${nom} » ajouté à Mes points`); } }
 function changed(){ store('points', points); dirty = true; renderPoints(); updFile(); }
 
 /* ---------- fichiers .mmap ---------- */
 function docData(){ const c = map.getCenter(); return { app: APP, version: 1, grille: 'momomap-3x3-v1', enregistre: new Date().toISOString(), vue: { lat: c.lat, lon: c.lng, zoom: map.getZoom(), fond: S.base }, points, calques: layers }; }
 function applyDoc(d){ if (!d || d.app !== APP) throw new Error('Ce fichier n\'est pas un fichier MomoMAP');
   points = Array.isArray(d.points) ? d.points : []; store('points', points); renderPoints();
-  layers = Array.isArray(d.calques) ? d.calques : []; saveLayers(); renderLayers();
+  layers = (Array.isArray(d.calques) ? d.calques : []).map(x => ({ kind: 'layer', parent: null, ...x })); saveLayers(); renderLayers();
   if (d.vue) { if (d.vue.fond) setBase(d.vue.fond); map.setView([d.vue.lat, d.vue.lon], d.vue.zoom || 18); } }
 function updFile(){ $('#fileName').textContent = fileName; $('#dirty').textContent = dirty ? '•' : ''; store('fileName', fileName); }
 async function openFile(){
@@ -798,40 +873,94 @@ function guessCRS(xs, ys){ // devine la projection d'un DXF d'après ses coordon
   if (mx > 1000000 && mx < 2500000 && my > 1000000 && my < 9300000) { const z = Math.floor((my - 2e5) / 1e6) + 41; if (z >= 42 && z <= 50) return 'CC' + z; }
   return null; }
 const LAYER_COLORS = ['#38bdf8','#fb923c','#f472b6','#a3e635','#c084fc','#f87171','#2dd4bf'];
-let layers = load('layers') || [], layerObjs = {};
+let layers = (load('layers') || []).map(x => ({ kind: 'layer', parent: null, ...x })), layerObjs = {}, dragId = null;
 function saveLayers(){ try { localStorage.setItem(LS + 'layers', JSON.stringify(layers)); } catch(e){ toast('Calques trop lourds pour la mémoire du navigateur : pensez à enregistrer le fichier .mmap'); } }
+const lyById = id => layers.find(x => x.id === id);
+const lyKids = f => layers.filter(x => x.parent === f.id);
+const lyShown = l => l.visible && (!l.parent || (lyById(l.parent) || { visible: true }).visible);
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 function drawLayer(ly){
   if (layerObjs[ly.id]) { map.removeLayer(layerObjs[ly.id]); delete layerObjs[ly.id]; }
-  if (!ly.visible) return;
+  if (ly.kind !== 'layer' || !lyShown(ly)) return;
   layerObjs[ly.id] = L.geoJSON(ly.geo, { renderer: L.canvas({ padding: .3 }),
     style: () => ({ color: ly.color, weight: 2, opacity: .95, fillOpacity: .12 }),
-    pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: ly.color, fillOpacity: 1, renderer: L.canvas() }),
+    pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: ly.color, fillOpacity: 1 }),
     onEachFeature: (f, l) => { const p = f.properties || {}, t = [p.name, p.layer && 'calque ' + p.layer].filter(Boolean).join(' · '); if (t) l.bindTooltip(esc(t), { className: 'pt-tip', sticky: true }); }
   }).addTo(map);
 }
-function renderLayers(){
-  Object.keys(layerObjs).forEach(id => { if (!layers.find(l => l.id === id)) { map.removeLayer(layerObjs[id]); delete layerObjs[id]; } });
-  layers.forEach(drawLayer);
-  $('#lyList').innerHTML = layers.length ? layers.map((l, i) => { const n = l.geo.features.length, np = l.geo.features.filter(f => f.geometry.type === 'Point').length;
-    return `<div class="pt" data-i="${i}"><span class="sw" style="width:12px;height:12px;border-radius:3px;background:${l.color};flex:none"></span><div class="m"><div class="n" title="${esc(l.name)}">${esc(l.name)}</div><div class="w" style="color:var(--mut)">${n} objet${n > 1 ? 's' : ''}${l.crs ? ' · ' + l.crs : ''}</div></div>
-    <button class="ib" data-ly="eye" title="${l.visible ? 'Masquer' : 'Afficher'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${l.visible ? '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/>'}</svg></button>
-    <button class="ib" data-ly="zoom" title="Zoomer sur le calque"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></button>
-    ${np ? `<button class="ib" data-ly="pts" title="Ajouter ses ${np} points à Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 7v5M9.5 9.5h5" stroke-linecap="round"/></svg></button>` : ''}
-    <button class="ib" data-ly="del" title="Retirer le calque"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`; }).join('')
-    : `<div class="empty">Aucun calque importé.<br>Glissez un fichier KML, KMZ, DXF ou GeoJSON sur la carte.</div>`;
-}
-$('#lyList').onclick = e => { const b = e.target.closest('[data-ly]'), row = e.target.closest('.pt'); if (!row) return; const ly = layers[+row.dataset.i], a = b ? b.dataset.ly : 'zoom';
-  if (a === 'eye') { ly.visible = !ly.visible; saveLayers(); renderLayers(); }
-  else if (a === 'zoom') { const bb = L.geoJSON(ly.geo).getBounds(); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 20 }); }
-  else if (a === 'del') { if (confirm(`Retirer le calque « ${ly.name} » ?`)) { layers.splice(+row.dataset.i, 1); saveLayers(); renderLayers(); dirty = true; updFile(); } }
-  else if (a === 'pts') { let n = 0; ly.geo.features.forEach(f => { if (f.geometry.type !== 'Point') return; const [lon, lat] = f.geometry.coordinates; const c = MM3.cellAt(lat, lon), b = MM3.bounds(c);
-      points.push({ id: Date.now().toString(36) + n, nom: (f.properties && f.properties.name) || `${ly.name} ${n + 1}`, mots: MM3.wordsOfCell(c).words.join('.'), lat: +((b.s + b.n) / 2).toFixed(7), lon: +((b.w + b.e) / 2).toFixed(7), date: new Date().toISOString() }); n++; });
-    changed(); toast(`${n} point${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à Mes points`); }
+const IC = {
+  eyeOn: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/>',
+  zoom: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 7v5M9.5 9.5h5"/>',
+  del: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
 };
+const ico = (p, t, a) => `<button class="ib" data-a="${a}" title="${t}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg></button>`;
+function lyRow(l, depth){
+  if (l.kind === 'folder') { const k = lyKids(l), n = k.length;
+    return `<div class="tr fo${l.visible ? '' : ' off'}" draggable="true" data-id="${l.id}" style="--d:${depth}">
+      <button class="ib tw${l.open ? ' op' : ''}" data-a="open" title="${l.open ? 'Replier' : 'Déplier'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">${IC.chev}</svg></button>
+      <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${IC.folder}</svg>
+      <div class="m"><div class="n" data-a="ren" title="Double-clic pour renommer">${esc(l.name)}</div><div class="w">${n} calque${n > 1 ? 's' : ''}</div></div>
+      ${ico(l.visible ? IC.eyeOn : IC.eyeOff, l.visible ? 'Masquer le dossier' : 'Afficher le dossier', 'eye')}${ico(IC.zoom, 'Zoomer sur le dossier', 'zoom')}${ico(IC.del, 'Supprimer le dossier', 'del')}</div>`
+      + (l.open ? k.map(c => lyRow(c, 1)).join('') : ''); }
+  const n = l.geo.features.length, np = l.geo.features.filter(f => f.geometry.type === 'Point').length;
+  return `<div class="tr${l.visible ? '' : ' off'}" draggable="true" data-id="${l.id}" style="--d:${depth}">
+    <label class="sw" title="Couleur" style="background:${l.color}"><input type="color" value="${l.color}" data-a="color"></label>
+    <div class="m"><div class="n" data-a="ren" title="Double-clic pour renommer">${esc(l.name)}</div><div class="w">${n} objet${n > 1 ? 's' : ''}${l.crs ? ' · ' + esc(l.crs) : ''}</div></div>
+    ${ico(l.visible ? IC.eyeOn : IC.eyeOff, l.visible ? 'Masquer' : 'Afficher', 'eye')}${ico(IC.zoom, 'Zoomer sur le calque', 'zoom')}${np ? ico(IC.pin, `Ajouter ses ${np} points à Mes points`, 'pts') : ''}${ico(IC.del, 'Retirer le calque', 'del')}</div>`;
+}
+function renderLayers(){
+  Object.keys(layerObjs).forEach(id => { if (!lyById(id)) { map.removeLayer(layerObjs[id]); delete layerObjs[id]; } });
+  layers.forEach(drawLayer);
+  // ordre d'affichage : le haut de la liste passe au-dessus
+  const order = []; layers.filter(x => !x.parent).forEach(r => { if (r.kind === 'folder') lyKids(r).forEach(c => order.push(c)); else order.push(r); });
+  order.slice().reverse().forEach(l => layerObjs[l.id] && layerObjs[l.id].bringToFront());
+  $('#lyList').innerHTML = layers.length ? layers.filter(x => !x.parent).map(l => lyRow(l, 0)).join('') + '<div class="tr-end" data-id="__root">Déposer ici pour sortir d\'un dossier</div>'
+    : `<div class="empty">Aucun calque.<br>Importez un fichier ou glissez-le sur la carte.</div>`;
+}
+function lyBounds(l){ const fs = l.kind === 'folder' ? lyKids(l).flatMap(c => c.geo.features) : l.geo.features; return L.geoJSON({ type: 'FeatureCollection', features: fs }).getBounds(); }
+function lyChanged(){ saveLayers(); renderLayers(); dirty = true; updFile(); }
+$('#lyList').addEventListener('click', e => { const row = e.target.closest('[data-id]'); if (!row || row.dataset.id === '__root') return; const l = lyById(row.dataset.id), a = (e.target.closest('[data-a]') || {}).dataset?.a;
+  if (a === 'color' || a === 'ren') return;
+  if (a === 'eye') { l.visible = !l.visible; lyChanged(); }
+  else if (a === 'open' || (!a && l.kind === 'folder')) { l.open = !l.open; saveLayers(); renderLayers(); }
+  else if (a === 'zoom' || !a) { const bb = lyBounds(l); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 20 }); }
+  else if (a === 'del') { const k = l.kind === 'folder' ? lyKids(l) : [];
+    if (!confirm(l.kind === 'folder' ? `Supprimer le dossier « ${l.name} » et ses ${k.length} calque(s) ?` : `Retirer le calque « ${l.name} » ?`)) return;
+    layers = layers.filter(x => x !== l && !k.includes(x)); lyChanged(); }
+  else if (a === 'pts') { let n = 0; l.geo.features.forEach(f => { if (f.geometry.type !== 'Point') return; const [lon, lat] = f.geometry.coordinates; addFav(lat, lon, (f.properties && f.properties.name) || `${l.name} ${n + 1}`, true); n++; });
+    changed(); toast(`${n} point${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à Mes points`); }
+});
+$('#lyList').addEventListener('input', e => { if (e.target.dataset.a !== 'color') return; const l = lyById(e.target.closest('[data-id]').dataset.id); l.color = e.target.value; e.target.parentNode.style.background = l.color; drawLayer(l); saveLayers(); });
+$('#lyList').addEventListener('change', e => { if (e.target.dataset.a === 'color') { dirty = true; updFile(); } });
+$('#lyList').addEventListener('dblclick', e => { const n = e.target.closest('[data-a="ren"]'); if (!n) return; const l = lyById(n.closest('[data-id]').dataset.id);
+  const v = prompt('Nouveau nom :', l.name); if (v && v.trim()) { l.name = v.trim(); lyChanged(); } });
+// glisser-déposer pour organiser
+$('#lyList').addEventListener('dragstart', e => { const r = e.target.closest('[data-id]'); if (!r) return; dragId = r.dataset.id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); r.classList.add('drag'); });
+$('#lyList').addEventListener('dragend', () => { dragId = null; document.querySelectorAll('#lyList .drag,#lyList .over-in,#lyList .over-b,#lyList .over-a').forEach(x => x.classList.remove('drag', 'over-in', 'over-b', 'over-a')); });
+function dropPos(e, row){ const d = lyById(dragId), t = row.dataset.id === '__root' ? null : lyById(row.dataset.id); if (!d || t === d) return null;
+  if (!t) return 'root';
+  if (t.kind === 'folder' && d.kind === 'layer') { const r = row.getBoundingClientRect(), y = (e.clientY - r.top) / r.height; return y < .25 ? 'b' : y > .75 && t.open && lyKids(t).length ? 'in' : y > .75 ? 'a' : 'in'; }
+  const r = row.getBoundingClientRect(); return e.clientY < r.top + r.height / 2 ? 'b' : 'a'; }
+$('#lyList').addEventListener('dragover', e => { if (!dragId) return; const row = e.target.closest('[data-id]'); document.querySelectorAll('#lyList .over-in,#lyList .over-b,#lyList .over-a').forEach(x => x.classList.remove('over-in', 'over-b', 'over-a'));
+  if (!row) return; const p = dropPos(e, row); if (!p) return; e.preventDefault(); e.stopPropagation(); row.classList.add(p === 'in' || p === 'root' ? 'over-in' : p === 'b' ? 'over-b' : 'over-a'); });
+$('#lyList').addEventListener('drop', e => { if (!dragId) return; e.preventDefault(); e.stopPropagation(); const row = e.target.closest('[data-id]'); if (!row) return; const p = dropPos(e, row); if (!p) return;
+  const d = lyById(dragId); let t = row.dataset.id === '__root' ? null : lyById(row.dataset.id);
+  if (d.kind === 'folder' && t && t.parent) t = lyById(t.parent); // un dossier reste à la racine
+  layers.splice(layers.indexOf(d), 1);
+  if (p === 'root') { d.parent = null; layers.push(d); }
+  else if (p === 'in') { d.parent = t.id; t.open = true; const k = lyKids(t); layers.splice(k.length ? layers.indexOf(k[k.length - 1]) + 1 : layers.indexOf(t) + 1, 0, d); }
+  else { if (d.kind === 'layer') d.parent = t.parent; const i = layers.indexOf(t); layers.splice(p === 'b' ? i : i + 1, 0, d); }
+  lyChanged(); });
+$('#lyFolder').onclick = () => { const n = prompt('Nom du dossier :', 'Nouveau dossier'); if (!n || !n.trim()) return; layers.unshift({ id: newId(), kind: 'folder', name: n.trim(), parent: null, visible: true, open: true }); lyChanged(); };
 function addLayer(name, geo, crs){
   if (!geo.features.length) return toast('Aucun objet lisible dans ' + name);
-  const ly = { id: Date.now().toString(36), name, crs: crs || '', color: LAYER_COLORS[layers.length % LAYER_COLORS.length], visible: true, geo };
-  layers.push(ly); saveLayers(); renderLayers(); dirty = true; updFile();
+  const nl = layers.filter(x => x.kind === 'layer').length;
+  const ly = { id: newId(), kind: 'layer', parent: null, name, crs: crs || '', color: LAYER_COLORS[nl % LAYER_COLORS.length], visible: true, geo };
+  layers.unshift(ly); lyChanged();
   const bb = L.geoJSON(geo).getBounds(); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 19 });
   toast(`${name} : ${geo.features.length} objet${geo.features.length > 1 ? 's' : ''} importé${geo.features.length > 1 ? 's' : ''}`);
 }
@@ -908,7 +1037,7 @@ function exportFeatures(){
   points.forEach(p => { const c = MM3.cellAt(p.lat, p.lon), b = MM3.bounds(c);
     if (wP) F.push({ kind: 'point', name: p.nom, words: p.mots, coords: [[p.lon, p.lat]] });
     if (wC) F.push({ kind: 'carre', name: p.nom, words: p.mots, coords: [[b.w, b.s], [b.e, b.s], [b.e, b.n], [b.w, b.n], [b.w, b.s]] }); });
-  if (wL) layers.filter(l => l.visible).forEach(l => l.geo.features.forEach(f => { const g = f.geometry, nm = (f.properties && f.properties.name) || '', base = { kind: 'calque', layer: (f.properties && f.properties.layer) || l.name, name: nm };
+  if (wL) layers.filter(l => l.kind === 'layer' && lyShown(l)).forEach(l => l.geo.features.forEach(f => { const g = f.geometry, nm = (f.properties && f.properties.name) || '', base = { kind: 'calque', layer: (f.properties && f.properties.layer) || l.name, name: nm };
     if (g.type === 'Point') F.push({ ...base, geom: 'Point', coords: [g.coordinates] });
     else if (g.type === 'LineString') F.push({ ...base, geom: 'Line', coords: g.coordinates });
     else if (g.type === 'Polygon') g.coordinates.forEach(r => F.push({ ...base, geom: 'Line', coords: r }));
@@ -964,6 +1093,118 @@ $('#xCrsOut').innerHTML = CRS_LIST.filter(c => c[0] !== 'auto').map(([k, n]) => 
 $('#xCrsIn').value = S.crsIn || 'auto'; $('#xCrsOut').value = S.crsOut || 'L93';
 $('#xCrsIn').onchange = e => { S.crsIn = e.target.value; saveSettings(); }; $('#xCrsOut').onchange = e => { S.crsOut = e.target.value; saveSettings(); };
 
+/* ---------- interroger la parcelle (API Carto IGN, Géoplateforme, Géorisques, BRGM — sans clé) ---------- */
+let mode = null, parcelLayer = null, parcelSeq = 0, parcelData = null;
+const AC = 'https://apicarto.ign.fr/api', GR = 'https://georisques.gouv.fr/api/v1';
+async function jget(url, ms = 15000){ const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
+  try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); } finally { clearTimeout(t); } }
+const gq = g => 'geom=' + encodeURIComponent(JSON.stringify(g));
+const feats = j => (j && (j.features || j.data || j.results)) || (Array.isArray(j) ? j : []);
+const pk = (o, ...k) => { for (const x of k) if (o && o[x] != null && o[x] !== '') return o[x]; return ''; };
+const uniq = a => [...new Set(a.filter(Boolean))];
+function roundGeom(g){ const r = c => typeof c[0] === 'number' ? [+c[0].toFixed(6), +c[1].toFixed(6)] : c.map(r); return { type: g.type, coordinates: r(g.coordinates) }; }
+function setMode(m){ mode = mode === m ? null : m; $('#tParcel').classList.toggle('on', mode === 'parcel'); map.getContainer().classList.toggle('qmode', mode === 'parcel');
+  if (mode === 'parcel') toast('Cliquez sur une parcelle pour l\'interroger'); }
+$('#tParcel').onclick = () => setMode('parcel');
+function secHTML(id, title){ return `<div class="sec" id="${id}"><div class="lbl" style="margin-top:0">${title}</div><div class="sb"><span class="ld">Chargement…</span></div></div>`; }
+function fill(id, html){ const el = document.querySelector('#' + id + ' .sb'); if (el) el.innerHTML = html || '<span class="mu">Rien à signaler ici.</span>'; }
+const li = (a, b) => `<div class="li"><b>${esc(a)}</b>${b ? `<span>${esc(b)}</span>` : ''}</div>`;
+const lnk = (u, t) => `<a class="xl" href="${u}" target="_blank" rel="noopener">${t} ↗</a>`;
+async function queryParcel(lat, lon){
+  const seq = ++parcelSeq, pt = { type: 'Point', coordinates: [+lon.toFixed(7), +lat.toFixed(7)] };
+  closeCards(); $('#pcard').classList.add('on');
+  if (parcelLayer) { map.removeLayer(parcelLayer); parcelLayer = null; }
+  parcelLayer = L.circleMarker([lat, lon], { radius: 5, color: S.selColor, weight: 2, fillOpacity: .6 }).addTo(map);
+  $('#pTitle').textContent = 'Recherche de la parcelle…'; $('#pSub').textContent = ''; $('#pBody').innerHTML = '';
+  let parc = null;
+  try { parc = feats(await jget(`${AC}/cadastre/parcelle?${gq(pt)}`))[0] || null; } catch(e){ parc = undefined; }
+  if (seq !== parcelSeq) return;
+  const p = parc ? parc.properties : {}, insee = parc ? (p.code_dep || '') + (p.code_com || '') : '';
+  if (parc && parc.geometry) { map.removeLayer(parcelLayer); parcelLayer = L.geoJSON(parc.geometry, { style: { color: S.selColor, weight: 3, fillColor: S.selColor, fillOpacity: .15 } }).addTo(map); }
+  const ref = parc ? `${p.section} ${String(p.numero).replace(/^0+/, '')}` : '';
+  $('#pTitle').textContent = parc ? `Parcelle ${ref}` : parc === undefined ? 'Cadastre indisponible' : 'Hors parcelle cadastrée';
+  $('#pSub').textContent = parc ? `${p.nom_com || ''} (${insee})` : parc === null ? 'Domaine public, voirie ou cours d\'eau' : 'Le service du cadastre ne répond pas';
+  parcelData = { lat, lon, ref, nom: parc ? `Parcelle ${ref} — ${p.nom_com || ''}` : '', idu: p.idu || '' };
+  const geomQ = parc && parc.geometry ? roundGeom(parc.geometry) : pt, gUse = JSON.stringify(geomQ).length < 3500 ? geomQ : pt;
+  const l93 = HAS_PROJ && inFranceBox(lat, lon) ? toL93(lat, lon) : null;
+  $('#pBody').innerHTML = secHTML('pLoc', 'Identification') + secHTML('pUrb', 'Urbanisme (PLU, servitudes)') + secHTML('pRis', 'Risques') + secHTML('pGeo', 'Géologie') + secHTML('pEnv', 'Environnement');
+  // identification
+  (async () => { const rows = [];
+    if (parc) { rows.push(['Référence', `${p.code_dep}${p.code_com} ${p.com_abs || '000'} ${p.section} ${p.numero}`], ['IDU', p.idu || '—'], ['Contenance', p.contenance ? `${(+p.contenance).toLocaleString('fr-FR')} m²` : '—'], ['Feuille', p.feuille || '—']); }
+    rows.push(['WGS84', `${lat.toFixed(6)}, ${lon.toFixed(6)}`]); if (l93) rows.push(['Lambert 93', `X ${l93[0].toFixed(2)}  Y ${l93[1].toFixed(2)}`]);
+    rows.push(['3 mots', '///' + MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.')]);
+    const [adr, alt] = await Promise.allSettled([jget(`https://data.geopf.fr/geocodage/reverse?lon=${lon}&lat=${lat}&limit=1`), jget(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&zonly=true`)]);
+    if (seq !== parcelSeq) return;
+    if (adr.status === 'fulfilled') { const f = feats(adr.value)[0]; if (f) rows.splice(parc ? 0 : 0, 0, ['Adresse proche', f.properties.label]); }
+    if (alt.status === 'fulfilled') { const z = (alt.value.elevations || [])[0]; const zz = typeof z === 'object' ? z.z : z; if (zz != null && zz > -1000) rows.push(['Altitude', `${(+zz).toFixed(1)} m`]); }
+    fill('pLoc', `<div class="kv">${rows.map(([k, v]) => `<span class="k">${k}</span><span class="v" title="${esc(v)}">${esc(v)}</span><button class="ib c" data-cp="${esc(v)}" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>`).join('')}</div>`);
+  })();
+  // urbanisme (Géoportail de l'urbanisme)
+  (async () => { const q = n => jget(`${AC}/gpu/${n}?${gq(n === 'document' || n === 'municipality' ? pt : gUse)}`).then(feats).catch(() => null);
+    const [doc, zon, scc, ps, pl, pp, is, il, ip, ss, sl, sp, mun] = await Promise.all(['document','zone-urba','secteur-cc','prescription-surf','prescription-lin','prescription-pct','info-surf','info-lin','info-pct','assiette-sup-s','assiette-sup-l','assiette-sup-p','municipality'].map(q));
+    if (seq !== parcelSeq) return;
+    if ([doc, zon, mun].every(x => x === null)) return fill('pUrb', `<span class="mu">Service du Géoportail de l'urbanisme injoignable.</span>${lnk(`https://www.geoportail-urbanisme.gouv.fr/map/#tile=1&lon=${lon}&lat=${lat}&zoom=18`, 'Ouvrir le Géoportail de l\'urbanisme')}`);
+    let h = '';
+    const d = (doc || [])[0]; if (d) { const dp = d.properties; h += li(`${pk(dp, 'du_type', 'typedoc', 'type') || 'Document'} ${pk(dp, 'grid_title', 'name', 'nom') ? '— ' + pk(dp, 'grid_title', 'name', 'nom') : ''}`, pk(dp, 'datappro', 'date_approbation') ? 'approuvé le ' + String(pk(dp, 'datappro', 'date_approbation')).replace(/^(\d{4})-?(\d{2})-?(\d{2}).*$/, '$3/$2/$1') : pk(dp, 'gpu_status', 'etat')); }
+    else if ((mun || []).some(m => m.properties && m.properties.is_rnu)) h += li('Règlement national d\'urbanisme (RNU)', 'pas de PLU ni de carte communale');
+    (zon || []).forEach(z => { const zp = z.properties; h += `<div class="li zone"><b>Zone ${esc(pk(zp, 'libelle'))}</b><span>${esc(pk(zp, 'libelong') || pk(zp, 'typezone'))}</span>${zp.urlfic ? lnk(zp.urlfic, 'Règlement de la zone') : ''}</div>`; });
+    (scc || []).forEach(z => { const zp = z.properties; h += li('Carte communale — ' + pk(zp, 'libelle', 'typesect'), pk(zp, 'libelong')); });
+    const pres = uniq([...(ps || []), ...(pl || []), ...(pp || [])].map(f => pk(f.properties, 'libelle', 'txt')));
+    if (pres.length) h += `<div class="sub">Prescriptions</div>` + pres.map(x => li(x)).join('');
+    const inf = uniq([...(is || []), ...(il || []), ...(ip || [])].map(f => pk(f.properties, 'libelle', 'txt')));
+    if (inf.length) h += `<div class="sub">Informations</div>` + inf.map(x => li(x)).join('');
+    const sup = uniq([...(ss || []), ...(sl || []), ...(sp || [])].map(f => { const sp_ = f.properties; return [String(pk(sp_, 'suptype', 'typesup')).toUpperCase(), pk(sp_, 'nomsuplitt', 'nomass', 'nomgen', 'libelle')].filter(Boolean).join(' — '); }));
+    if (sup.length) h += `<div class="sub">Servitudes d'utilité publique</div>` + sup.map(x => li(x)).join('');
+    fill('pUrb', (h || '<span class="mu">Aucun document d\'urbanisme publié ici.</span>') + lnk(`https://www.geoportail-urbanisme.gouv.fr/map/#tile=1&lon=${lon}&lat=${lat}&zoom=18`, 'Voir sur le Géoportail de l\'urbanisme'));
+  })();
+  // risques (Géorisques)
+  (async () => { const ll = `latlon=${lon},${lat}`, g = u => jget(GR + u).catch(() => null);
+    const [rap, sis, rga, rad, ppr, cat] = await Promise.all([g(`/resultats_rapport_risque?${ll}`), g(`/zonage_sismique?${ll}`), g(`/rga?${ll}`), insee ? g(`/radon?code_insee=${insee}`) : null, g(`/gaspar/pprn?${ll}&rayon=10`), insee ? g(`/gaspar/catnat?code_insee=${insee}&page_size=100`) : null]);
+    if (seq !== parcelSeq) return;
+    let h = '';
+    const s0 = feats(sis)[0]; if (s0) h += li('Sismicité', pk(s0, 'zone_sismicite', 'libelle_zone', 'code_zone'));
+    if (rga) { const r = feats(rga)[0] || rga; const ex = pk(r, 'exposition', 'libelleExposition'); if (ex) h += li('Retrait-gonflement des argiles', ex); }
+    const rd = feats(rad)[0]; if (rd) h += li('Potentiel radon', 'classe ' + pk(rd, 'classe_potentiel', 'classePotentiel'));
+    if (rap) { [['risquesNaturels', 'Naturel'], ['risquesTechnologiques', 'Technologique']].forEach(([k]) => { const o = rap[k]; if (!o) return;
+        Object.entries(o).forEach(([nm, v]) => { if (!v || !v.present) return; const t = pk(v, 'libelle') || nm.replace(/([A-Z])/g, ' $1').toLowerCase();
+          if (/sism|argile|radon/i.test(t)) return; h += li(t.charAt(0).toUpperCase() + t.slice(1), pk(v, 'libelleStatutAdresse', 'libelleStatutCommune')); }); }); }
+    const pp = feats(ppr); if (pp.length) h += `<div class="sub">Plans de prévention (PPR)</div>` + uniq(pp.map(x => [pk(x, 'nom_ppr', 'libelle_ppr', 'nom'), pk(x, 'etat', 'libelle_etat')].filter(Boolean).join(' — '))).map(x => li(x)).join('');
+    const cn = feats(cat); if (cn.length) h += li(`${cn.length} arrêté${cn.length > 1 ? 's' : ''} de catastrophe naturelle sur la commune`, (() => { const x = cn.map(c => pk(c, 'date_publication_arrete', 'date_fin_evt', 'date_debut_evt')).filter(Boolean).sort().pop(); return x ? 'dernier : ' + x : ''; })());
+    const none = [rap, sis, rga, ppr].every(x => x === null);
+    fill('pRis', (none ? '<span class="mu">Service Géorisques injoignable.</span>' : h || '<span class="mu">Aucun risque recensé à cet endroit.</span>') + lnk('https://www.georisques.gouv.fr/mes-risques/connaitre-les-risques-pres-de-chez-moi', 'Rapport complet sur Géorisques'));
+  })();
+  // géologie (BRGM)
+  (async () => { const d = .0005, u = `https://geoservices.brgm.fr/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&LAYERS=SCAN_H_GEOL50&QUERY_LAYERS=SCAN_H_GEOL50&STYLES=&SRS=EPSG:4326&BBOX=${lon - d},${lat - d},${lon + d},${lat + d}&WIDTH=101&HEIGHT=101&X=50&Y=50&INFO_FORMAT=text/plain&FEATURE_COUNT=3`;
+    let txt = null; try { const c = new AbortController(); setTimeout(() => c.abort(), 12000); const r = await fetch(u, { signal: c.signal }); if (r.ok) txt = await r.text(); } catch(e){}
+    if (seq !== parcelSeq) return;
+    let h = '';
+    if (txt) { const kv = txt.split(/\r?\n/).map(x => x.match(/^\s*([^=]+?)\s*=\s*'?(.*?)'?\s*$/)).filter(Boolean).filter(m => m[2] && !/^(geometry|the_geom|objectid|gid|fid)$/i.test(m[1]));
+      const want = kv.filter(m => /descr|notation|lib|legende|age|lithol|nature|ere|syst/i.test(m[1])); (want.length ? want : kv).slice(0, 6).forEach(m => h += li(m[1].replace(/_/g, ' '), m[2])); }
+    fill('pGeo', (h || '<span class="mu">Description non disponible ici. Activez la superposition « Carte géologique » pour la voir sur la carte.</span>') + lnk(`https://infoterre.brgm.fr/viewer/MainTileForward.do`, 'Ouvrir InfoTerre (BRGM)'));
+  })();
+  // environnement (API Carto nature)
+  (async () => { const L_ = [['natura-habitat', 'Natura 2000 (habitats)'], ['natura-oiseaux', 'Natura 2000 (oiseaux)'], ['znieff1', 'ZNIEFF type 1'], ['znieff2', 'ZNIEFF type 2'], ['pn', 'Parc national'], ['pnr', 'Parc naturel régional'], ['rnn', 'Réserve naturelle nationale']];
+    const r = await Promise.all(L_.map(([n]) => jget(`${AC}/nature/${n}?${gq(pt)}`).then(feats).catch(() => null)));
+    if (seq !== parcelSeq) return;
+    let h = ''; r.forEach((fs, i) => (fs || []).forEach(f => h += li(L_[i][1], pk(f.properties, 'sitename', 'nom', 'nom_site', 'NOM_SITE', 'lib_znieff', 'nom_zone', 'libelle'))));
+    fill('pEnv', r.every(x => x === null) ? '<span class="mu">Service injoignable.</span>' : h || '<span class="mu">Aucune zone naturelle protégée ou inventoriée ici.</span>');
+  })();
+}
+$('#pBody').onclick = e => { const b = e.target.closest('[data-cp]'); if (b) copy(b.dataset.cp); };
+$('#pClose').onclick = () => { $('#pcard').classList.remove('on'); parcelSeq++; if (parcelLayer) { map.removeLayer(parcelLayer); parcelLayer = null; } };
+$('#pFav').onclick = () => { if (parcelData) addFav(parcelData.lat, parcelData.lon, parcelData.nom || 'Point'); };
+$('#pCopy').onclick = () => { if (parcelData && parcelData.ref) copy(parcelData.idu || parcelData.ref); };
+/* ---------- menu clic droit ---------- */
+const cm = $('#ctxm'); let cmAt = null;
+map.on('contextmenu', e => { cmAt = e.latlng; const p = e.containerPoint, sz = map.getSize();
+  cm.style.left = Math.min(p.x, sz.x - 230) + 'px'; cm.style.top = Math.min(p.y, sz.y - 170) + 'px'; cm.classList.add('on'); });
+['click', 'movestart', 'zoomstart'].forEach(ev => map.on(ev, () => cm.classList.remove('on')));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cm.classList.remove('on'); });
+cm.onclick = e => { const a = e.target.closest('[data-c]'); if (!a || !cmAt) return; cm.classList.remove('on'); const { lat, lng } = cmAt;
+  if (a.dataset.c === 'parcel') queryParcel(lat, lng);
+  else if (a.dataset.c === 'fav') addFav(lat, lng);
+  else if (a.dataset.c === 'words') select(MM3.cellAt(lat, lng));
+  else if (a.dataset.c === 'xy') { const l = HAS_PROJ && inFranceBox(lat, lng) ? toL93(lat, lng) : null; copy(l ? `${l[0].toFixed(2)} ${l[1].toFixed(2)}` : `${lat.toFixed(6)}, ${lng.toFixed(6)}`); } };
 /* ---------- paramètres ---------- */
 function saveSettings(){ store('settings', S); }
 function bindSettings(){
@@ -989,7 +1230,7 @@ function toggleGrid(){ S.grid = !S.grid; saveSettings(); bindSettings(); redraw(
 function toggleLabels(){ S.labels = !S.labels; saveSettings(); bindSettings(); redraw();
   if (S.labels && cellPxAt(map.getCenter().lat) < S.labMin) toast('Mots visibles en zoomant au maximum'); }
 $('#ovGrid').onclick = toggleGrid; $('#ovLabels').onclick = toggleLabels;
-$('#tLocate').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
+$('#ptMe').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
   navigator.geolocation.getCurrentPosition(p => { goLatLon(p.coords.latitude, p.coords.longitude, 20); toast(`Position trouvée (précision ± ${Math.round(p.coords.accuracy)} m)`); },
     e => toast('Position refusée ou indisponible'), { enableHighAccuracy: true, timeout: 15000 }); };
 $('#zIn').onclick = () => map.zoomIn(); $('#zOut').onclick = () => map.zoomOut();
@@ -1001,7 +1242,7 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(e.shiftKey); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); openFile(); return; }
   if (typing) return;
-  if (e.key === 'Escape') { document.querySelectorAll('.modal.on').forEach(m => m.classList.remove('on')); return; }
+  if (e.key === 'Escape') { document.querySelectorAll('.modal.on').forEach(m => m.classList.remove('on')); if (mode) setMode(mode); return; }
   if (e.key === '/') { e.preventDefault(); q.focus(); q.value = '///'; return; }
   if (e.key === 'g' || e.key === 'G') toggleGrid();
   if (e.key === 'l' || e.key === 'L') toggleLabels();
@@ -1012,44 +1253,50 @@ document.addEventListener('keydown', e => {
 
 /* ---------- guide ---------- */
 const GUIDE = [
- ['Principe', `<h3>Une adresse de trois mots pour chaque carré de 3 m</h3>
-  <p>MomoMAP découpe toute la surface de la Terre en carrés d'environ <b>3 mètres sur 3 mètres</b>. Chaque carré reçoit une combinaison unique de trois mots, par exemple <span class="ex">///jambon.calculatrice.arbre</span>.</p>
-  <p>Trois mots se retiennent, se dictent au téléphone et se notent sur un carnet de chantier bien plus facilement que des coordonnées : c'est idéal pour indiquer un regard, une vanne, un piquet d'implantation ou un point de livraison.</p>
-  <h4>Toujours la même adresse</h4><p>Le calcul est fixe : un carré donne toujours les mêmes trois mots, sur n'importe quel ordinateur ou téléphone, même sans connexion au dictionnaire en ligne. Et à l'inverse, trois mots ramènent toujours au même carré.</p>
-  <h4>Des mots simples là où on vit</h4><p>En France, les adresses n'utilisent que les <b>5 000 noms communs les plus courants</b> de la langue. En Europe, on reste sur des noms courants. Les mots plus rares ne servent qu'en pleine mer ou près des pôles.</p>
-  <h4>Des voisins qui ne se ressemblent pas</h4><p>Deux carrés côte à côte ont des adresses complètement différentes. Une erreur sur un mot vous envoie donc très loin, ce qui se repère tout de suite, plutôt qu'à un carré d'à côté sans qu'on s'en aperçoive.</p>`],
- ['Naviguer', `<h3>Se déplacer et choisir un carré</h3>
-  <p><b>Cliquez</b> n'importe où sur la carte : le carré correspondant s'allume et ses trois mots apparaissent dans le panneau de droite.</p>
-  <p>La <b>grille</b> s'affiche dès que les carrés sont assez grands à l'écran (à partir du zoom 18 environ). En survolant la carte, la barre du bas indique en direct les trois mots sous votre souris.</p>
-  <p>La grille et les mots se règlent dans <b>Fonds de carte → Superpositions</b>, comme le cadastre : on les active ou on les coupe à volonté (touches <kbd>G</kbd> et <kbd>L</kbd>). En zoomant fort, <b>Mots dans les carrés</b> écrit les adresses directement dans chaque case : pratique pour repérer un emplacement sur une photo aérienne.</p>
-  <h4>Le voisinage</h4><p>Le panneau montre les 8 carrés qui entourent celui sélectionné. Cliquez sur l'un d'eux, ou utilisez les <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> du clavier, pour vous décaler d'un carré à la fois.</p>
-  <h4>Les fonds de carte</h4><p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Vous pouvez superposer les <b>parcelles cadastrales</b>. Le zoom va du globe entier jusqu'au détail d'un carré ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>`],
- ['Rechercher', `<h3>Trouver un lieu</h3>
-  <p>La barre de recherche comprend trois choses :</p>
-  <h4>Une adresse postale</h4><p>Tapez une rue ou une commune : les propositions de la Base Adresse Nationale s'affichent pendant la frappe (et une recherche mondiale prend le relais hors de France).</p>
-  <h4>Trois mots</h4><p>Commencez par <span class="ex">///</span> ou séparez les mots par des points : <span class="ex">///terre.mandat.carton</span>. Les accents et majuscules sont facultatifs. Pendant la saisie, MomoMAP propose les mots qui commencent par ce que vous tapez ; si un mot est mal orthographié, il suggère les plus proches.</p>
-  <h4>Des coordonnées</h4><p>En degrés décimaux <span class="ex">44.5594, 6.0786</span> ou en Lambert 93 <span class="ex">944850 6386950</span> (X puis Y, en mètres).</p>
-  <p>Raccourci : la touche <kbd>/</kbd> place directement le curseur dans la barre, prêt pour une adresse en trois mots.</p>`],
- ['Points & fichiers', `<h3>Garder ses emplacements</h3>
-  <p>Après avoir choisi un carré, le bouton <b>Point</b> l'ajoute à votre liste avec un nom (« Regard EU 4 », « Accès livraison »…). Les points apparaissent sur la carte et dans le tiroir <b>Mes points</b>, d'où l'on peut les retrouver, les renommer ou les supprimer.</p>
-  <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> crée un fichier MomoMAP contenant vos points et la vue en cours. Vous pouvez en faire un par chantier et l'<b>Ouvrir</b> plus tard, ou le transmettre à un collègue.</p>
-  <p><b>Enregistrer sous</b> permet de choisir un nouveau nom. Le nom du fichier ouvert s'affiche en bas de l'écran, avec un point quand il reste des changements à enregistrer.</p>
-  <h4>Backup automatique</h4><p>Dans les Paramètres, choisissez la fréquence du backup. En cas de souci, le bouton <b>Restaurer</b> recharge la dernière copie de sécurité.</p>
-  <h4>Importer KML, KMZ, DXF, GeoJSON</h4><p>Le bouton <b>Importer / exporter</b> (ou un simple glisser-déposer sur la carte) ajoute un fichier comme <b>calque</b> : lignes, polylignes, cercles, arcs, textes et blocs pour un DXF, repères, lignes et polygones pour un KML ou KMZ. Chaque calque peut être masqué, recentré ou retiré, et ses points peuvent être ajoutés à <b>Mes points</b> pour obtenir leurs trois mots.</p>
-  <p>Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84). Si elle ne l'est pas, choisissez-la dans la liste avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
-  <h4>Exporter vers Google Earth ou un logiciel de DAO</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : vos points y arrivent avec leur nom et leurs trois mots, les carrés de 3 × 3 m en polylignes fermées, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
-  <h4>Copier et partager</h4><p><b>Copier</b> met l'adresse <span class="ex">///trois.mots.ici</span> dans le presse-papiers. <b>Lien</b> copie un lien qui ouvre MomoMAP directement sur ce carré.</p>`],
- ['Raccourcis', `<h3>Raccourcis clavier</h3><table>
-  <tr><td><kbd>Clic</kbd></td><td>Choisir le carré sous la souris</td></tr>
-  <tr><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></td><td>Passer au carré voisin</td></tr>
-  <tr><td><kbd>C</kbd></td><td>Copier les trois mots du carré choisi</td></tr>
+ ['Présentation', `<h3>MomoMAP, cartographie et SIG</h3>
+  <p>MomoMAP affiche les fonds de carte de référence (plans, photos aériennes, cadastre, géologie), interroge les parcelles pour connaître leurs règles d'urbanisme et leurs risques, et échange des données avec les autres logiciels au format KML, KMZ, DXF et GeoJSON.</p>
+  <h4>La barre d'outils</h4><table>
+  <tr><td><b>Fonds de carte</b></td><td>Choix du fond et des superpositions : grille de mots, trois mots, parcelles cadastrales, carte géologique.</td></tr>
+  <tr><td><b>Mes points</b></td><td>Se centrer sur sa position et retrouver ses points favoris.</td></tr>
+  <tr><td><b>Interroger la parcelle</b></td><td>Cliquez sur une parcelle : cadastre, PLU, servitudes, risques, géologie, environnement.</td></tr>
+  <tr><td><b>Import / export</b></td><td>Importer et exporter des fichiers, organiser les calques en dossiers.</td></tr>
+  <tr><td><b>Ouvrir / Enregistrer</b></td><td>Vos points, calques et vue dans un fichier .mmap.</td></tr></table>
+  <h4>Le clic droit</h4><p>Un clic droit sur la carte propose d'interroger la parcelle à cet endroit, d'y placer un point favori, d'afficher ses trois mots ou de copier ses coordonnées (en Lambert 93 en France).</p>`],
+ ['Fonds & superpositions', `<h3>Fonds de carte</h3>
+  <p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Le zoom va du globe entier jusqu'au détail d'un mètre ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>
+  <h4>Superpositions</h4><p>Elles s'activent ou se coupent indépendamment, par-dessus n'importe quel fond :</p>
+  <p><b>Grille de mots 3×3 m</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
+  <b>Afficher les 3 mots</b> (<kbd>L</kbd>) — en zoomant fort, écrit les trois mots dans chaque carré.<br>
+  <b>Parcelles cadastrales</b> — le plan cadastral de l'IGN.<br>
+  <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.</p>`],
+ ['Interroger la parcelle', `<h3>Tout savoir sur une parcelle</h3>
+  <p>Activez l'outil <b>Interroger la parcelle</b> puis cliquez sur la carte (ou faites un clic droit → « Interroger la parcelle ici »). La parcelle se dessine et sa fiche s'ouvre à droite :</p>
+  <h4>Identification</h4><p>Référence cadastrale complète, identifiant IDU, contenance, adresse la plus proche, altitude, coordonnées WGS84 et Lambert 93, trois mots.</p>
+  <h4>Urbanisme</h4><p>Document en vigueur (PLU, PLUi, carte communale ou RNU), zone et lien vers son règlement, prescriptions, informations et servitudes d'utilité publique, d'après le Géoportail de l'urbanisme.</p>
+  <h4>Risques</h4><p>Sismicité, retrait-gonflement des argiles, radon, risques naturels et technologiques, plans de prévention (PPR) et arrêtés de catastrophe naturelle, d'après Géorisques.</p>
+  <h4>Géologie et environnement</h4><p>Formation géologique du BRGM quand elle est disponible, zones Natura 2000, ZNIEFF, parcs et réserves naturelles.</p>
+  <p>Ces informations proviennent des services publics de l'État, sans compte ni clé. Elles sont données à titre indicatif : pour un acte officiel (certificat d'urbanisme, état des risques), référez-vous aux documents opposables via les liens de chaque rubrique.</p>`],
+ ['Mes points', `<h3>Points favoris</h3>
+  <p><b>Centrer sur moi</b> place la carte sur votre position (le navigateur demande l'autorisation).</p>
+  <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de la grille de mots. Chaque point garde ses coordonnées et son adresse en trois mots. Un clic dans la liste recentre la carte dessus.</p>`],
+ ['Import / export', `<h3>Échanger avec les autres logiciels</h3>
+  <h4>Importer</h4><p>Bouton <b>Choisir un fichier</b> ou glisser-déposer sur la carte : KML, KMZ, DXF, GeoJSON. Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84) ; sinon choisissez-la avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
+  <h4>Calques et dossiers</h4><p>Chaque fichier importé devient un calque. Créez des dossiers avec <b>+ Dossier</b>, puis faites glisser les calques pour les ranger ou changer leur ordre : le haut de la liste s'affiche par-dessus. L'œil masque un calque ou un dossier entier, la loupe recentre la carte, la pastille de couleur change sa teinte, et un double-clic sur le nom le renomme. Les points d'un calque peuvent rejoindre <b>Mes points</b>.</p>
+  <h4>Exporter</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : points avec leur nom et leurs trois mots, carrés de 3×3 m, calques visibles, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
+  <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> sauve vos points, vos calques et la vue en cours dans un fichier MomoMAP, à rouvrir plus tard ou à transmettre. Le backup automatique se règle dans les Paramètres.</p>`],
+ ['Trois mots', `<h3>Une adresse de trois mots pour chaque carré de 3 m</h3>
+  <p>Avec la superposition <b>Grille de mots</b>, chaque carré d'environ 3 × 3 m de la Terre a une adresse unique de trois mots, par exemple <span class="ex">///jambon.calculatrice.arbre</span>. Elle se dicte au téléphone et se note sur un carnet de chantier bien plus facilement que des coordonnées.</p>
+  <p>Un carré donne toujours les mêmes trois mots, partout et sans connexion. En France, seuls les 5 000 noms communs les plus courants sont utilisés. Deux carrés voisins ont des adresses sans rapport : une erreur de mot se repère tout de suite.</p>
+  <p>Tapez <span class="ex">///trois.mots.ici</span> dans la recherche (accents facultatifs) pour retrouver un carré. Les flèches du clavier passent au carré voisin.</p>`],
+ ['Raccourcis', `<h3>Raccourcis</h3><table>
+  <tr><td><kbd>Clic droit</kbd></td><td>Menu : parcelle, favori, trois mots, coordonnées</td></tr>
   <tr><td><kbd>/</kbd></td><td>Rechercher une adresse en trois mots</td></tr>
-  <tr><td><kbd>G</kbd></td><td>Afficher / masquer la grille</td></tr>
-  <tr><td><kbd>L</kbd></td><td>Afficher / masquer les mots dans les carrés</td></tr>
-  <tr><td><kbd>Ctrl</kbd> + <kbd>O</kbd></td><td>Ouvrir un fichier</td></tr>
-  <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Enregistrer</td></tr>
+  <tr><td><kbd>G</kbd> / <kbd>L</kbd></td><td>Grille de mots / trois mots dans les carrés</td></tr>
+  <tr><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></td><td>Carré voisin (grille active)</td></tr>
+  <tr><td><kbd>C</kbd></td><td>Copier les trois mots du carré choisi</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <kbd>O</kbd> / <kbd>S</kbd></td><td>Ouvrir / Enregistrer</td></tr>
   <tr><td><kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>S</kbd></td><td>Enregistrer sous</td></tr>
-  <tr><td><kbd>Échap</kbd></td><td>Fermer une fenêtre</td></tr></table>`],
+  <tr><td><kbd>Échap</kbd></td><td>Fermer, quitter l'interrogation</td></tr></table>`],
 ];
 $('#gtabs').innerHTML = GUIDE.map((g, i) => `<button data-t="${i}">${g[0]}</button>`).join('');
 function gTab(i){ $('#gbody').innerHTML = GUIDE[i][1]; $('#gbody').scrollTop = 0; document.querySelectorAll('#gtabs button').forEach((b, j) => b.classList.toggle('on', i === j)); }
@@ -1062,6 +1309,7 @@ document.querySelectorAll('.modal').forEach(m => m.onclick = e => { if (e.target
 $('#bInstall').onclick = async () => { const e = window.__installPrompt;
   if (e) { e.prompt(); await e.userChoice; window.__installPrompt = null; $('#bInstall').classList.remove('ready'); } else $('#instm').classList.add('on'); };
 if (window.__installPrompt) $('#bInstall').classList.add('ready');
+if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) $('#bInstall').classList.add('gone');
 // Double-clic sur un .mmap (appli installée) : ouverture directe
 if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   if (!params || !params.files || !params.files.length) return; const h = params.files[0];
@@ -1069,7 +1317,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- démarrage ---------- */
-bindSettings(); setBase(S.base); if (S.cad) setCad(true); renderPoints(); renderLayers(); updFile(); setupBackup();
+bindSettings(); setBase(S.base); if (S.cad) setCad(true); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
   const ws = parseWords(h);
