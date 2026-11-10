@@ -112,7 +112,7 @@ svg{display:block}
 .opt .sw{width:30px;height:22px;border-radius:5px;border:1px solid var(--line2);flex:none}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
 .row label{color:var(--tx)}
-select,input[type=text].f,input[type=number].f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font:13px var(--ui)}
+select,input.f,input[type=number].f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font:13px var(--ui)}
 input[type=color]{width:38px;height:26px;border:1px solid var(--line2);border-radius:6px;background:var(--bg);padding:1px}
 input[type=range]{accent-color:var(--acc);width:130px}
 .tg{position:relative;width:36px;height:20px;border-radius:20px;background:var(--line2);cursor:pointer;flex:none;border:0}
@@ -227,21 +227,66 @@ body.drop #map{outline:3px dashed var(--acc);outline-offset:-8px}
 .mbody td{border-top:1px solid var(--line);padding:6px 4px;vertical-align:top}
 .mbody td:first-child{white-space:nowrap;padding-right:14px}
 
+/* ---------- barres de défilement ---------- */
+*{scrollbar-width:thin;scrollbar-color:#343a48 transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#343a48;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#4b5366}
+::-webkit-scrollbar-corner{background:transparent}
+.dim{color:var(--dim)}
+.lbl2{display:flex;justify-content:space-between;align-items:center}
+.btn.mini{flex:none;height:26px;padding:0 10px;font-size:12px;text-transform:none;letter-spacing:0}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tool{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-size:13px}
+.tool svg{width:18px;height:18px;flex:none}
+.tool:hover{border-color:var(--acc2)}
+.tool.on{border-color:var(--acc);background:var(--accbg);color:var(--acc)}
+#tDraw.busy{color:var(--acc)}
+.leaflet-container.drawing{cursor:crosshair}
+.leaflet-tooltip.meas-tip{background:var(--panel);color:var(--tx);border:1px solid var(--line2);box-shadow:none;font:500 12px var(--ui);padding:3px 8px;border-radius:6px}
+.leaflet-tooltip.meas-tip:before{display:none}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:6px;border-radius:7px;cursor:pointer;color:var(--mut)}
+.seg button.on{background:var(--panel2);color:var(--tx)}
+.rt-in{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.rt-in input{flex:1;min-width:0}
+.rt-in .ib{width:30px;height:30px;flex:none}.rt-in .ib svg{width:16px;height:16px}
+.rt-pin{width:24px;height:24px;border-radius:50%;background:#4cc3ff;color:#06131b;font:700 12px var(--ui);display:grid;place-items:center;border:2px solid #fff}
+.rt-pin.s{flex:none;border-color:var(--panel2)}
+.rt-sum{display:flex;align-items:baseline;gap:10px;margin-top:4px}
+.rt-sum b{font-size:22px}.rt-sum span{font-size:16px;color:var(--mut)}
+.rt-src{font-size:12px;color:var(--dim);margin-bottom:6px}
+.rt-steps{max-height:300px;overflow:auto}
+.sr-dot{width:18px;height:18px;border-radius:50%;background:var(--acc);border:3px solid #0f1115}
+#zoomc .ib svg{width:18px;height:18px}
+
 /* ---------- toast ---------- */
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:3000;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 
 
 @media (max-width:720px){
-  #brand .t{display:none}
-  #card{left:12px;right:12px;width:auto;top:auto;bottom:56px;max-height:52%}
-  .drawer{left:12px;right:12px;width:auto;top:120px}
-  #tools{top:auto;bottom:56px;flex-direction:row;flex-wrap:wrap;max-width:calc(100% - 24px)}
-  #tools .sep{width:1px;height:auto;margin:4px 3px}
+  #top{top:8px;left:8px;right:8px;gap:6px}
+  #brand{display:none}
+  #searchwrap{max-width:none}
+  #topright .ib{width:44px}
+  #tools{position:fixed;left:0;right:0;top:auto;bottom:0;border-radius:16px 16px 0 0;flex-direction:row;overflow-x:auto;gap:2px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));justify-content:space-between;border-width:1px 0 0}
+  #tools .ib{width:auto;height:44px;flex:1 1 0;min-width:0}
+  #tools .sep{display:none}
   .ib[data-tip]:hover:after{display:none}
-  #filelbl{display:none}
-  #zoomc{display:none}
-  #topright .hide-m{display:none}
+  .drawer,#card,.card,#pcard{left:0;right:0;width:auto;top:auto;bottom:calc(56px + env(safe-area-inset-bottom));max-height:58vh;border-radius:16px 16px 0 0;border-width:1px 0 0}
+  .drawer .dh{position:relative}
+  .drawer .dh:before,.card .ch:before,#card .ch:before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;border-radius:4px;background:var(--line2);transform:translateX(-50%)}
+  #card .ch,.card .ch{position:relative}
+  #status,#filelbl{display:none}
+  #zoomc{right:10px;bottom:calc(70px + env(safe-area-inset-bottom))}
+  #zoomc #zIn,#zoomc #zOut{display:none}
+  body.panel #zoomc{display:none}
+  .leaflet-control-attribution{display:none}
+  #toast{top:62px;max-width:calc(100% - 24px)}
+  .tool{height:44px}
+  input.f,select{font-size:16px}
 }
 </style>
 </head>
@@ -367,83 +412,120 @@ setTimeout(done,4700);
 </div>
 
 <div id="tools">
-  <button class="ib" id="tLayers" data-tip="Fonds de carte et superpositions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
-  <button class="ib" id="tPoints" data-tip="Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
+  <button class="ib" id="tLayers" data-d="dLayers" data-tip="Calques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5" opacity=".5"/></svg></button>
+  <button class="ib" id="tPoints" data-d="dPoints" data-tip="Points favoris"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
+  <button class="ib" id="tDraw" data-d="dDraw" data-tip="Dessin et mesures"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 7l3 3"/></svg></button>
   <div class="sep"></div>
-  <button class="ib" id="tParcel" data-tip="Interroger la parcelle (PLU, risques, géologie…)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l6-2 6 2 4-1.5V18l-4 1.5-6-2-6 2V7.5z" opacity=".55"/><circle cx="12" cy="11" r="3.6"/><path d="M14.6 13.6L18 17"/></svg></button>
+  <button class="ib" id="tParcel" data-tip="Interroger la parcelle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l6-2 6 2 4-1.5V18l-4 1.5-6-2-6 2V7.5z" opacity=".55"/><circle cx="12" cy="11" r="3.6"/><path d="M14.6 13.6L18 17"/></svg></button>
+  <button class="ib" id="tRoute" data-d="dRoute" data-tip="Itinéraire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg></button>
   <div class="sep"></div>
-  <button class="ib" id="tXchg" data-tip="Import / export et calques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12M3 12l4 4 4-4M17 20V8M13 12l4-4 4 4"/></svg></button>
+  <button class="ib" id="tXchg" data-d="dXchg" data-tip="Import / export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12M3 12l4 4 4-4M17 20V8M13 12l4-4 4 4"/></svg></button>
+  <button class="ib" id="tSaveD" data-d="dSave" data-tip="Sauvegarde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
   <div class="sep"></div>
-  <button class="ib" id="tOpen" data-tip="Ouvrir (Ctrl+O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></button>
-  <button class="ib" id="tSave" data-tip="Enregistrer (Ctrl+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg></button>
-  <button class="ib" id="tSaveAs" data-tip="Enregistrer sous (Ctrl+Maj+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9l4 4v5"/><path d="M8 3v5h6M18 15v6M15 18h6"/></svg></button>
-  <div class="sep"></div>
-  <button class="ib" id="tSettings" data-tip="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   <button class="ib" id="tGuide" data-tip="Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13M9 8h6"/></svg></button>
+  <button class="ib" id="tSettings" data-d="dSettings" data-tip="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
 </div>
 
-<!-- Tiroir : fonds -->
 <div class="drawer" id="dLayers">
-  <div class="dh">Fonds de carte <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh">Calques <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
-    <div class="lbl">Fond</div>
+    <div class="lbl">Fond de carte</div>
     <div id="baseList"></div>
     <div class="lbl">Superpositions</div>
-    <div class="row"><label>Grille de mots 3×3 m <span style="color:var(--dim)">(G)</span></label><button class="tg" id="ovGrid"></button></div>
-    <div class="row"><label>Afficher les 3 mots <span style="color:var(--dim)">(L)</span></label><button class="tg" id="ovLabels"></button></div>
+    <div class="row"><label>Grille de mots 3×3 m <span class="dim">(G)</span></label><button class="tg" id="ovGrid"></button></div>
+    <div class="row"><label>Afficher les 3 mots <span class="dim">(L)</span></label><button class="tg" id="ovLabels"></button></div>
     <div class="row"><label>Parcelles cadastrales (IGN)</label><button class="tg" id="ovCad"></button></div>
     <div class="row"><label>Carte géologique (BRGM)</label><button class="tg" id="ovGeol"></button></div>
+    <div class="lbl lbl2">Mes calques <button class="btn mini" id="lyFolder">+ Dossier</button></div>
+    <div id="lyList"></div>
+    <p class="hint">Glissez les calques pour les ranger dans un dossier ou changer l'ordre d'affichage. Double-clic sur un nom pour le renommer.</p>
   </div>
 </div>
 
-<!-- Tiroir : échanges -->
+<div class="drawer" id="dPoints">
+  <div class="dh"><span>Points favoris <span id="ptCount" class="dim"></span></span><button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db"><div id="ptList"></div><p class="hint">Clic droit sur la carte (appui long sur téléphone) → « Ajouter aux favoris ici ».</p></div>
+</div>
+
+<div class="drawer" id="dDraw">
+  <div class="dh">Dessin et mesures <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db">
+    <div class="lbl">Mesurer</div>
+    <div class="tgrid">
+      <button class="tool" data-tool="dist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><circle cx="3" cy="17" r="1.5"/><circle cx="21" cy="7" r="1.5"/></svg>Distance</button>
+      <button class="tool" data-tool="area"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l3-12 10 2 3 9z"/><path d="M4 18l16-1" opacity=".4"/></svg>Surface</button>
+    </div>
+    <div class="lbl">Dessiner</div>
+    <div class="tgrid">
+      <button class="tool" data-tool="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l5-9 6 5 7-10"/></svg>Polyligne</button>
+      <button class="tool" data-tool="poly"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19l-2-8 7-7 9 4-2 10z"/></svg>Polygone</button>
+      <button class="tool" data-tool="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 12h8"/><circle cx="12" cy="12" r="1"/></svg>Cercle</button>
+      <button class="tool" data-tool="pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Épingle</button>
+    </div>
+    <div class="row"><label>Couleur du dessin</label><input type="color" id="drColor" value="#fff200"></div>
+    <p class="hint" id="drHint">Choisissez un outil.</p>
+    <div class="acts" style="padding:6px 0 0"><button class="btn" id="drFinish">Terminer le tracé</button><button class="btn" id="drClear">Effacer les mesures</button></div>
+    <p class="hint">Les dessins rejoignent le calque « Dessins » (exportable en KML, KMZ, DXF). Les mesures restent temporaires.</p>
+  </div>
+</div>
+
+<div class="drawer" id="dRoute">
+  <div class="dh">Itinéraire <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db">
+    <div class="seg"><button class="on" data-prof="car">Voiture</button><button data-prof="pedestrian">À pied</button></div>
+    <div class="rt-in"><span class="rt-pin s">A</span><input class="f" id="rtA" placeholder="Départ : adresse ou coordonnées"><button class="ib" id="rtPickA" title="Choisir sur la carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></button><button class="ib" id="rtMe" title="Ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></div>
+    <div class="rt-in"><span class="rt-pin s">B</span><input class="f" id="rtB" placeholder="Arrivée : adresse ou coordonnées"><button class="ib" id="rtPickB" title="Choisir sur la carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></button><button class="ib" id="rtSwap" title="Inverser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button></div>
+    <div class="acts" style="padding:8px 0"><button class="btn pri" id="rtGo">Calculer</button><button class="btn" id="rtAdd">Ajouter aux calques</button><button class="btn" id="rtClear" style="flex:none;width:40px" title="Effacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>
+    <div id="rtRes" class="sb"></div>
+  </div>
+</div>
+
 <div class="drawer" id="dXchg">
-  <div class="dh">Import / export <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh">Import / export <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Importer</div>
-    <button class="btn pri" id="xImport" style="width:100%">Choisir un fichier KML, KMZ, DXF, GeoJSON…</button>
-    <p class="hint">Ou glissez-déposez le fichier sur la carte.</p>
-    <div class="row"><label>Projection du DXF</label></div><select id="xCrsIn" style="width:100%"></select>
-    <div class="lbl" style="display:flex;justify-content:space-between;align-items:center">Calques <button class="btn" id="lyFolder" style="flex:none;height:26px;padding:0 10px;font-size:12px;text-transform:none;letter-spacing:0">+ Dossier</button></div>
-    <div id="lyList"></div>
-    <p class="hint">Glissez les calques pour les ranger dans un dossier ou changer leur ordre d'affichage. Double-clic sur un nom pour le renommer.</p>
+    <button class="btn pri" id="xImport" style="width:100%">Choisir un fichier (KML, KMZ, DXF, GeoJSON)</button>
+    <p class="hint">Ou glissez-déposez le fichier sur la carte. Il apparaît dans Calques.</p>
+    <div class="row"><label>Projection des DXF importés</label></div><select id="xCrsIn" style="width:100%"></select>
     <div class="lbl">Exporter</div>
-    <label class="chk"><input type="checkbox" id="xPts" checked> Mes points (nom + trois mots)</label>
-    <label class="chk"><input type="checkbox" id="xSq" checked> Carrés 3×3 m des points</label>
-    <label class="chk"><input type="checkbox" id="xLy"> Calques importés visibles</label>
-    <div class="row" style="margin-top:6px"><label>Projection du DXF</label></div><select id="xCrsOut" style="width:100%"></select>
+    <label class="chk"><input type="checkbox" id="xPts" checked> Points favoris (nom + trois mots)</label>
+    <label class="chk"><input type="checkbox" id="xSq"> Carrés 3×3 m des points</label>
+    <label class="chk"><input type="checkbox" id="xLy" checked> Calques visibles (dont Dessins)</label>
+    <div class="row" style="margin-top:6px"><label>Projection du DXF exporté</label></div><select id="xCrsOut" style="width:100%"></select>
     <div class="acts" style="padding:12px 0 4px"><button class="btn" data-exp="kml">KML</button><button class="btn" data-exp="kmz">KMZ</button><button class="btn" data-exp="dxf">DXF</button></div>
   </div>
 </div>
 <input type="file" id="xFile" accept=".kml,.kmz,.dxf,.geojson,.json,.mmap" multiple hidden>
 
-<!-- Tiroir : points -->
-<div class="drawer" id="dPoints">
-  <div class="dh"><span>Mes points <span id="ptCount" style="color:var(--mut);font-weight:400"></span></span><button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <div class="db"><button class="btn" id="ptMe" style="width:100%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Centrer sur moi</button>
-    <div class="lbl">Mes points favoris</div><div id="ptList"></div><p class="hint">Clic droit sur la carte → « Ajouter aux favoris ici ».</p></div>
+<div class="drawer" id="dSave">
+  <div class="dh">Sauvegarde <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db">
+    <div class="lbl">Projet</div>
+    <p style="margin:2px 0 10px">Fichier : <b id="fileName2">sans titre</b> <span id="dirty2" class="dim"></span></p>
+    <button class="btn" id="tOpen" style="width:100%;margin-bottom:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>Ouvrir… <span class="dim">Ctrl+O</span></button>
+    <button class="btn pri" id="tSave" style="width:100%;margin-bottom:6px">Enregistrer <span style="opacity:.6">Ctrl+S</span></button>
+    <button class="btn" id="tSaveAs" style="width:100%">Enregistrer sous… <span class="dim">Ctrl+Maj+S</span></button>
+    <p class="hint">Le fichier .mmap contient vos points, vos calques, vos dessins et la vue en cours.</p>
+    <div class="lbl">Backup automatique</div>
+    <div class="row"><label>Fréquence</label><select id="sBackup"><option value="0">Désactivé</option><option value="1">Toutes les minutes</option><option value="2">Toutes les 2 min</option><option value="5">Toutes les 5 min</option><option value="10">Toutes les 10 min</option><option value="30">Toutes les 30 min</option></select></div>
+    <div class="row"><label>Dernier backup</label><button class="btn" id="sRestore" style="flex:none;padding:0 12px">Restaurer</button></div>
+  </div>
 </div>
 
-<!-- Tiroir : paramètres -->
 <div class="drawer" id="dSettings">
-  <div class="dh">Paramètres <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh">Paramètres <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
-    <div class="lbl">Grille</div>
+    <div class="lbl">Coordonnées</div>
+    <div class="row"><label>Afficher Lambert 93</label><button class="tg" id="sL93"></button></div>
+    <div class="lbl">Grille de mots</div>
     <div class="row"><label>Couleur</label><input type="color" id="sGridColor"></div>
     <div class="row"><label>Opacité</label><input type="range" id="sGridOp" min="0.1" max="1" step="0.05"></div>
     <div class="row"><label>Taille mini d'un carré</label><select id="sGridMin"><option value="4">4 px</option><option value="6">6 px</option><option value="10">10 px</option><option value="16">16 px</option></select></div>
     <div class="row"><label>Mots dans les carrés dès</label><select id="sLabMin"><option value="60">60 px</option><option value="80">80 px</option><option value="110">110 px</option></select></div>
-    <div class="lbl">Sélection</div>
-    <div class="row"><label>Couleur du carré choisi</label><input type="color" id="sSelColor"></div>
+    <div class="row"><label>Couleur de sélection</label><input type="color" id="sSelColor"></div>
     <div class="row"><label>Centrer la carte au clic</label><button class="tg" id="sFly"></button></div>
-    <div class="lbl">Coordonnées</div>
-    <div class="row"><label>Afficher Lambert 93</label><button class="tg" id="sL93"></button></div>
-    <div class="lbl">Sauvegarde</div>
-    <div class="row"><label>Backup auto</label><select id="sBackup"><option value="0">Désactivé</option><option value="1">Toutes les minutes</option><option value="2">Toutes les 2 min</option><option value="5">Toutes les 5 min</option><option value="10">Toutes les 10 min</option><option value="30">Toutes les 30 min</option></select></div>
-    <div class="row"><label>Restaurer le dernier backup</label><button class="btn" id="sRestore" style="flex:none;padding:0 12px">Restaurer</button></div>
-    <div class="lbl">Dictionnaire</div>
-    <p style="color:var(--mut);font-size:12.5px;margin:4px 0 10px" id="dicoInfo"></p>
-    <button class="btn" id="sReset" style="width:100%">Réinitialiser les paramètres</button>
+    <p class="hint" id="dicoInfo"></p>
+    <button class="btn" id="sReset" style="width:100%;margin-top:8px">Réinitialiser les paramètres</button>
   </div>
 </div>
 
@@ -487,6 +569,7 @@ setTimeout(done,4700);
 <div id="status"><span id="stZoom">z 19</span><span class="w" id="stHover">Survolez la carte</span></div>
 <div id="filelbl">Fichier : <b id="fileName">sans titre</b> <span id="dirty"></span></div>
 <div id="zoomc">
+  <button class="ib" id="zLoc" title="Centrer sur moi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button class="ib" id="zIn" title="Zoom avant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   <button class="ib" id="zOut" title="Zoom arrière"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
 </div>
@@ -705,7 +788,9 @@ map.on('mousemove', e => { const { lat, lng } = e.latlng, l = S.l93 && HAS_PROJ 
   if (k !== hoverKey) { hoverKey = k; redraw(); }
   $('#stHover').innerHTML = `<b>///</b>${esc(MM3.wordsOfCell(c).words.join('.'))} &nbsp;${xy}`; });
 map.on('mouseout', () => { hover = null; hoverKey = ''; redraw(); });
-map.on('click', e => { if (mode === 'parcel') return queryParcel(e.latlng.lat, e.latlng.lng);
+map.on('click', e => { if (drawTool) return drawClick(e.latlng);
+  if (rtPick) { const w = rtPick; rtPickSet(null); return rtSet(w, e.latlng.lat, e.latlng.lng); }
+  if (mode === 'parcel') return queryParcel(e.latlng.lat, e.latlng.lng);
   if (S.grid) select(MM3.cellAt(e.latlng.lat, e.latlng.lng), { fly: S.fly }); });
 function closeCards(){ document.querySelectorAll('#card,.card').forEach(c => c.classList.remove('on')); }
 
@@ -757,7 +842,9 @@ q.addEventListener('keydown', e => {
     sugg.querySelectorAll('.it').forEach((d, i) => d.classList.toggle('k', i === sIdx)); }
   else if (e.key === 'Enter') { e.preventDefault(); if (sIdx >= 0) pick(sIdx); else submitSearch(); }
   else if (e.key === 'Escape') { sugg.classList.remove('on'); q.blur(); } });
-function goLatLon(lat, lon, z){ select(MM3.cellAt(lat, lon), { fly: true, zoom: z || 19 }); }
+let searchMk = null;
+function goLatLon(lat, lon, z){ if (S.grid) return select(MM3.cellAt(lat, lon), { fly: true, zoom: z || 19 });
+  if (searchMk) map.removeLayer(searchMk); searchMk = L.marker([lat, lon], { icon: L.divIcon({ className: '', iconSize: [18, 18], iconAnchor: [9, 9], html: '<div class="sr-dot"></div>' }) }).addTo(map); map.flyTo([lat, lon], z || 18, { duration: .7 }); }
 function wordsItems(t){
   const raw = t.trim().replace(/^\/+/, ''), parts = raw.split(/[.\s]+/), last = parts[parts.length - 1] || '';
   const ws = parseWords(raw);
@@ -834,7 +921,7 @@ function applyDoc(d){ if (!d || d.app !== APP) throw new Error('Ce fichier n\'es
   points = Array.isArray(d.points) ? d.points : []; store('points', points); renderPoints();
   layers = (Array.isArray(d.calques) ? d.calques : []).map(x => ({ kind: 'layer', parent: null, ...x })); saveLayers(); renderLayers();
   if (d.vue) { if (d.vue.fond) setBase(d.vue.fond); map.setView([d.vue.lat, d.vue.lon], d.vue.zoom || 18); } }
-function updFile(){ $('#fileName').textContent = fileName; $('#dirty').textContent = dirty ? '•' : ''; store('fileName', fileName); }
+function updFile(){ $('#fileName').textContent = fileName; $('#dirty').textContent = dirty ? '•' : ''; $('#fileName2').textContent = fileName; $('#dirty2').textContent = dirty ? '(non enregistré)' : ''; store('fileName', fileName); }
 async function openFile(){
   if (dirty && points.length && !confirm('Des modifications ne sont pas enregistrées. Ouvrir quand même ?')) return;
   if (window.showOpenFilePicker) { try { const [h] = await showOpenFilePicker({ types: [{ description: 'Fichier MomoMAP', accept: { 'application/json': [EXT, '.json'] } }] });
@@ -883,8 +970,8 @@ function drawLayer(ly){
   if (layerObjs[ly.id]) { map.removeLayer(layerObjs[ly.id]); delete layerObjs[ly.id]; }
   if (ly.kind !== 'layer' || !lyShown(ly)) return;
   layerObjs[ly.id] = L.geoJSON(ly.geo, { renderer: L.canvas({ padding: .3 }),
-    style: () => ({ color: ly.color, weight: 2, opacity: .95, fillOpacity: .12 }),
-    pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: ly.color, fillOpacity: 1 }),
+    style: f => ({ color: (f.properties && f.properties.color) || ly.color, weight: 2.5, opacity: .95, fillOpacity: .12 }),
+    pointToLayer: (f, ll) => f.properties && f.properties.pin ? L.marker(ll, { icon: L.divIcon({ className: '', iconSize: [22, 28], iconAnchor: [11, 27], html: `<svg width="22" height="28" viewBox="0 0 24 30"><path d="M12 29s-10-8.6-10-16.5A10 10 0 0 1 22 12.5C22 20.4 12 29 12 29z" fill="${f.properties.color || ly.color}" stroke="#0f1115" stroke-width="1.5"/><circle cx="12" cy="12.5" r="3.6" fill="#0f1115"/></svg>` }) }) : L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: (f.properties && f.properties.color) || ly.color, fillOpacity: 1 }),
     onEachFeature: (f, l) => { const p = f.properties || {}, t = [p.name, p.layer && 'calque ' + p.layer].filter(Boolean).join(' · '); if (t) l.bindTooltip(esc(t), { className: 'pt-tip', sticky: true }); }
   }).addTo(map);
 }
@@ -1103,12 +1190,13 @@ const feats = j => (j && (j.features || j.data || j.results)) || (Array.isArray(
 const pk = (o, ...k) => { for (const x of k) if (o && o[x] != null && o[x] !== '') return o[x]; return ''; };
 const uniq = a => [...new Set(a.filter(Boolean))];
 function roundGeom(g){ const r = c => typeof c[0] === 'number' ? [+c[0].toFixed(6), +c[1].toFixed(6)] : c.map(r); return { type: g.type, coordinates: r(g.coordinates) }; }
-function setMode(m){ mode = mode === m ? null : m; $('#tParcel').classList.toggle('on', mode === 'parcel'); map.getContainer().classList.toggle('qmode', mode === 'parcel');
+function setMode(m){ mode = mode === m ? null : m; if (mode && typeof drawTool !== 'undefined' && drawTool) setTool(drawTool); $('#tParcel').classList.toggle('on', mode === 'parcel'); map.getContainer().classList.toggle('qmode', mode === 'parcel');
   if (mode === 'parcel') toast('Cliquez sur une parcelle pour l\'interroger'); }
 $('#tParcel').onclick = () => setMode('parcel');
 function secHTML(id, title){ return `<div class="sec" id="${id}"><div class="lbl" style="margin-top:0">${title}</div><div class="sb"><span class="ld">Chargement…</span></div></div>`; }
 function fill(id, html){ const el = document.querySelector('#' + id + ' .sb'); if (el) el.innerHTML = html || '<span class="mu">Rien à signaler ici.</span>'; }
 const li = (a, b) => `<div class="li"><b>${esc(a)}</b>${b ? `<span>${esc(b)}</span>` : ''}</div>`;
+const safe = (id, fn) => fn().catch(e => { console.warn(id, e); fill(id, '<span class="mu">Lecture impossible des données reçues.</span>'); });
 const lnk = (u, t) => `<a class="xl" href="${u}" target="_blank" rel="noopener">${t} ↗</a>`;
 async function queryParcel(lat, lon){
   const seq = ++parcelSeq, pt = { type: 'Point', coordinates: [+lon.toFixed(7), +lat.toFixed(7)] };
@@ -1129,7 +1217,7 @@ async function queryParcel(lat, lon){
   const l93 = HAS_PROJ && inFranceBox(lat, lon) ? toL93(lat, lon) : null;
   $('#pBody').innerHTML = secHTML('pLoc', 'Identification') + secHTML('pUrb', 'Urbanisme (PLU, servitudes)') + secHTML('pRis', 'Risques') + secHTML('pGeo', 'Géologie') + secHTML('pEnv', 'Environnement');
   // identification
-  (async () => { const rows = [];
+  safe('pLoc', async () => { const rows = [];
     if (parc) { rows.push(['Référence', `${p.code_dep}${p.code_com} ${p.com_abs || '000'} ${p.section} ${p.numero}`], ['IDU', p.idu || '—'], ['Contenance', p.contenance ? `${(+p.contenance).toLocaleString('fr-FR')} m²` : '—'], ['Feuille', p.feuille || '—']); }
     rows.push(['WGS84', `${lat.toFixed(6)}, ${lon.toFixed(6)}`]); if (l93) rows.push(['Lambert 93', `X ${l93[0].toFixed(2)}  Y ${l93[1].toFixed(2)}`]);
     rows.push(['3 mots', '///' + MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.')]);
@@ -1138,9 +1226,9 @@ async function queryParcel(lat, lon){
     if (adr.status === 'fulfilled') { const f = feats(adr.value)[0]; if (f) rows.splice(parc ? 0 : 0, 0, ['Adresse proche', f.properties.label]); }
     if (alt.status === 'fulfilled') { const z = (alt.value.elevations || [])[0]; const zz = typeof z === 'object' ? z.z : z; if (zz != null && zz > -1000) rows.push(['Altitude', `${(+zz).toFixed(1)} m`]); }
     fill('pLoc', `<div class="kv">${rows.map(([k, v]) => `<span class="k">${k}</span><span class="v" title="${esc(v)}">${esc(v)}</span><button class="ib c" data-cp="${esc(v)}" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>`).join('')}</div>`);
-  })();
+  });
   // urbanisme (Géoportail de l'urbanisme)
-  (async () => { const q = n => jget(`${AC}/gpu/${n}?${gq(n === 'document' || n === 'municipality' ? pt : gUse)}`).then(feats).catch(() => null);
+  safe('pUrb', async () => { const q = n => jget(`${AC}/gpu/${n}?${gq(n === 'document' || n === 'municipality' ? pt : gUse)}`).then(feats).catch(() => null);
     const [doc, zon, scc, ps, pl, pp, is, il, ip, ss, sl, sp, mun] = await Promise.all(['document','zone-urba','secteur-cc','prescription-surf','prescription-lin','prescription-pct','info-surf','info-lin','info-pct','assiette-sup-s','assiette-sup-l','assiette-sup-p','municipality'].map(q));
     if (seq !== parcelSeq) return;
     if ([doc, zon, mun].every(x => x === null)) return fill('pUrb', `<span class="mu">Service du Géoportail de l'urbanisme injoignable.</span>${lnk(`https://www.geoportail-urbanisme.gouv.fr/map/#tile=1&lon=${lon}&lat=${lat}&zoom=18`, 'Ouvrir le Géoportail de l\'urbanisme')}`);
@@ -1156,9 +1244,9 @@ async function queryParcel(lat, lon){
     const sup = uniq([...(ss || []), ...(sl || []), ...(sp || [])].map(f => { const sp_ = f.properties; return [String(pk(sp_, 'suptype', 'typesup')).toUpperCase(), pk(sp_, 'nomsuplitt', 'nomass', 'nomgen', 'libelle')].filter(Boolean).join(' — '); }));
     if (sup.length) h += `<div class="sub">Servitudes d'utilité publique</div>` + sup.map(x => li(x)).join('');
     fill('pUrb', (h || '<span class="mu">Aucun document d\'urbanisme publié ici.</span>') + lnk(`https://www.geoportail-urbanisme.gouv.fr/map/#tile=1&lon=${lon}&lat=${lat}&zoom=18`, 'Voir sur le Géoportail de l\'urbanisme'));
-  })();
+  });
   // risques (Géorisques)
-  (async () => { const ll = `latlon=${lon},${lat}`, g = u => jget(GR + u).catch(() => null);
+  safe('pRis', async () => { const ll = `latlon=${lon},${lat}`, g = u => jget(GR + u).catch(() => null);
     const [rap, sis, rga, rad, ppr, cat] = await Promise.all([g(`/resultats_rapport_risque?${ll}`), g(`/zonage_sismique?${ll}`), g(`/rga?${ll}`), insee ? g(`/radon?code_insee=${insee}`) : null, g(`/gaspar/pprn?${ll}&rayon=10`), insee ? g(`/gaspar/catnat?code_insee=${insee}&page_size=100`) : null]);
     if (seq !== parcelSeq) return;
     let h = '';
@@ -1166,29 +1254,30 @@ async function queryParcel(lat, lon){
     if (rga) { const r = feats(rga)[0] || rga; const ex = pk(r, 'exposition', 'libelleExposition'); if (ex) h += li('Retrait-gonflement des argiles', ex); }
     const rd = feats(rad)[0]; if (rd) h += li('Potentiel radon', 'classe ' + pk(rd, 'classe_potentiel', 'classePotentiel'));
     if (rap) { [['risquesNaturels', 'Naturel'], ['risquesTechnologiques', 'Technologique']].forEach(([k]) => { const o = rap[k]; if (!o) return;
-        Object.entries(o).forEach(([nm, v]) => { if (!v || !v.present) return; const t = pk(v, 'libelle') || nm.replace(/([A-Z])/g, ' $1').toLowerCase();
+        Object.entries(o).forEach(([nm, v]) => { if (!v || !v.present) return; const t = String(pk(v, 'libelle') || nm.replace(/([A-Z])/g, ' $1').toLowerCase());
           if (/sism|argile|radon/i.test(t)) return; h += li(t.charAt(0).toUpperCase() + t.slice(1), pk(v, 'libelleStatutAdresse', 'libelleStatutCommune')); }); }); }
     const pp = feats(ppr); if (pp.length) h += `<div class="sub">Plans de prévention (PPR)</div>` + uniq(pp.map(x => [pk(x, 'nom_ppr', 'libelle_ppr', 'nom'), pk(x, 'etat', 'libelle_etat')].filter(Boolean).join(' — '))).map(x => li(x)).join('');
     const cn = feats(cat); if (cn.length) h += li(`${cn.length} arrêté${cn.length > 1 ? 's' : ''} de catastrophe naturelle sur la commune`, (() => { const x = cn.map(c => pk(c, 'date_publication_arrete', 'date_fin_evt', 'date_debut_evt')).filter(Boolean).sort().pop(); return x ? 'dernier : ' + x : ''; })());
     const none = [rap, sis, rga, ppr].every(x => x === null);
     fill('pRis', (none ? '<span class="mu">Service Géorisques injoignable.</span>' : h || '<span class="mu">Aucun risque recensé à cet endroit.</span>') + lnk('https://www.georisques.gouv.fr/mes-risques/connaitre-les-risques-pres-de-chez-moi', 'Rapport complet sur Géorisques'));
-  })();
+  });
   // géologie (BRGM)
-  (async () => { const d = .0005, u = `https://geoservices.brgm.fr/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&LAYERS=SCAN_H_GEOL50&QUERY_LAYERS=SCAN_H_GEOL50&STYLES=&SRS=EPSG:4326&BBOX=${lon - d},${lat - d},${lon + d},${lat + d}&WIDTH=101&HEIGHT=101&X=50&Y=50&INFO_FORMAT=text/plain&FEATURE_COUNT=3`;
-    let txt = null; try { const c = new AbortController(); setTimeout(() => c.abort(), 12000); const r = await fetch(u, { signal: c.signal }); if (r.ok) txt = await r.text(); } catch(e){}
+  safe('pGeo', async () => { const d = .0005; let txt = null;
+    for (const lyr of ['LITHO_1M_SIMPLIFIEE', 'GEOLOGIE', 'SCAN_F_GEOL1M']) { const u = `https://geoservices.brgm.fr/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&LAYERS=${lyr}&QUERY_LAYERS=${lyr}&STYLES=&SRS=EPSG:4326&BBOX=${lon - d},${lat - d},${lon + d},${lat + d}&WIDTH=101&HEIGHT=101&X=50&Y=50&INFO_FORMAT=text/plain&FEATURE_COUNT=3`;
+      try { const c = new AbortController(); setTimeout(() => c.abort(), 8000); const r = await fetch(u, { signal: c.signal }); if (r.ok) { const t = await r.text(); if (t && !/ServiceException|^\s*</.test(t) && /=/.test(t)) { txt = t; break; } } } catch(e){} }
     if (seq !== parcelSeq) return;
     let h = '';
     if (txt) { const kv = txt.split(/\r?\n/).map(x => x.match(/^\s*([^=]+?)\s*=\s*'?(.*?)'?\s*$/)).filter(Boolean).filter(m => m[2] && !/^(geometry|the_geom|objectid|gid|fid)$/i.test(m[1]));
       const want = kv.filter(m => /descr|notation|lib|legende|age|lithol|nature|ere|syst/i.test(m[1])); (want.length ? want : kv).slice(0, 6).forEach(m => h += li(m[1].replace(/_/g, ' '), m[2])); }
     fill('pGeo', (h || '<span class="mu">Description non disponible ici. Activez la superposition « Carte géologique » pour la voir sur la carte.</span>') + lnk(`https://infoterre.brgm.fr/viewer/MainTileForward.do`, 'Ouvrir InfoTerre (BRGM)'));
-  })();
+  });
   // environnement (API Carto nature)
-  (async () => { const L_ = [['natura-habitat', 'Natura 2000 (habitats)'], ['natura-oiseaux', 'Natura 2000 (oiseaux)'], ['znieff1', 'ZNIEFF type 1'], ['znieff2', 'ZNIEFF type 2'], ['pn', 'Parc national'], ['pnr', 'Parc naturel régional'], ['rnn', 'Réserve naturelle nationale']];
+  safe('pEnv', async () => { const L_ = [['natura-habitat', 'Natura 2000 (habitats)'], ['natura-oiseaux', 'Natura 2000 (oiseaux)'], ['znieff1', 'ZNIEFF type 1'], ['znieff2', 'ZNIEFF type 2'], ['pn', 'Parc national'], ['pnr', 'Parc naturel régional'], ['rnn', 'Réserve naturelle nationale']];
     const r = await Promise.all(L_.map(([n]) => jget(`${AC}/nature/${n}?${gq(pt)}`).then(feats).catch(() => null)));
     if (seq !== parcelSeq) return;
     let h = ''; r.forEach((fs, i) => (fs || []).forEach(f => h += li(L_[i][1], pk(f.properties, 'sitename', 'nom', 'nom_site', 'NOM_SITE', 'lib_znieff', 'nom_zone', 'libelle'))));
     fill('pEnv', r.every(x => x === null) ? '<span class="mu">Service injoignable.</span>' : h || '<span class="mu">Aucune zone naturelle protégée ou inventoriée ici.</span>');
-  })();
+  });
 }
 $('#pBody').onclick = e => { const b = e.target.closest('[data-cp]'); if (b) copy(b.dataset.cp); };
 $('#pClose').onclick = () => { $('#pcard').classList.remove('on'); parcelSeq++; if (parcelLayer) { map.removeLayer(parcelLayer); parcelLayer = null; } };
@@ -1205,6 +1294,131 @@ cm.onclick = e => { const a = e.target.closest('[data-c]'); if (!a || !cmAt) ret
   else if (a.dataset.c === 'fav') addFav(lat, lng);
   else if (a.dataset.c === 'words') select(MM3.cellAt(lat, lng));
   else if (a.dataset.c === 'xy') { const l = HAS_PROJ && inFranceBox(lat, lng) ? toL93(lat, lng) : null; copy(l ? `${l[0].toFixed(2)} ${l[1].toFixed(2)}` : `${lat.toFixed(6)}, ${lng.toFixed(6)}`); } };
+/* ---------- dessin & mesures ---------- */
+const RT = 6371008.8, rad = d => d * Math.PI / 180;
+function geoDist(a, b){ const dφ = rad(b.lat - a.lat), dλ = rad(b.lng - a.lng), x = Math.sin(dφ / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dλ / 2) ** 2; return 2 * RT * Math.asin(Math.sqrt(x)); }
+const pathLen = p => p.reduce((s, q, i) => i ? s + geoDist(p[i - 1], q) : 0, 0);
+function geoArea(p){ if (p.length < 3) return 0; let s = 0; for (let i = 0; i < p.length; i++) { const a = p[i], b = p[(i + 1) % p.length]; s += rad(b.lng - a.lng) * (2 + Math.sin(rad(a.lat)) + Math.sin(rad(b.lat))); } return Math.abs(s * RT * RT / 2); }
+const fmtL = m => m < 1000 ? `${m.toLocaleString('fr-FR', { maximumFractionDigits: m < 10 ? 2 : 1 })} m` : `${(m / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} km`;
+const fmtA = a => a < 10000 ? `${a.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} m²` : a < 1e6 ? `${(a / 1e4).toLocaleString('fr-FR', { maximumFractionDigits: 4 })} ha (${Math.round(a).toLocaleString('fr-FR')} m²)` : `${(a / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} km²`;
+function circlePts(c, r, n = 72){ const out = []; for (let i = 0; i <= n; i++) { const t = 2 * Math.PI * i / n, dN = r * Math.cos(t), dE = r * Math.sin(t);
+  out.push(L.latLng(c.lat + dN / RT * 180 / Math.PI, c.lng + dE / (RT * Math.cos(rad(c.lat))) * 180 / Math.PI)); } return out; }
+const TOOLS = { dist: ['Mesure linéaire', 'Cliquez les points du tracé, double-clic pour terminer.'], area: ['Mesure de surface', 'Cliquez les sommets de la surface, double-clic pour terminer.'],
+  line: ['Polyligne', 'Cliquez les sommets, double-clic pour terminer.'], poly: ['Polygone', 'Cliquez les sommets, double-clic pour fermer.'], circle: ['Cercle', 'Cliquez le centre, puis un point du bord.'], pin: ['Épingle', 'Cliquez à l\'endroit de l\'épingle.'] };
+let drawTool = null, drawPts = [], drawPrev = null, drawTip = null;
+const measLayer = L.layerGroup().addTo(map);
+function drawColor(){ return $('#drColor').value || '#fff200'; }
+function clearPreview(){ if (drawPrev) { map.removeLayer(drawPrev); drawPrev = null; } if (drawTip) { map.removeLayer(drawTip); drawTip = null; } }
+function setTool(t){
+  clearPreview(); drawPts = [];
+  drawTool = drawTool === t ? null : t;
+  if (drawTool && mode) setMode(mode);
+  if (drawTool && rtPick) rtPickSet(null);
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === drawTool));
+  $('#tDraw').classList.toggle('busy', !!drawTool);
+  map.getContainer().classList.toggle('drawing', !!drawTool);
+  drawTool ? map.doubleClickZoom.disable() : map.doubleClickZoom.enable();
+  $('#drHint').textContent = drawTool ? TOOLS[drawTool][1] + ' Échap pour annuler, Retour arrière pour effacer le dernier point.' : 'Choisissez un outil.';
+}
+document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+function drawingLayer(){ let l = lyById('dessins');
+  if (!l) { l = { id: 'dessins', kind: 'layer', parent: null, name: 'Dessins', crs: '', color: '#fff200', visible: true, geo: { type: 'FeatureCollection', features: [] } }; layers.unshift(l); }
+  if (!l.visible) l.visible = true; return l; }
+function addDrawn(feature){ const l = drawingLayer(); l.geo.features.push(feature); lyChanged(); }
+const ll2c = p => p.map(q => [+q.lng.toFixed(8), +q.lat.toFixed(8)]);
+function drawLabel(p){ const t = drawTool;
+  if (t === 'dist' || t === 'line') return fmtL(pathLen(p));
+  if (t === 'area' || t === 'poly') return p.length > 2 ? `${fmtA(geoArea(p))} · périmètre ${fmtL(pathLen([...p, p[0]]))}` : fmtL(pathLen(p));
+  if (t === 'circle' && p.length === 2) { const r = geoDist(p[0], p[1]); return `r = ${fmtL(r)} · ${fmtA(Math.PI * r * r)}`; } return ''; }
+function preview(cursor){
+  clearPreview(); if (!drawTool || !drawPts.length) return;
+  const p = cursor ? [...drawPts, cursor] : drawPts, col = drawTool === 'dist' || drawTool === 'area' ? '#ffffff' : drawColor(), st = { color: col, weight: 2.5, dashArray: '6 5', interactive: false };
+  if (drawTool === 'circle') drawPrev = L.polygon(circlePts(p[0], geoDist(p[0], p[1] || p[0])), { ...st, fillOpacity: .1 });
+  else if (drawTool === 'area' || drawTool === 'poly') drawPrev = L.polygon(p, { ...st, fillOpacity: .1 });
+  else drawPrev = L.polyline(p, st);
+  drawPrev.addTo(map);
+  const lab = drawLabel(p); if (lab) drawTip = L.tooltip({ permanent: true, direction: 'right', offset: [12, 0], className: 'meas-tip' }).setLatLng(p[p.length - 1]).setContent(lab).addTo(map);
+}
+function drawClick(ll){
+  const t = drawTool;
+  if (t === 'pin') { const n = prompt('Nom de l\'épingle :', 'Épingle'); if (n === null) return;
+    addDrawn({ type: 'Feature', properties: { name: n.trim() || 'Épingle', pin: true, color: drawColor() }, geometry: { type: 'Point', coordinates: [+ll.lng.toFixed(8), +ll.lat.toFixed(8)] } }); return; }
+  drawPts.push(ll);
+  if (t === 'circle' && drawPts.length === 2) return finishDraw();
+  preview();
+}
+function finishDraw(){
+  const t = drawTool, p = drawPts.slice(); clearPreview(); drawPts = [];
+  if (!t) return;
+  const need = t === 'area' || t === 'poly' ? 3 : 2; if (p.length < need) return;
+  const lab = (() => { const s = drawTool; drawTool = t; const r = drawLabel(p); drawTool = s; return r; })();
+  if (t === 'dist' || t === 'area') {
+    const shape = t === 'dist' ? L.polyline(p, { color: '#fff', weight: 2.5 }) : L.polygon(p, { color: '#fff', weight: 2.5, fillOpacity: .12 });
+    shape.addTo(measLayer); L.tooltip({ permanent: true, direction: 'center', className: 'meas-tip' }).setLatLng(t === 'dist' ? p[p.length - 1] : shape.getBounds().getCenter()).setContent(lab).addTo(measLayer); return; }
+  const col = drawColor();
+  if (t === 'line') addDrawn({ type: 'Feature', properties: { name: 'Polyligne ' + lab, color: col, longueur_m: +pathLen(p).toFixed(2) }, geometry: { type: 'LineString', coordinates: ll2c(p) } });
+  else if (t === 'poly') addDrawn({ type: 'Feature', properties: { name: 'Polygone ' + fmtA(geoArea(p)), color: col, surface_m2: +geoArea(p).toFixed(2) }, geometry: { type: 'Polygon', coordinates: [ll2c([...p, p[0]])] } });
+  else if (t === 'circle') { const r = geoDist(p[0], p[1]);
+    addDrawn({ type: 'Feature', properties: { name: `Cercle r ${fmtL(r)}`, color: col, rayon_m: +r.toFixed(2), centre: ll2c([p[0]])[0] }, geometry: { type: 'Polygon', coordinates: [ll2c(circlePts(p[0], r))] } }); }
+}
+map.on('mousemove', e => { if (drawTool && drawPts.length) preview(e.latlng); });
+map.on('dblclick', e => { if (drawTool) { L.DomEvent.stop(e); if (drawTool !== 'circle') { drawPts.pop(); finishDraw(); } } });
+document.addEventListener('keydown', e => { if (!drawTool || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key === 'Escape') { e.stopImmediatePropagation(); if (drawPts.length) { drawPts = []; clearPreview(); } else setTool(drawTool); }
+  else if (e.key === 'Enter') finishDraw();
+  else if (e.key === 'Backspace') { e.preventDefault(); drawPts.pop(); preview(); } }, true);
+$('#drFinish').onclick = finishDraw;
+$('#drClear').onclick = () => { measLayer.clearLayers(); toast('Mesures effacées'); };
+/* ---------- itinéraire ---------- */
+const rt = { a: null, b: null, mA: null, mB: null, line: null, profile: 'car', data: null };
+let rtPick = null;
+const rtIcon = t => L.divIcon({ className: '', iconSize: [26, 26], iconAnchor: [13, 13], html: `<div class="rt-pin">${t}</div>` });
+function rtPickSet(w){ rtPick = w; ['A', 'B'].forEach(k => $('#rtPick' + k).classList.toggle('on', rtPick === k.toLowerCase())); map.getContainer().classList.toggle('drawing', !!w || !!drawTool);
+  if (w) { if (drawTool) setTool(drawTool); if (mode) setMode(mode); toast(`Cliquez sur la carte pour placer ${w === 'a' ? 'le départ' : 'l\'arrivée'}`); } }
+$('#rtPickA').onclick = () => rtPickSet(rtPick === 'a' ? null : 'a'); $('#rtPickB').onclick = () => rtPickSet(rtPick === 'b' ? null : 'b');
+function rtSet(w, lat, lon, label){
+  rt[w] = { lat, lon }; const m = w === 'a' ? 'mA' : 'mB'; if (rt[m]) map.removeLayer(rt[m]);
+  rt[m] = L.marker([lat, lon], { icon: rtIcon(w === 'a' ? 'A' : 'B'), draggable: true }).addTo(map)
+    .on('dragend', ev => { const p = ev.target.getLatLng(); rtSet(w, p.lat, p.lng); });
+  $(w === 'a' ? '#rtA' : '#rtB').value = label || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  if (rt.a && rt.b) rtCompute();
+}
+async function rtGeocode(w){ const t = $(w === 'a' ? '#rtA' : '#rtB').value.trim(); if (!t) return;
+  const c = parseCoords(t); if (c) return rtSet(w, c.lat, c.lon);
+  const r = await geocode(t); if (!r.length) return toast('Adresse introuvable : ' + t); rtSet(w, r[0].lat, r[0].lon, r[0].label); }
+['a', 'b'].forEach(w => $(w === 'a' ? '#rtA' : '#rtB').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); rtGeocode(w); } }));
+$('#rtMe').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible');
+  navigator.geolocation.getCurrentPosition(p => rtSet('a', p.coords.latitude, p.coords.longitude, 'Ma position'), () => toast('Position refusée ou indisponible'), { enableHighAccuracy: true, timeout: 15000 }); };
+$('#rtSwap').onclick = () => { const a = rt.a, b = rt.b, la = $('#rtA').value, lb = $('#rtB').value; if (!a || !b) return; rtSet('a', b.lat, b.lon, lb); rtSet('b', a.lat, a.lon, la); };
+document.querySelectorAll('[data-prof]').forEach(b => b.onclick = () => { rt.profile = b.dataset.prof; document.querySelectorAll('[data-prof]').forEach(x => x.classList.toggle('on', x === b)); if (rt.a && rt.b) rtCompute(); });
+$('#rtGo').onclick = async () => { if (!rt.a) await rtGeocode('a'); if (!rt.b) await rtGeocode('b'); if (rt.a && rt.b) rtCompute(); else toast('Indiquez un départ et une arrivée'); };
+const MOD = { left: 'à gauche', right: 'à droite', 'slight left': 'légèrement à gauche', 'slight right': 'légèrement à droite', 'sharp left': 'franchement à gauche', 'sharp right': 'franchement à droite', straight: 'tout droit', uturn: 'demi-tour' };
+function stepText(type, mod, name, exit){ const m = MOD[mod] || '', on = name ? ` sur ${name}` : '';
+  switch (type) { case 'depart': return `Partir${on}`; case 'arrive': return 'Arrivée';
+    case 'roundabout': case 'rotary': case 'exit roundabout': return `Au rond-point, prendre la ${exit ? exit + (exit === 1 ? 're' : 'e') + ' ' : ''}sortie${on}`;
+    case 'turn': case 'end of road': return `Tourner ${m}${on}`; case 'fork': return `À la bifurcation, rester ${m}${on}`;
+    case 'merge': return `Rejoindre${on}`; case 'on ramp': return `Prendre la bretelle ${m}${on}`; case 'off ramp': return `Sortir ${m}${on}`;
+    default: return m && mod !== 'straight' ? `Continuer ${m}${on}` : `Continuer${on}`; } }
+const fmtT = s => { s = Math.round(s / 60); return s < 60 ? `${s} min` : `${Math.floor(s / 60)} h ${String(s % 60).padStart(2, '0')}`; };
+async function rtCompute(){
+  $('#rtRes').innerHTML = '<span class="ld">Calcul de l\'itinéraire…</span>';
+  const { a, b } = rt; let res = null;
+  try { const j = await jget(`https://data.geopf.fr/navigation/itineraire?resource=bdtopo-osrm&profile=${rt.profile === 'car' ? 'car' : 'pedestrian'}&optimization=fastest&start=${a.lon},${a.lat}&end=${b.lon},${b.lat}&geometryFormat=geojson&getSteps=true&distanceUnit=meter&timeUnit=second`);
+    const steps = (j.portions || []).flatMap(p => p.steps || []).map(s => ({ t: stepText(s.instruction && s.instruction.type, s.instruction && s.instruction.modifier, s.attributes && s.attributes.name && (s.attributes.name.nom_1_droite || s.attributes.name.nom_1_gauche || s.attributes.name.cpx_numero), s.instruction && s.instruction.exit), d: s.distance }));
+    res = { dist: +j.distance, dur: +j.duration, geom: j.geometry, steps, src: 'IGN Géoplateforme' }; } catch(e){}
+  if (!res && rt.profile === 'car') try { const j = await jget(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=full&geometries=geojson&steps=true`);
+    const r = j.routes[0]; res = { dist: r.distance, dur: r.duration, geom: r.geometry, steps: r.legs[0].steps.map(s => ({ t: stepText(s.maneuver.type, s.maneuver.modifier, s.name, s.maneuver.exit), d: s.distance })), src: 'OSRM' }; } catch(e){}
+  if (!res) { $('#rtRes').innerHTML = '<span class="mu">Aucun itinéraire trouvé (service injoignable ou points inaccessibles).</span>'; return; }
+  rt.data = res; if (rt.line) map.removeLayer(rt.line);
+  rt.line = L.geoJSON(res.geom, { style: { color: '#4cc3ff', weight: 6, opacity: .85 } }).addTo(map); map.fitBounds(rt.line.getBounds(), { padding: [60, 60] });
+  $('#rtRes').innerHTML = `<div class="rt-sum"><b>${fmtL(res.dist)}</b><span>${fmtT(res.dur)}</span></div><div class="rt-src">${rt.profile === 'car' ? 'En voiture' : 'À pied'} · ${res.src}</div>
+    <div class="rt-steps">${res.steps.filter(s => s.t).map(s => `<div class="li"><b>${esc(s.t)}</b>${s.d ? `<span>${fmtL(s.d)}</span>` : ''}</div>`).join('')}</div>`;
+}
+$('#rtAdd').onclick = () => { if (!rt.data) return toast('Calculez d\'abord un itinéraire');
+  const nm = `Itinéraire ${$('#rtA').value} → ${$('#rtB').value}`.slice(0, 80), nl = layers.filter(x => x.kind === 'layer').length;
+  layers.unshift({ id: newId(), kind: 'layer', parent: null, name: nm, crs: '', color: '#4cc3ff', visible: true, geo: { type: 'FeatureCollection', features: [{ type: 'Feature', properties: { name: `${fmtL(rt.data.dist)} · ${fmtT(rt.data.dur)}` }, geometry: rt.data.geom }] } });
+  lyChanged(); toast('Itinéraire ajouté aux calques'); };
+$('#rtClear').onclick = () => { ['mA', 'mB', 'line'].forEach(k => { if (rt[k]) { map.removeLayer(rt[k]); rt[k] = null; } }); rt.a = rt.b = rt.data = null; $('#rtA').value = $('#rtB').value = ''; $('#rtRes').innerHTML = ''; };
 /* ---------- paramètres ---------- */
 function saveSettings(){ store('settings', S); }
 function bindSettings(){
@@ -1222,16 +1436,19 @@ $('#dicoInfo').textContent = `${MM3.W.toLocaleString('fr-FR')} mots pour ${(MM3.
 
 /* ---------- outils ---------- */
 function toggleDrawer(id){ const d = $(id), on = !d.classList.contains('on'); document.querySelectorAll('.drawer').forEach(x => x.classList.remove('on'));
-  ['#tLayers','#tPoints','#tSettings','#tXchg'].forEach(b => $(b).classList.remove('on'));
-  if (on) { d.classList.add('on'); $({ '#dLayers':'#tLayers', '#dPoints':'#tPoints', '#dSettings':'#tSettings', '#dXchg':'#tXchg' }[id]).classList.add('on'); } }
+  document.querySelectorAll('#tools [data-d]').forEach(b => b.classList.toggle('on', on && '#' + b.dataset.d === id));
+  if (on) { d.classList.add('on'); if (matchMedia('(max-width:720px)').matches) closeCards(); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => toggleDrawer('#' + b.closest('.drawer').id));
-$('#tLayers').onclick = () => toggleDrawer('#dLayers'); $('#tPoints').onclick = () => toggleDrawer('#dPoints'); $('#tSettings').onclick = () => toggleDrawer('#dSettings'); $('#tXchg').onclick = () => toggleDrawer('#dXchg');
+document.querySelectorAll('#tools [data-d]').forEach(b => b.addEventListener('click', () => toggleDrawer('#' + b.dataset.d)));
 function toggleGrid(){ S.grid = !S.grid; saveSettings(); bindSettings(); redraw(); toast(S.grid ? 'Grille affichée' : 'Grille masquée'); }
 function toggleLabels(){ S.labels = !S.labels; saveSettings(); bindSettings(); redraw();
   if (S.labels && cellPxAt(map.getCenter().lat) < S.labMin) toast('Mots visibles en zoomant au maximum'); }
 $('#ovGrid').onclick = toggleGrid; $('#ovLabels').onclick = toggleLabels;
-$('#ptMe').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
-  navigator.geolocation.getCurrentPosition(p => { goLatLon(p.coords.latitude, p.coords.longitude, 20); toast(`Position trouvée (précision ± ${Math.round(p.coords.accuracy)} m)`); },
+let meMk = null;
+$('#zLoc').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
+  navigator.geolocation.getCurrentPosition(p => { const ll = [p.coords.latitude, p.coords.longitude]; if (meMk) map.removeLayer(meMk);
+    meMk = L.layerGroup([L.circle(ll, { radius: p.coords.accuracy, color: '#4cc3ff', weight: 1, fillOpacity: .08, interactive: false }), L.circleMarker(ll, { radius: 7, color: '#fff', weight: 2, fillColor: '#4cc3ff', fillOpacity: 1 })]).addTo(map);
+    map.flyTo(ll, Math.max(map.getZoom(), 18), { duration: .7 }); toast(`Position trouvée (précision ± ${Math.round(p.coords.accuracy)} m)`); },
     e => toast('Position refusée ou indisponible'), { enableHighAccuracy: true, timeout: 15000 }); };
 $('#zIn').onclick = () => map.zoomIn(); $('#zOut').onclick = () => map.zoomOut();
 function updZoom(){ const cpx = cellPxAt(map.getCenter().lat); $('#stZoom').textContent = `z ${map.getZoom()}` + (S.grid && cpx < S.gridMin ? ' · zoomez pour la grille' : ''); }
@@ -1256,11 +1473,14 @@ const GUIDE = [
  ['Présentation', `<h3>MomoMAP, cartographie et SIG</h3>
   <p>MomoMAP affiche les fonds de carte de référence (plans, photos aériennes, cadastre, géologie), interroge les parcelles pour connaître leurs règles d'urbanisme et leurs risques, et échange des données avec les autres logiciels au format KML, KMZ, DXF et GeoJSON.</p>
   <h4>La barre d'outils</h4><table>
-  <tr><td><b>Fonds de carte</b></td><td>Choix du fond et des superpositions : grille de mots, trois mots, parcelles cadastrales, carte géologique.</td></tr>
-  <tr><td><b>Mes points</b></td><td>Se centrer sur sa position et retrouver ses points favoris.</td></tr>
-  <tr><td><b>Interroger la parcelle</b></td><td>Cliquez sur une parcelle : cadastre, PLU, servitudes, risques, géologie, environnement.</td></tr>
-  <tr><td><b>Import / export</b></td><td>Importer et exporter des fichiers, organiser les calques en dossiers.</td></tr>
-  <tr><td><b>Ouvrir / Enregistrer</b></td><td>Vos points, calques et vue dans un fichier .mmap.</td></tr></table>
+  <tr><td><b>Calques</b></td><td>Fond de carte, superpositions (grille de mots, trois mots, cadastre, géologie) et vos calques rangés en dossiers.</td></tr>
+  <tr><td><b>Points</b></td><td>Vos points favoris, ajoutés par clic droit sur la carte.</td></tr>
+  <tr><td><b>Dessin</b></td><td>Mesure de distance et de surface, polyligne, polygone, cercle, épingle.</td></tr>
+  <tr><td><b>Interroger</b></td><td>Cliquez sur une parcelle : cadastre, PLU, servitudes, risques, géologie, environnement.</td></tr>
+  <tr><td><b>Itinéraire</b></td><td>Calcul d'itinéraire routier ou à pied, avec la feuille de route.</td></tr>
+  <tr><td><b>Import / export</b></td><td>KML, KMZ, DXF, GeoJSON.</td></tr>
+  <tr><td><b>Sauvegarde</b></td><td>Ouvrir, enregistrer le projet .mmap, backup automatique.</td></tr></table>
+  <p>Le bouton rond en bas à droite vous recentre sur votre position. Sur téléphone, la barre d'outils est en bas de l'écran et les panneaux s'ouvrent depuis le bas.</p>
   <h4>Le clic droit</h4><p>Un clic droit sur la carte propose d'interroger la parcelle à cet endroit, d'y placer un point favori, d'afficher ses trois mots ou de copier ses coordonnées (en Lambert 93 en France).</p>`],
  ['Fonds & superpositions', `<h3>Fonds de carte</h3>
   <p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Le zoom va du globe entier jusqu'au détail d'un mètre ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>
@@ -1276,8 +1496,11 @@ const GUIDE = [
   <h4>Risques</h4><p>Sismicité, retrait-gonflement des argiles, radon, risques naturels et technologiques, plans de prévention (PPR) et arrêtés de catastrophe naturelle, d'après Géorisques.</p>
   <h4>Géologie et environnement</h4><p>Formation géologique du BRGM quand elle est disponible, zones Natura 2000, ZNIEFF, parcs et réserves naturelles.</p>
   <p>Ces informations proviennent des services publics de l'État, sans compte ni clé. Elles sont données à titre indicatif : pour un acte officiel (certificat d'urbanisme, état des risques), référez-vous aux documents opposables via les liens de chaque rubrique.</p>`],
+ ['Dessin & itinéraire', `<h3>Dessin et mesures</h3>
+  <p><b>Distance</b> et <b>Surface</b> : cliquez les points, double-clic (ou Entrée) pour terminer ; la longueur, la surface et le périmètre s'affichent sur la carte. Ces mesures sont temporaires (bouton « Effacer les mesures »).</p>
+  <p><b>Polyligne</b>, <b>Polygone</b>, <b>Cercle</b> (centre puis bord) et <b>Épingle</b> créent des objets durables dans le calque « Dessins », avec la couleur choisie : ils s'enregistrent dans le .mmap et s'exportent en KML, KMZ ou DXF. <kbd>Retour arrière</kbd> efface le dernier point, <kbd>Échap</kbd> annule.</p>
+  <h3>Itinéraire</h3><p>Saisissez un départ et une arrivée (adresse ou coordonnées, puis Entrée), ou placez-les sur la carte avec la cible, ou partez de votre position. Les points A et B se déplacent à la souris. Le calcul utilise le service d'itinéraire de l'IGN (voiture ou à pied), puis OSRM en secours ; « Ajouter aux calques » conserve le tracé.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
-  <p><b>Centrer sur moi</b> place la carte sur votre position (le navigateur demande l'autorisation).</p>
   <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de la grille de mots. Chaque point garde ses coordonnées et son adresse en trois mots. Un clic dans la liste recentre la carte dessus.</p>`],
  ['Import / export', `<h3>Échanger avec les autres logiciels</h3>
   <h4>Importer</h4><p>Bouton <b>Choisir un fichier</b> ou glisser-déposer sur la carte : KML, KMZ, DXF, GeoJSON. Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84) ; sinon choisissez-la avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
