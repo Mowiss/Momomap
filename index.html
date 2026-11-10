@@ -15,6 +15,11 @@
 </head>
 <body class="relative font-sans text-gray-800">
 
+    <!-- Message d'information (Toast) -->
+    <div id="toast" class="absolute top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-center">
+        Zoomez davantage pour voir la grille (Zoom >= 19)
+    </div>
+
     <div id="loading" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-4"></div>
         <h2 class="text-xl font-bold">Chargement du dictionnaire...</h2>
@@ -45,6 +50,7 @@
         let dicoMots = [];
         let map;
         let gridSquareLayer;
+        let gridLayerGroup;
 
         const EARTH_CIRCUMFERENCE = 40075016.686;
         const ORIGIN_SHIFT = EARTH_CIRCUMFERENCE / 2.0;
@@ -80,31 +86,132 @@
             return [dicoMots[w1], dicoMots[w2], dicoMots[w3]];
         }
 
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function drawGrid() {
+            gridLayerGroup.clearLayers();
+            
+            // Ne dessine rien si le calque n'est pas actif
+            if (!map.hasLayer(gridLayerGroup)) return;
+
+            // Protection anti-crash : seulement aux zooms profonds
+            if (map.getZoom() < 19) {
+                return;
+            }
+
+            const bounds = map.getBounds();
+            const swMeters = latLonToMeters(bounds.getSouth(), bounds.getWest());
+            const neMeters = latLonToMeters(bounds.getNorth(), bounds.getEast());
+
+            // Arrondir aux multiples de 3 mètres
+            const startX = Math.floor(swMeters.x / 3) * 3;
+            const endX = Math.ceil(neMeters.x / 3) * 3;
+            const startY = Math.floor(swMeters.y / 3) * 3;
+            const endY = Math.ceil(neMeters.y / 3) * 3;
+
+            const lines = [];
+
+            // Lignes verticales
+            for (let x = startX; x <= endX; x += 3) {
+                const bottom = metersToLatLon(x, startY);
+                const top = metersToLatLon(x, endY);
+                lines.push([[bottom.lat, bottom.lon], [top.lat, top.lon]]);
+            }
+
+            // Lignes horizontales
+            for (let y = startY; y <= endY; y += 3) {
+                const left = metersToLatLon(startX, y);
+                const right = metersToLatLon(endX, y);
+                lines.push([[left.lat, left.lon], [right.lat, right.lon]]);
+            }
+
+            // Création d'une multi-polyline unique pour de très hautes performances
+            L.polyline(lines, { color: 'rgba(120, 120, 120, 0.6)', weight: 1 }).addTo(gridLayerGroup);
+        }
+
         async function initApp() {
             try {
-                const response = await fetch('https://raw.githubusercontent.com/words/an-array-of-french-words/master/index.json');
-                const allWords = await response.json();
+                // Nouveau dictionnaire
+                const response = await fetch('https://raw.githubusercontent.com/hbenbel/French-Dictionary/master/dictionary/dictionary.txt');
+                const text = await response.text();
+                const allWords = text.split('\n').map(w => w.trim());
                 
-                let filtered = allWords.filter(m => /^[a-zâäàéèêëîïôöûüùç]{4,8}$/i.test(m));
+                // Filtre sévère (longueur 4-8, pas de tirets, pas de conjugaisons)
+                const exclureSuffixes = /(ons|ez|aient|ais|ait|ions|iez|âmes|âtes|èrent|ées|ant)$/i;
+                let filtered = allWords.filter(m => 
+                    /^[a-zâäàéèêëîïôöûüùç]{4,8}$/i.test(m) && 
+                    !exclureSuffixes.test(m)
+                );
+                
+                // Tri alphabétique obligatoire pour le déterminisme
+                filtered.sort();
                 
                 dicoMots = filtered.slice(0, 40000);
+                
+                // Compléter au besoin pour atteindre exactement 40000 (normalement inutile avec un gros dico, mais par sécurité)
                 let fallbackIndex = 0;
                 while (dicoMots.length < 40000 && fallbackIndex < allWords.length) {
-                    if(!dicoMots.includes(allWords[fallbackIndex])) {
+                    if(/^[a-zâäàéèêëîïôöûüùç]+$/i.test(allWords[fallbackIndex]) && !dicoMots.includes(allWords[fallbackIndex])) {
                         dicoMots.push(allWords[fallbackIndex]);
                     }
                     fallbackIndex++;
                 }
 
+                // Assurer qu'il est trié à la toute fin
+                dicoMots.sort();
+
                 document.getElementById('loading').style.display = 'none';
 
-                map = L.map('map', { zoomControl: false }).setView([48.8584, 2.2945], 19);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                // Initialisation des calques cartographiques
+                const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 21,
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                    attribution: '© OpenStreetMap'
+                });
+
+                const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 21,
+                    attribution: '© Esri'
+                });
+
+                gridLayerGroup = L.layerGroup();
+
+                map = L.map('map', { 
+                    zoomControl: false,
+                    layers: [osmLayer], // Couche par défaut
+                    maxZoom: 21
+                }).setView([48.8584, 2.2945], 19);
                 
+                // Boutons des calques (Plan, Satellite, Grille)
+                const baseMaps = {
+                    "Plan (OpenStreetMap)": osmLayer,
+                    "Satellite (Esri)": satelliteLayer
+                };
+                const overlayMaps = {
+                    "Grille de référence (3x3m)": gridLayerGroup
+                };
+                L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
                 L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+                // Événements pour redessiner la grille
+                map.on('moveend', drawGrid);
+                map.on('zoomend', drawGrid);
+                
+                // Alerte quand on active la grille et qu'on est dézoomé
+                map.on('overlayadd', function(e) {
+                    if (e.name === "Grille de référence (3x3m)") {
+                        if (map.getZoom() < 19) {
+                            showToast("Zoomez davantage pour voir la grille (Zoom >= 19)");
+                        }
+                        drawGrid();
+                    }
+                });
 
                 map.on('click', function(e) {
                     processLocation(e.latlng.lat, e.latlng.lng);
@@ -113,6 +220,7 @@
                 processLocation(48.8584, 2.2945);
 
             } catch (err) {
+                console.error(err);
                 document.getElementById('loading').innerHTML = '<h2 class="text-red-500 text-xl font-bold">Erreur</h2><p>Impossible de charger le dictionnaire.</p>';
             }
         }
