@@ -261,6 +261,32 @@ body.drop #map{outline:3px dashed var(--acc);outline-offset:-8px}
 .sr-dot{width:18px;height:18px;border-radius:50%;background:var(--acc);border:3px solid #0f1115}
 #zoomc .ib svg{width:18px;height:18px}
 
+#ecard{width:330px}
+.ebody{padding:4px 16px 14px}
+.fl{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font:13px var(--ui)}
+.tr.sel{border-color:var(--acc2);background:var(--accbg)}
+.tr.it{cursor:pointer;padding-top:3px;padding-bottom:3px}
+.tr.it .n{font-weight:400;font-size:13px}
+.tr.it .gi{width:15px;height:15px;flex:none}
+.tr.it.more{cursor:default}
+.trm{display:none;flex-direction:column;margin:2px 0 6px 30px;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:4px}
+.trm.on{display:flex}
+.trm button{background:none;border:0;text-align:left;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.trm button:hover{background:var(--panel2)}
+.trm button.dz{color:var(--err)}
+.bgrp{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin:8px 2px 2px}
+#legend{position:absolute;left:66px;bottom:52px;z-index:860;width:270px;max-height:46%;display:none;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#legend.on{display:flex}
+#legend .lh{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-bottom:1px solid var(--line);font-size:13px}
+#legend .lh .dim{font-size:11.5px;flex:1}
+#legend .lh .ib{width:26px;height:26px}#legend .lh .ib svg{width:15px;height:15px;transition:transform .15s}
+#legend.min .lb{display:none}#legend.min .lh{border-bottom:0}#legend.min .lh .ib svg{transform:rotate(180deg)}
+#legend .lb{padding:6px 12px 10px;overflow:auto}
+#lgImg{background:#fff;border-radius:6px;padding:6px;margin-top:4px}
+#lgImg img{display:block;max-width:100%}
+#lgImg .mu{color:#555}
+
 /* ---------- toast ---------- */
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:3000;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
@@ -275,6 +301,7 @@ body.drop #map{outline:3px dashed var(--acc);outline-offset:-8px}
   #tools .ib{width:auto;height:44px;flex:1 1 0;min-width:0}
   #tools .sep{display:none}
   .ib[data-tip]:hover:after{display:none}
+  #legend{left:8px;right:auto;bottom:calc(64px + env(safe-area-inset-bottom));width:min(270px,70vw)}
   .drawer,#card,.card,#pcard{left:0;right:0;width:auto;top:auto;bottom:calc(56px + env(safe-area-inset-bottom));max-height:58vh;border-radius:16px 16px 0 0;border-width:1px 0 0}
   .drawer .dh{position:relative}
   .drawer .dh:before,.card .ch:before,#card .ch:before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;border-radius:4px;background:var(--line2);transform:translateX(-50%)}
@@ -547,6 +574,39 @@ setTimeout(done,4700);
   </div>
 </div>
 
+<!-- Éditeur d'objet / de calque -->
+<div id="ecard" class="card">
+  <div class="ch"><span class="k" id="eKind">Style</span><button class="ib" id="eClose" style="width:28px;height:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="ebody">
+    <label class="fl">Nom</label><input class="f" id="eName" style="width:100%">
+    <label class="fl">Descriptif</label><textarea class="f" id="eDesc" rows="3" style="width:100%;resize:vertical"></textarea>
+    <p class="hint" id="eMeas"></p>
+    <div class="lbl">Contour</div>
+    <div class="row"><label>Afficher le contour</label><button class="tg" id="eStroke"></button></div>
+    <div class="row"><label>Couleur</label><input type="color" id="eColor"></div>
+    <div class="row"><label>Épaisseur <span class="dim" id="eWeightV"></span></label><input type="range" id="eWeight" min="0.5" max="14" step="0.5"></div>
+    <div class="row"><label>Opacité <span class="dim" id="eOpacityV"></span></label><input type="range" id="eOpacity" min="0" max="1" step="0.05"></div>
+    <div id="eFillBox"><div class="lbl">Intérieur</div>
+      <div class="row"><label>Remplir</label><button class="tg" id="eFill"></button></div>
+      <div class="row"><label>Couleur</label><input type="color" id="eFillColor"></div>
+      <div class="row"><label>Opacité <span class="dim" id="eFillOpV"></span></label><input type="range" id="eFillOp" min="0" max="1" step="0.05"></div></div>
+    <div id="eSizeBox"><div class="lbl">Points</div>
+      <div class="row"><label>Symbole</label><select id="ePin"><option value="dot">Rond</option><option value="pin">Épingle</option></select></div>
+      <div class="row"><label>Taille <span class="dim" id="eSizeV"></span></label><input type="range" id="eSize" min="2" max="16" step="1"></div></div>
+    <div class="acts" style="padding:12px 0 2px"><button class="btn" id="eZoom">Zoomer</button><button class="btn" id="eReset">Style du calque</button><button class="btn" id="eDel" style="flex:none;width:40px" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>
+  </div>
+</div>
+
+<!-- Légende géologique -->
+<div id="legend">
+  <div class="lh"><b>Carte géologique</b><span class="dim">BRGM 1/50 000</span><button class="ib" id="lgToggle" title="Replier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+  <div class="lb">
+    <div class="row"><label>Opacité</label><input type="range" id="lgOp" min="0.1" max="1" step="0.05" value="0.6"></div>
+    <div id="lgImg"></div>
+    <p class="hint">Couleurs et notations des formations géologiques. Pour la notice détaillée d'une feuille : <a class="xl" style="margin:0" href="https://infoterre.brgm.fr/" target="_blank" rel="noopener">InfoTerre ↗</a></p>
+  </div>
+</div>
+
 <!-- Fiche parcelle -->
 <div id="pcard" class="card">
   <div class="ch"><span class="k">Interrogation de la parcelle</span><button class="ib" id="pClose" style="width:28px;height:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -705,11 +765,22 @@ function dms(v, pos, neg){ const s = v < 0 ? neg : pos; v = Math.abs(v); const d
 
 /* ---------- carte ---------- */
 const IGN = (layer, fmt, extra = '') => `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=${extra || 'normal'}&TILEMATRIXSET=PM&FORMAT=${fmt}&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`;
+const T = (url, o) => () => L.tileLayer(url, { maxZoom: 25, ...o });
 const BASES = {
-  osm:   { name:'Plan OpenStreetMap', sw:'#e8e4da', l: () => L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom:19, maxZoom:25, attribution:'© OpenStreetMap' }) },
-  ignplan:{ name:'Plan IGN', sw:'#f3efe4', l: () => L.tileLayer(IGN('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2','image/png'), { maxNativeZoom:19, maxZoom:25, attribution:'© IGN Géoplateforme' }) },
-  ortho: { name:'Photo aérienne IGN', sw:'#5c6b4c', l: () => L.tileLayer(IGN('ORTHOIMAGERY.ORTHOPHOTOS','image/jpeg'), { maxNativeZoom:19, maxZoom:25, attribution:'© IGN Géoplateforme' }) },
-  esri:  { name:'Satellite (monde)', sw:'#3b4a3a', l: () => L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom:18, maxZoom:25, attribution:'© Esri' }) },
+  osm:      { g: 'Plans', name: 'Plan OpenStreetMap', sw: '#e8e4da', l: T('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, attribution: '© OpenStreetMap' }) },
+  osmfr:    { g: 'Plans', name: 'OpenStreetMap France', sw: '#efe6d6', l: T('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', { subdomains: 'abc', maxNativeZoom: 20, attribution: '© OpenStreetMap France' }) },
+  ignplan:  { g: 'Plans', name: 'Plan IGN', sw: '#f3efe4', l: T(IGN('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2', 'image/png'), { maxNativeZoom: 19, attribution: '© IGN Géoplateforme' }) },
+  topo:     { g: 'Plans', name: 'OpenTopoMap (courbes de niveau)', sw: '#d9dcc0', l: T('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { subdomains: 'abc', maxNativeZoom: 17, attribution: '© OpenStreetMap, SRTM · © OpenTopoMap' }) },
+  esritopo: { g: 'Plans', name: 'Topographique (monde)', sw: '#e2e6d5', l: T('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 18, attribution: '© Esri' }) },
+  ortho:    { g: 'Photos', name: 'Photo aérienne IGN', sw: '#5c6b4c', l: T(IGN('ORTHOIMAGERY.ORTHOPHOTOS', 'image/jpeg'), { maxNativeZoom: 19, attribution: '© IGN Géoplateforme' }) },
+  irc:      { g: 'Photos', name: 'Photo infrarouge IGN', sw: '#9b3b3b', l: T(IGN('ORTHOIMAGERY.ORTHOPHOTOS.IRC', 'image/jpeg'), { maxNativeZoom: 19, attribution: '© IGN Géoplateforme' }) },
+  esri:     { g: 'Photos', name: 'Satellite (monde)', sw: '#3b4a3a', l: T('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 18, attribution: '© Esri' }) },
+  ortho2000:{ g: 'Historiques', name: 'Photo aérienne 2000-2005', sw: '#6b7158', l: T(IGN('ORTHOIMAGERY.ORTHOPHOTOS2000-2005', 'image/jpeg'), { maxNativeZoom: 18, attribution: '© IGN Géoplateforme' }) },
+  ortho1950:{ g: 'Historiques', name: 'Photo aérienne 1950-1965', sw: '#8a8a82', l: T(IGN('ORTHOIMAGERY.ORTHOPHOTOS.1950-1965', 'image/png'), { maxNativeZoom: 18, attribution: '© IGN Géoplateforme' }) },
+  etatmajor:{ g: 'Historiques', name: 'Carte de l\'état-major (1820-1866)', sw: '#d8c9a3', l: T(IGN('GEOGRAPHICALGRIDSYSTEMS.ETATMAJOR40', 'image/jpeg'), { maxNativeZoom: 15, attribution: '© IGN Géoplateforme' }) },
+  cassini:  { g: 'Historiques', name: 'Carte de Cassini (XVIIIe siècle)', sw: '#e3d3b0', l: T(IGN('BNF-IGNF_GEOGRAPHICALGRIDSYSTEMS.CASSINI', 'image/png'), { maxNativeZoom: 15, attribution: '© BnF / IGN' }) },
+  pentes:   { g: 'Relief', name: 'Pentes (zones de montagne)', sw: '#d7a85a', l: T(IGN('GEOGRAPHICALGRIDSYSTEMS.SLOPES.MOUNTAIN', 'image/png'), { maxNativeZoom: 17, attribution: '© IGN Géoplateforme' }) },
+  relief:   { g: 'Relief', name: 'Ombrage du relief', sw: '#b8b8b8', l: T(IGN('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', 'image/png', 'estompage_grayscale'), { maxNativeZoom: 15, attribution: '© IGN Géoplateforme' }) },
 };
 const map = L.map('map', { zoomControl:false, maxZoom:25, minZoom:0, worldCopyJump:true }).setView([44.5594, 6.0786], 18);
 let baseLayer = null, cadLayer = null;
@@ -717,7 +788,7 @@ function setBase(k){ if (!BASES[k]) k = 'osm'; if (baseLayer) map.removeLayer(ba
   baseLayer = BASES[k].l(); let ok = 0, bad = 0;
   baseLayer.on('tileload', () => ok++).on('tileerror', () => { bad++; if (bad === 8 && ok === 0) toast(`Le fond « ${BASES[k].name} » ne répond pas : essayez un autre fond`); });
   baseLayer.addTo(map); baseLayer.bringToBack(); S.base = k; saveSettings(); renderBases(); }
-function renderBases(){ $('#baseList').innerHTML = Object.entries(BASES).map(([k, b]) =>
+function renderBases(){ let g = ''; $('#baseList').innerHTML = Object.entries(BASES).map(([k, b]) => (b.g !== g ? `<div class="bgrp">${(g = b.g)}</div>` : '') +
   `<div class="opt ${S.base===k?'on':''}" data-b="${k}"><span class="sw" style="background:${b.sw}"></span>${b.name}</div>`).join(''); }
 $('#baseList').onclick = e => { const o = e.target.closest('[data-b]'); if (o) setBase(o.dataset.b); };
 function setCad(on){ S.cad = on; $('#ovCad').classList.toggle('on', on); if (cadLayer) { map.removeLayer(cadLayer); cadLayer = null; }
@@ -725,7 +796,17 @@ function setCad(on){ S.cad = on; $('#ovCad').classList.toggle('on', on); if (cad
 $('#ovCad').onclick = () => setCad(!S.cad);
 let geolLayer = null;
 function setGeol(on){ S.geol = on; $('#ovGeol').classList.toggle('on', on); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
-  if (on) geolLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { layers: 'SCAN_H_GEOL50', format: 'image/png', transparent: true, opacity: .6, maxZoom: 25, attribution: '© BRGM' }).addTo(map); saveSettings(); }
+  if (on) geolLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { layers: 'SCAN_H_GEOL50', format: 'image/png', transparent: true, opacity: S.geolOp || .6, maxZoom: 25, attribution: '© BRGM' }).addTo(map);
+  $('#legend').classList.toggle('on', on);
+  if (on && !$('#lgImg').dataset.ok) { $('#lgImg').dataset.ok = 1; const im = new Image(); im.alt = 'Légende de la carte géologique';
+    const srcs = ['SCAN_H_GEOL50', 'SCAN_D_GEOL50', 'GEOLOGIE'].map(l => `https://geoservices.brgm.fr/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=${l}&FORMAT=image/png&STYLE=`);
+    im.onerror = () => { if (srcs.length) im.src = srcs.shift(); else $('#lgImg').innerHTML = '<span class="mu">La légende n\'a pas pu être chargée depuis le BRGM.</span>'; };
+    im.src = srcs.shift();
+    $('#lgImg').appendChild(im); }
+  saveSettings(); }
+$('#lgOp').value = S.geolOp || .6;
+$('#lgOp').oninput = e => { S.geolOp = +e.target.value; if (geolLayer) geolLayer.setOpacity(S.geolOp); saveSettings(); };
+$('#lgToggle').onclick = () => $('#legend').classList.toggle('min');
 $('#ovGeol').onclick = () => setGeol(!S.geol);
 
 /* ---------- calque grille (canvas) ---------- */
@@ -958,19 +1039,30 @@ function guessCRS(xs, ys){ // devine la projection d'un DXF d'après ses coordon
   if (mx > 1000000 && mx < 2500000 && my > 1000000 && my < 9300000) { const z = Math.floor((my - 2e5) / 1e6) + 41; if (z >= 42 && z <= 50) return 'CC' + z; }
   return null; }
 const LAYER_COLORS = ['#38bdf8','#fb923c','#f472b6','#a3e635','#c084fc','#f87171','#2dd4bf'];
-let layers = (load('layers') || []).map(x => ({ kind: 'layer', parent: null, ...x })), layerObjs = {}, dragId = null;
+let layers = (load('layers') || []).map(x => ({ kind: 'layer', parent: null, ...x })), layerObjs = {}, dragId = null, hiLayer = null, edit = null;
 function saveLayers(){ try { localStorage.setItem(LS + 'layers', JSON.stringify(layers)); } catch(e){ toast('Calques trop lourds pour la mémoire du navigateur : pensez à enregistrer le fichier .mmap'); } }
 const lyById = id => layers.find(x => x.id === id);
 const lyKids = f => layers.filter(x => x.parent === f.id);
 const lyShown = l => l.visible && (!l.parent || (lyById(l.parent) || { visible: true }).visible);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const gKind = g => !g ? '' : /Point/.test(g.type) ? 'pt' : /Polygon/.test(g.type) ? 'sf' : 'ln';
+/* style : défauts < style du calque < couleur héritée < style propre à l'objet */
+function effStyle(ly, f){ const p = (f && f.properties) || {};
+  const s = { color: ly.color, weight: 2.5, opacity: .95, stroke: true, fill: true, fillColor: '', fillOpacity: .15, size: 5, pin: false, ...(ly.style || {}) };
+  if (p.color) s.color = p.color; if (p.pin) s.pin = true; Object.assign(s, p._s || {}); if (!s.fillColor) s.fillColor = s.color; return s; }
 function drawLayer(ly){
   if (layerObjs[ly.id]) { map.removeLayer(layerObjs[ly.id]); delete layerObjs[ly.id]; }
   if (ly.kind !== 'layer' || !lyShown(ly)) return;
   layerObjs[ly.id] = L.geoJSON(ly.geo, { renderer: L.canvas({ padding: .3 }),
-    style: f => ({ color: (f.properties && f.properties.color) || ly.color, weight: 2.5, opacity: .95, fillOpacity: .12 }),
-    pointToLayer: (f, ll) => f.properties && f.properties.pin ? L.marker(ll, { icon: L.divIcon({ className: '', iconSize: [22, 28], iconAnchor: [11, 27], html: `<svg width="22" height="28" viewBox="0 0 24 30"><path d="M12 29s-10-8.6-10-16.5A10 10 0 0 1 22 12.5C22 20.4 12 29 12 29z" fill="${f.properties.color || ly.color}" stroke="#0f1115" stroke-width="1.5"/><circle cx="12" cy="12.5" r="3.6" fill="#0f1115"/></svg>` }) }) : L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: (f.properties && f.properties.color) || ly.color, fillOpacity: 1 }),
-    onEachFeature: (f, l) => { const p = f.properties || {}, t = [p.name, p.layer && 'calque ' + p.layer].filter(Boolean).join(' · '); if (t) l.bindTooltip(esc(t), { className: 'pt-tip', sticky: true }); }
+    filter: f => !(f.properties && f.properties._h),
+    style: f => { const s = effStyle(ly, f), line = gKind(f.geometry) === 'ln'; return { color: s.color, weight: s.weight, opacity: s.stroke ? s.opacity : 0, stroke: s.stroke, fill: !line && s.fill, fillColor: s.fillColor, fillOpacity: s.fillOpacity }; },
+    pointToLayer: (f, ll) => { const s = effStyle(ly, f);
+      if (s.pin) { const h = Math.round(s.size * 5.6), w = Math.round(h * .8);
+        return L.marker(ll, { icon: L.divIcon({ className: '', iconSize: [w, h], iconAnchor: [w / 2, h - 1], html: `<svg width="${w}" height="${h}" viewBox="0 0 24 30"><path d="M12 29s-10-8.6-10-16.5A10 10 0 0 1 22 12.5C22 20.4 12 29 12 29z" fill="${s.fillColor}" fill-opacity="${s.fill ? Math.max(s.fillOpacity, .5) : 0}" stroke="${s.stroke ? s.color : 'none'}" stroke-width="${s.stroke ? 1.6 : 0}"/><circle cx="12" cy="12.5" r="3.6" fill="#0f1115"/></svg>` }) }); }
+      return L.circleMarker(ll, { radius: s.size, color: s.stroke ? s.color : 'transparent', weight: s.stroke ? Math.min(s.weight, 4) : 0, opacity: s.opacity, fillColor: s.fillColor, fillOpacity: s.fill ? Math.max(s.fillOpacity, .6) : 0 }); },
+    onEachFeature: (f, l) => { const p = f.properties || {}, t = [p.name, p.desc].filter(Boolean).map(esc).join('<br><span style="color:var(--mut)">') + (p.desc && p.name ? '</span>' : '');
+      if (t) l.bindTooltip(t, { className: 'pt-tip', sticky: true });
+      l.on('click', e => { if (drawTool || rtPick || mode) return; L.DomEvent.stop(e); openEditor(ly.id, ly.geo.features.indexOf(f)); }); }
   }).addTo(map);
 }
 const IC = {
@@ -981,65 +1073,105 @@ const IC = {
   del: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
   chev: '<path d="M9 6l6 6-6 6"/>',
+  style: '<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2z"/>',
+  split: '<path d="M4 4h6v6H4zM14 14h6v6h-6zM14 4h6v6h-6z"/><path d="M7 10v7h7"/>',
+  more: '<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+  pt: '<circle cx="12" cy="12" r="4"/>', ln: '<path d="M4 18l6-7 4 4 6-9"/>', sf: '<path d="M5 18l-1-9 8-5 8 5-2 9z"/>',
 };
 const ico = (p, t, a) => `<button class="ib" data-a="${a}" title="${t}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg></button>`;
+const twist = (open, t) => `<button class="ib tw${open ? ' op' : ''}" data-a="open" title="${t}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">${IC.chev}</svg></button>`;
+function itemRows(l, depth){
+  const fs = l.geo.features, max = 300;
+  let h = fs.slice(0, max).map((f, i) => { const p = f.properties || {}, s = effStyle(l, f), k = gKind(f.geometry), nm = p.name || ({ pt: 'Point', ln: 'Ligne', sf: 'Surface' }[k]) + ' ' + (i + 1);
+    return `<div class="tr it${p._h ? ' off' : ''}${edit && edit.id === l.id && edit.i === i ? ' sel' : ''}" data-id="${l.id}" data-i="${i}" style="--d:${depth}">
+      <svg class="gi" viewBox="0 0 24 24" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${IC[k] || IC.pt}</svg>
+      <div class="m"><div class="n" title="${esc(nm)}">${esc(nm)}</div>${p.desc ? `<div class="w">${esc(p.desc)}</div>` : ''}</div>
+      ${ico(p._h ? IC.eyeOff : IC.eyeOn, p._h ? 'Afficher' : 'Masquer', 'ieye')}${ico(IC.style, 'Nom, descriptif et style', 'iedit')}</div>`; }).join('');
+  if (fs.length > max) h += `<div class="tr it more" style="--d:${depth}"><div class="m"><div class="w">… et ${fs.length - max} autres objets (cliquez-les sur la carte)</div></div></div>`;
+  return h;
+}
 function lyRow(l, depth){
   if (l.kind === 'folder') { const k = lyKids(l), n = k.length;
-    return `<div class="tr fo${l.visible ? '' : ' off'}" draggable="true" data-id="${l.id}" style="--d:${depth}">
-      <button class="ib tw${l.open ? ' op' : ''}" data-a="open" title="${l.open ? 'Replier' : 'Déplier'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">${IC.chev}</svg></button>
+    return `<div class="tr fo${l.visible ? '' : ' off'}" draggable="true" data-id="${l.id}" style="--d:${depth}">${twist(l.open, l.open ? 'Replier' : 'Déplier')}
       <svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${IC.folder}</svg>
       <div class="m"><div class="n" data-a="ren" title="Double-clic pour renommer">${esc(l.name)}</div><div class="w">${n} calque${n > 1 ? 's' : ''}</div></div>
       ${ico(l.visible ? IC.eyeOn : IC.eyeOff, l.visible ? 'Masquer le dossier' : 'Afficher le dossier', 'eye')}${ico(IC.zoom, 'Zoomer sur le dossier', 'zoom')}${ico(IC.del, 'Supprimer le dossier', 'del')}</div>`
       + (l.open ? k.map(c => lyRow(c, 1)).join('') : ''); }
   const n = l.geo.features.length, np = l.geo.features.filter(f => f.geometry.type === 'Point').length;
-  return `<div class="tr${l.visible ? '' : ' off'}" draggable="true" data-id="${l.id}" style="--d:${depth}">
-    <label class="sw" title="Couleur" style="background:${l.color}"><input type="color" value="${l.color}" data-a="color"></label>
+  return `<div class="tr${l.visible ? '' : ' off'}${edit && edit.id === l.id && edit.i < 0 ? ' sel' : ''}" draggable="true" data-id="${l.id}" style="--d:${depth}">${twist(l.open, l.open ? 'Replier les objets' : 'Décomposer : voir les objets')}
+    <span class="sw" style="background:${l.color}"></span>
     <div class="m"><div class="n" data-a="ren" title="Double-clic pour renommer">${esc(l.name)}</div><div class="w">${n} objet${n > 1 ? 's' : ''}${l.crs ? ' · ' + esc(l.crs) : ''}</div></div>
-    ${ico(l.visible ? IC.eyeOn : IC.eyeOff, l.visible ? 'Masquer' : 'Afficher', 'eye')}${ico(IC.zoom, 'Zoomer sur le calque', 'zoom')}${np ? ico(IC.pin, `Ajouter ses ${np} points à Mes points`, 'pts') : ''}${ico(IC.del, 'Retirer le calque', 'del')}</div>`;
+    ${ico(l.visible ? IC.eyeOn : IC.eyeOff, l.visible ? 'Masquer' : 'Afficher', 'eye')}${ico(IC.style, 'Style du calque', 'style')}${ico(IC.more, 'Plus d\'actions', 'menu')}</div>
+    <div class="trm" data-for="${l.id}">
+      <button data-a="zoom" data-id="${l.id}">Zoomer sur le calque</button>
+      <button data-a="split" data-id="${l.id}">Éclater en sous-calques</button>
+      ${np ? `<button data-a="pts" data-id="${l.id}">Ajouter ses ${np} points aux favoris</button>` : ''}
+      <button data-a="del" data-id="${l.id}" class="dz">Supprimer le calque</button></div>`
+    + (l.open ? itemRows(l, depth + 1) : '');
 }
 function renderLayers(){
   Object.keys(layerObjs).forEach(id => { if (!lyById(id)) { map.removeLayer(layerObjs[id]); delete layerObjs[id]; } });
   layers.forEach(drawLayer);
-  // ordre d'affichage : le haut de la liste passe au-dessus
   const order = []; layers.filter(x => !x.parent).forEach(r => { if (r.kind === 'folder') lyKids(r).forEach(c => order.push(c)); else order.push(r); });
   order.slice().reverse().forEach(l => layerObjs[l.id] && layerObjs[l.id].bringToFront());
   $('#lyList').innerHTML = layers.length ? layers.filter(x => !x.parent).map(l => lyRow(l, 0)).join('') + '<div class="tr-end" data-id="__root">Déposer ici pour sortir d\'un dossier</div>'
-    : `<div class="empty">Aucun calque.<br>Importez un fichier ou glissez-le sur la carte.</div>`;
+    : `<div class="empty">Aucun calque.<br>Importez un fichier, dessinez, ou glissez un fichier sur la carte.</div>`;
 }
 function lyBounds(l){ const fs = l.kind === 'folder' ? lyKids(l).flatMap(c => c.geo.features) : l.geo.features; return L.geoJSON({ type: 'FeatureCollection', features: fs }).getBounds(); }
-function lyChanged(){ saveLayers(); renderLayers(); dirty = true; updFile(); }
-$('#lyList').addEventListener('click', e => { const row = e.target.closest('[data-id]'); if (!row || row.dataset.id === '__root') return; const l = lyById(row.dataset.id), a = (e.target.closest('[data-a]') || {}).dataset?.a;
+let rT = 0; function lyChanged(soft){ saveLayers(); if (soft) { cancelAnimationFrame(rT); rT = requestAnimationFrame(() => { const l = edit && lyById(edit.id); if (l) drawLayer(l); }); } else renderLayers(); dirty = true; updFile(); }
+/* éclater un calque : par sous-calque d'origine (DXF/KML), sinon par type d'objet */
+function splitLayer(l){
+  const key = f => (f.properties && f.properties.layer) || '', keys = uniq(l.geo.features.map(key));
+  const byLayer = keys.length > 1, groups = {};
+  l.geo.features.forEach(f => { const k = byLayer ? key(f) || 'Sans calque' : ({ pt: 'Points', ln: 'Lignes', sf: 'Surfaces' }[gKind(f.geometry)]); (groups[k] = groups[k] || []).push(f); });
+  if (Object.keys(groups).length < 2) return toast('Ce calque ne contient qu\'un seul type d\'objet : rien à éclater');
+  const fo = { id: newId(), kind: 'folder', name: l.name, parent: null, visible: l.visible, open: true }, i = layers.indexOf(l);
+  const kids = Object.entries(groups).map(([k, fs], j) => ({ id: newId(), kind: 'layer', parent: fo.id, name: k, crs: l.crs, color: j ? LAYER_COLORS[(LAYER_COLORS.indexOf(l.color) + j) % LAYER_COLORS.length] : l.color, style: l.style ? { ...l.style } : undefined, visible: true, geo: { type: 'FeatureCollection', features: fs } }));
+  if (l.parent) { fo.parent = null; }
+  layers.splice(i, 1, fo, ...kids); if (edit && edit.id === l.id) closeEditor(); lyChanged(); toast(`${l.name} éclaté en ${kids.length} calques`); }
+$('#lyList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-a]'), a = btn && btn.dataset.a;
+  if (btn && btn.closest('.trm')) { const l = lyById(btn.dataset.id); document.querySelectorAll('.trm.on').forEach(m => m.classList.remove('on'));
+    if (a === 'zoom') { const bb = lyBounds(l); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 20 }); }
+    else if (a === 'split') splitLayer(l);
+    else if (a === 'del') { if (confirm(`Retirer le calque « ${l.name} » ?`)) { if (edit && edit.id === l.id) closeEditor(); layers = layers.filter(x => x !== l); lyChanged(); } }
+    else if (a === 'pts') { let n = 0; l.geo.features.forEach(f => { if (f.geometry.type !== 'Point') return; const [lon, lat] = f.geometry.coordinates; addFav(lat, lon, (f.properties && f.properties.name) || `${l.name} ${n + 1}`, true); n++; });
+      changed(); toast(`${n} point${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} aux favoris`); }
+    return; }
+  const row = e.target.closest('.tr[data-id]'); if (!row) return; const l = lyById(row.dataset.id); if (!l) return;
+  if (row.classList.contains('it')) { const i = +row.dataset.i, f = l.geo.features[i]; if (!f) return;
+    if (a === 'ieye') { f.properties = f.properties || {}; f.properties._h = !f.properties._h; lyChanged(); }
+    else { openEditor(l.id, i); const b = L.geoJSON(f).getBounds(); if (b.isValid()) map.fitBounds(b, { padding: [80, 80], maxZoom: 20 }); }
+    return; }
   if (a === 'color' || a === 'ren') return;
+  if (a === 'menu') { const m = document.querySelector(`.trm[data-for="${l.id}"]`), on = !m.classList.contains('on'); document.querySelectorAll('.trm.on').forEach(x => x.classList.remove('on')); m.classList.toggle('on', on); return; }
   if (a === 'eye') { l.visible = !l.visible; lyChanged(); }
+  else if (a === 'style') openEditor(l.id, -1);
   else if (a === 'open' || (!a && l.kind === 'folder')) { l.open = !l.open; saveLayers(); renderLayers(); }
   else if (a === 'zoom' || !a) { const bb = lyBounds(l); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 20 }); }
-  else if (a === 'del') { const k = l.kind === 'folder' ? lyKids(l) : [];
-    if (!confirm(l.kind === 'folder' ? `Supprimer le dossier « ${l.name} » et ses ${k.length} calque(s) ?` : `Retirer le calque « ${l.name} » ?`)) return;
-    layers = layers.filter(x => x !== l && !k.includes(x)); lyChanged(); }
-  else if (a === 'pts') { let n = 0; l.geo.features.forEach(f => { if (f.geometry.type !== 'Point') return; const [lon, lat] = f.geometry.coordinates; addFav(lat, lon, (f.properties && f.properties.name) || `${l.name} ${n + 1}`, true); n++; });
-    changed(); toast(`${n} point${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à Mes points`); }
+  else if (a === 'del') { const k = lyKids(l); if (!confirm(`Supprimer le dossier « ${l.name} » et ses ${k.length} calque(s) ?`)) return; layers = layers.filter(x => x !== l && !k.includes(x)); lyChanged(); }
 });
-$('#lyList').addEventListener('input', e => { if (e.target.dataset.a !== 'color') return; const l = lyById(e.target.closest('[data-id]').dataset.id); l.color = e.target.value; e.target.parentNode.style.background = l.color; drawLayer(l); saveLayers(); });
-$('#lyList').addEventListener('change', e => { if (e.target.dataset.a === 'color') { dirty = true; updFile(); } });
 $('#lyList').addEventListener('dblclick', e => { const n = e.target.closest('[data-a="ren"]'); if (!n) return; const l = lyById(n.closest('[data-id]').dataset.id);
   const v = prompt('Nouveau nom :', l.name); if (v && v.trim()) { l.name = v.trim(); lyChanged(); } });
-// glisser-déposer pour organiser
-$('#lyList').addEventListener('dragstart', e => { const r = e.target.closest('[data-id]'); if (!r) return; dragId = r.dataset.id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); r.classList.add('drag'); });
+// glisser-déposer pour organiser (calques et dossiers)
+$('#lyList').addEventListener('dragstart', e => { const r = e.target.closest('[draggable][data-id]'); if (!r) return; dragId = r.dataset.id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); r.classList.add('drag'); });
 $('#lyList').addEventListener('dragend', () => { dragId = null; document.querySelectorAll('#lyList .drag,#lyList .over-in,#lyList .over-b,#lyList .over-a').forEach(x => x.classList.remove('drag', 'over-in', 'over-b', 'over-a')); });
 function dropPos(e, row){ const d = lyById(dragId), t = row.dataset.id === '__root' ? null : lyById(row.dataset.id); if (!d || t === d) return null;
   if (!t) return 'root';
-  if (t.kind === 'folder' && d.kind === 'layer') { const r = row.getBoundingClientRect(), y = (e.clientY - r.top) / r.height; return y < .25 ? 'b' : y > .75 && t.open && lyKids(t).length ? 'in' : y > .75 ? 'a' : 'in'; }
-  const r = row.getBoundingClientRect(); return e.clientY < r.top + r.height / 2 ? 'b' : 'a'; }
-$('#lyList').addEventListener('dragover', e => { if (!dragId) return; const row = e.target.closest('[data-id]'); document.querySelectorAll('#lyList .over-in,#lyList .over-b,#lyList .over-a').forEach(x => x.classList.remove('over-in', 'over-b', 'over-a'));
+  const r = row.getBoundingClientRect(), y = (e.clientY - r.top) / r.height;
+  if (t.kind === 'folder' && d.kind === 'layer') return y < .25 ? 'b' : y > .75 && !t.open ? 'a' : 'in';
+  return y < .5 ? 'b' : 'a'; }
+$('#lyList').addEventListener('dragover', e => { if (!dragId) return; const row = e.target.closest('[draggable][data-id],.tr-end'); document.querySelectorAll('#lyList .over-in,#lyList .over-b,#lyList .over-a').forEach(x => x.classList.remove('over-in', 'over-b', 'over-a'));
   if (!row) return; const p = dropPos(e, row); if (!p) return; e.preventDefault(); e.stopPropagation(); row.classList.add(p === 'in' || p === 'root' ? 'over-in' : p === 'b' ? 'over-b' : 'over-a'); });
-$('#lyList').addEventListener('drop', e => { if (!dragId) return; e.preventDefault(); e.stopPropagation(); const row = e.target.closest('[data-id]'); if (!row) return; const p = dropPos(e, row); if (!p) return;
+$('#lyList').addEventListener('drop', e => { if (!dragId) return; e.preventDefault(); e.stopPropagation(); const row = e.target.closest('[draggable][data-id],.tr-end'); if (!row) return; const p = dropPos(e, row); if (!p) return;
   const d = lyById(dragId); let t = row.dataset.id === '__root' ? null : lyById(row.dataset.id);
-  if (d.kind === 'folder' && t && t.parent) t = lyById(t.parent); // un dossier reste à la racine
+  if (d.kind === 'folder' && t && t.parent) t = lyById(t.parent);
   layers.splice(layers.indexOf(d), 1);
   if (p === 'root') { d.parent = null; layers.push(d); }
   else if (p === 'in') { d.parent = t.id; t.open = true; const k = lyKids(t); layers.splice(k.length ? layers.indexOf(k[k.length - 1]) + 1 : layers.indexOf(t) + 1, 0, d); }
   else { if (d.kind === 'layer') d.parent = t.parent; const i = layers.indexOf(t); layers.splice(p === 'b' ? i : i + 1, 0, d); }
   lyChanged(); });
+document.addEventListener('click', e => { if (!e.target.closest('.trm,[data-a="menu"]')) document.querySelectorAll('.trm.on').forEach(m => m.classList.remove('on')); });
 $('#lyFolder').onclick = () => { const n = prompt('Nom du dossier :', 'Nouveau dossier'); if (!n || !n.trim()) return; layers.unshift({ id: newId(), kind: 'folder', name: n.trim(), parent: null, visible: true, open: true }); lyChanged(); };
 function addLayer(name, geo, crs){
   if (!geo.features.length) return toast('Aucun objet lisible dans ' + name);
@@ -1049,6 +1181,52 @@ function addLayer(name, geo, crs){
   const bb = L.geoJSON(geo).getBounds(); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 19 });
   toast(`${name} : ${geo.features.length} objet${geo.features.length > 1 ? 's' : ''} importé${geo.features.length > 1 ? 's' : ''}`);
 }
+/* ---------- éditeur : nom, descriptif, style ---------- */
+const SFIELDS = ['stroke', 'color', 'weight', 'opacity', 'fill', 'fillColor', 'fillOpacity', 'size', 'pin'];
+function openEditor(id, i){
+  const l = lyById(id); if (!l) return; edit = { id, i }; const f = i >= 0 ? l.geo.features[i] : null, p = f ? (f.properties = f.properties || {}) : null;
+  const s = effStyle(l, f), k = f ? gKind(f.geometry) : uniq(l.geo.features.map(x => gKind(x.geometry))).join('');
+  closeCards(); $('#ecard').classList.add('on');
+  $('#eKind').textContent = f ? 'Objet du calque « ' + l.name + ' »' : 'Style du calque';
+  $('#eName').value = f ? p.name || '' : l.name; $('#eDesc').value = f ? p.desc || '' : l.desc || '';
+  $('#eStroke').classList.toggle('on', s.stroke); $('#eColor').value = s.color; $('#eWeight').value = s.weight; $('#eOpacity').value = s.opacity;
+  $('#eFill').classList.toggle('on', s.fill); $('#eFillColor').value = s.fillColor; $('#eFillOp').value = s.fillOpacity; $('#eSize').value = s.size; $('#ePin').value = s.pin ? 'pin' : 'dot';
+  $('#eFillBox').style.display = /sf|pt/.test(k) ? '' : 'none'; $('#eSizeBox').style.display = /pt/.test(k) ? '' : 'none';
+  $('#eReset').style.display = f ? '' : 'none'; $('#eMeas').innerHTML = f ? measureOf(f) : `${l.geo.features.length} objet(s)`;
+  updOut(); highlight(f); if (!$('#dLayers').classList.contains('on')) {} renderLayers();
+}
+function measureOf(f){ const g = f.geometry, ll = c => L.latLng(c[1], c[0]);
+  if (g.type === 'LineString') return 'Longueur : ' + fmtL(pathLen(g.coordinates.map(ll)));
+  if (g.type === 'Polygon') { const r = g.coordinates[0].map(ll); return `Surface : ${fmtA(geoArea(r.slice(0, -1)))} · périmètre ${fmtL(pathLen(r))}`; }
+  if (g.type === 'Point') { const [x, y] = g.coordinates, l93 = HAS_PROJ && inFranceBox(y, x) ? toL93(y, x) : null; return l93 ? `X ${l93[0].toFixed(2)}  Y ${l93[1].toFixed(2)} (L93)` : `${y.toFixed(6)}, ${x.toFixed(6)}`; }
+  return ''; }
+function highlight(f){ if (hiLayer) { map.removeLayer(hiLayer); hiLayer = null; } if (!f) return;
+  hiLayer = L.geoJSON(f, { interactive: false, style: { color: '#fff', weight: 2, dashArray: '5 5', fill: false }, pointToLayer: (x, ll) => L.circleMarker(ll, { radius: 14, color: '#fff', weight: 2, dashArray: '4 4', fill: false, interactive: false }) }).addTo(map); }
+function closeEditor(){ edit = null; $('#ecard').classList.remove('on'); highlight(null); renderLayers(); }
+function updOut(){ $('#eWeightV').textContent = (+$('#eWeight').value).toLocaleString('fr-FR') + ' px'; $('#eOpacityV').textContent = Math.round($('#eOpacity').value * 100) + ' %';
+  $('#eFillOpV').textContent = Math.round($('#eFillOp').value * 100) + ' %'; $('#eSizeV').textContent = $('#eSize').value; }
+function readStyle(){ return { stroke: $('#eStroke').classList.contains('on'), color: $('#eColor').value, weight: +$('#eWeight').value, opacity: +$('#eOpacity').value,
+  fill: $('#eFill').classList.contains('on'), fillColor: $('#eFillColor').value, fillOpacity: +$('#eFillOp').value, size: +$('#eSize').value, pin: $('#ePin').value === 'pin' }; }
+function applyEdit(field){
+  if (!edit) return; const l = lyById(edit.id); if (!l) return closeEditor(); const f = edit.i >= 0 ? l.geo.features[edit.i] : null; updOut();
+  if (field === 'name') { if (f) f.properties.name = $('#eName').value; else l.name = $('#eName').value || l.name; return lyChanged(); }
+  if (field === 'desc') { if (f) f.properties.desc = $('#eDesc').value; else l.desc = $('#eDesc').value; return lyChanged(true); }
+  const s = readStyle();
+  if (f) { const base = effStyle(l, null), o = {}; SFIELDS.forEach(k => { if (s[k] !== base[k]) o[k] = s[k]; }); f.properties._s = o; delete f.properties.color; if (!s.pin) delete f.properties.pin; }
+  else { l.style = s; l.color = s.color; }
+  lyChanged(true);
+}
+[['#eName', 'name'], ['#eDesc', 'desc']].forEach(([id, k]) => $(id).addEventListener('change', () => applyEdit(k)));
+$('#eDesc').addEventListener('input', () => applyEdit('desc'));
+['#eColor', '#eWeight', '#eOpacity', '#eFillColor', '#eFillOp', '#eSize', '#ePin'].forEach(id => $(id).addEventListener('input', () => applyEdit('style')));
+['#eStroke', '#eFill'].forEach(id => $(id).onclick = () => { $(id).classList.toggle('on'); applyEdit('style'); });
+$('#eReset').onclick = () => { if (!edit || edit.i < 0) return; const l = lyById(edit.id), f = l.geo.features[edit.i]; delete f.properties._s; delete f.properties.color; delete f.properties.pin; lyChanged(); openEditor(edit.id, edit.i); };
+$('#eDel').onclick = () => { if (!edit) return; const l = lyById(edit.id);
+  if (edit.i >= 0) { if (!confirm('Supprimer cet objet ?')) return; l.geo.features.splice(edit.i, 1); }
+  else { if (!confirm(`Supprimer le calque « ${l.name} » ?`)) return; layers = layers.filter(x => x !== l); }
+  closeEditor(); lyChanged(); };
+$('#eClose').onclick = closeEditor;
+$('#eZoom').onclick = () => { if (!edit) return; const l = lyById(edit.id), b = edit.i >= 0 ? L.geoJSON(l.geo.features[edit.i]).getBounds() : lyBounds(l); if (b.isValid()) map.fitBounds(b, { padding: [80, 80], maxZoom: 20 }); };
 /* --- lecture KML --- */
 function parseKML(text){
   const xml = new DOMParser().parseFromString(text, 'text/xml'); if (xml.querySelector('parsererror')) throw new Error('KML illisible');
@@ -1056,7 +1234,8 @@ function parseKML(text){
   const coords = el => el ? el.textContent.trim().split(/\s+/).map(t => t.split(',').map(Number)).filter(c => c.length >= 2 && isFinite(c[0]) && isFinite(c[1])).map(c => [c[0], c[1]]) : [];
   kids(xml, 'Placemark').forEach(pm => {
     const nmEl = [...pm.children].find(c => c.localName === 'name'), name = nmEl ? nmEl.textContent.trim() : '';
-    const props = { name };
+    const dEl = [...pm.children].find(c => c.localName === 'description'), fo = pm.parentElement && pm.parentElement.localName === 'Folder' ? [...pm.parentElement.children].find(c => c.localName === 'name') : null;
+    const props = { name }; if (dEl && dEl.textContent.trim()) props.desc = dEl.textContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); if (fo) props.layer = fo.textContent.trim();
     kids(pm, 'Point').forEach(p => { const c = coords(kids(p, 'coordinates')[0])[0]; if (c) feats.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: c } }); });
     kids(pm, 'LineString').forEach(p => { const c = coords(kids(p, 'coordinates')[0]); if (c.length > 1) feats.push({ type: 'Feature', properties: props, geometry: { type: 'LineString', coordinates: c } }); });
     kids(pm, 'Polygon').forEach(p => { const rings = []; kids(p, 'outerBoundaryIs').concat(kids(p, 'innerBoundaryIs')).forEach(b => { const c = coords(kids(b, 'coordinates')[0]); if (c.length > 2) rings.push(c); });
@@ -1122,10 +1301,10 @@ function exportFeatures(){
   points.forEach(p => { const c = MM3.cellAt(p.lat, p.lon), b = MM3.bounds(c);
     if (wP) F.push({ kind: 'point', name: p.nom, words: p.mots, coords: [[p.lon, p.lat]] });
     if (wC) F.push({ kind: 'carre', name: p.nom, words: p.mots, coords: [[b.w, b.s], [b.e, b.s], [b.e, b.n], [b.w, b.n], [b.w, b.s]] }); });
-  if (wL) layers.filter(l => l.kind === 'layer' && lyShown(l)).forEach(l => l.geo.features.forEach(f => { const g = f.geometry, nm = (f.properties && f.properties.name) || '', base = { kind: 'calque', layer: (f.properties && f.properties.layer) || l.name, name: nm };
+  if (wL) layers.filter(l => l.kind === 'layer' && lyShown(l)).forEach(l => l.geo.features.forEach(f => { const g = f.geometry, nm = (f.properties && f.properties.name) || '', base = { kind: 'calque', layer: (f.properties && f.properties.layer) || l.name, name: nm, desc: (f.properties && f.properties.desc) || '', st: effStyle(l, f) }; if (f.properties && f.properties._h) return;
     if (g.type === 'Point') F.push({ ...base, geom: 'Point', coords: [g.coordinates] });
     else if (g.type === 'LineString') F.push({ ...base, geom: 'Line', coords: g.coordinates });
-    else if (g.type === 'Polygon') g.coordinates.forEach(r => F.push({ ...base, geom: 'Line', coords: r }));
+    else if (g.type === 'Polygon') F.push({ ...base, geom: 'Poly', coords: g.coordinates[0], rings: g.coordinates });
     else if (g.type === 'MultiLineString') g.coordinates.forEach(r => F.push({ ...base, geom: 'Line', coords: r }));
     else if (g.type === 'MultiPolygon') g.coordinates.forEach(p => p.forEach(r => F.push({ ...base, geom: 'Line', coords: r }))); }));
   return F;
@@ -1136,7 +1315,12 @@ function buildKML(F){
   const pm = (f, style, geom) => `<Placemark><name>${xmlEsc(f.name)}</name>${f.words ? `<description>///${xmlEsc(f.words)}</description>` : ''}<styleUrl>#${style}</styleUrl>${geom}</Placemark>`;
   const pts = F.filter(f => f.kind === 'point').map(f => pm(f, 'pt', `<Point><coordinates>${cs(f.coords)}</coordinates></Point>`));
   const sq = F.filter(f => f.kind === 'carre').map(f => pm({ ...f, name: f.name + ' (3×3 m)' }, 'sq', `<Polygon><outerBoundaryIs><LinearRing><coordinates>${cs(f.coords)}</coordinates></LinearRing></outerBoundaryIs></Polygon>`));
-  const lys = {}; F.filter(f => f.kind === 'calque').forEach(f => (lys[f.layer] = lys[f.layer] || []).push(pm(f, 'ly', f.geom === 'Point' ? `<Point><coordinates>${cs(f.coords)}</coordinates></Point>` : `<LineString><coordinates>${cs(f.coords)}</coordinates></LineString>`)));
+  const kc = (hex, a) => { const h = hex.replace('#', ''); return Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0') + h.slice(4, 6) + h.slice(2, 4) + h.slice(0, 2); };
+  const sty = s => `<Style><IconStyle><color>${kc(s.fillColor, 1)}</color><scale>${(s.size / 5).toFixed(2)}</scale></IconStyle><LineStyle><color>${kc(s.color, s.stroke ? s.opacity : 0)}</color><width>${s.weight}</width></LineStyle><PolyStyle><color>${kc(s.fillColor, s.fill ? s.fillOpacity : 0)}</color><outline>${s.stroke ? 1 : 0}</outline></PolyStyle></Style>`;
+  const pmL = (f, geom) => `<Placemark><name>${xmlEsc(f.name)}</name>${f.desc ? `<description>${xmlEsc(f.desc)}</description>` : ''}${sty(f.st)}${geom}</Placemark>`;
+  const lys = {}; F.filter(f => f.kind === 'calque').forEach(f => (lys[f.layer] = lys[f.layer] || []).push(pmL(f, f.geom === 'Point' ? `<Point><coordinates>${cs(f.coords)}</coordinates></Point>`
+    : f.geom === 'Poly' ? `<Polygon>${f.rings.map((r, i) => `<${i ? 'inner' : 'outer'}BoundaryIs><LinearRing><coordinates>${cs(r)}</coordinates></LinearRing></${i ? 'inner' : 'outer'}BoundaryIs>`).join('')}</Polygon>`
+    : `<LineString><coordinates>${cs(f.coords)}</coordinates></LineString>`)));
   return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${xmlEsc(fileName.replace(/\.mmap$/, ''))}</name>
 <Style id="pt"><IconStyle><color>ff00f2ff</color><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href></Icon></IconStyle></Style>
 <Style id="sq"><LineStyle><color>ff00f2ff</color><width>2</width></LineStyle><PolyStyle><color>4000f2ff</color></PolyStyle></Style>
@@ -1149,14 +1333,18 @@ function buildDXF(F, crs){
   const lay = s => u(String(s).replace(/[<>\/\\":;?*|=,`]/g, '_')).slice(0, 60) || '0';
   const xy = p => toCRS(crs, p[1], p[0]), f8 = v => v.toFixed(crs === 'WGS84' ? 9 : 4);
   const text = (layer, p, t, dy) => { w(0, 'TEXT'); w(8, layer); w(10, f8(p[0] + h)); w(20, f8(p[1] + dy)); w(30, 0); w(40, h); w(1, u(t)); };
-  const pline = (layer, pts) => { w(0, 'POLYLINE'); w(8, layer); w(66, 1); w(10, 0); w(20, 0); w(30, 0); pts.forEach(p => { w(0, 'VERTEX'); w(8, layer); w(10, f8(p[0])); w(20, f8(p[1])); w(30, 0); }); w(0, 'SEQEND'); w(8, layer); };
+  const ACI = [[1, 255, 0, 0], [2, 255, 255, 0], [3, 0, 255, 0], [4, 0, 255, 255], [5, 0, 0, 255], [6, 255, 0, 255], [7, 255, 255, 255], [8, 128, 128, 128], [30, 255, 127, 0], [40, 255, 191, 0], [140, 0, 127, 255], [210, 255, 0, 191]];
+  const aci = hex => { if (!hex) return 256; const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; let best = 7, d = 1e9; ACI.forEach(([c, R, G, B]) => { const e = (r - R) ** 2 + (g - G) ** 2 + (b - B) ** 2; if (e < d) { d = e; best = c; } }); return best; };
+  let col = 256;
+  const pline = (layer, pts, closed) => { w(0, 'POLYLINE'); w(8, layer); if (col !== 256) w(62, col); w(66, 1); if (closed) w(70, 1); w(10, 0); w(20, 0); w(30, 0); pts.forEach(p => { w(0, 'VERTEX'); w(8, layer); w(10, f8(p[0])); w(20, f8(p[1])); w(30, 0); }); w(0, 'SEQEND'); w(8, layer); };
   w(0, 'SECTION'); w(2, 'HEADER'); w(9, '$ACADVER'); w(1, 'AC1009'); w(0, 'ENDSEC');
   w(0, 'SECTION'); w(2, 'ENTITIES');
   F.forEach(f => { const P = f.coords.map(xy);
     if (f.kind === 'point') { w(0, 'POINT'); w(8, 'MOMOMAP_POINTS'); w(10, f8(P[0][0])); w(20, f8(P[0][1])); w(30, 0); text('MOMOMAP_NOMS', P[0], f.name, h * .4); text('MOMOMAP_MOTS', P[0], '///' + f.words, -h * 1.4); }
     else if (f.kind === 'carre') pline('MOMOMAP_CARRES', P);
-    else if (f.geom === 'Point') { w(0, 'POINT'); w(8, lay(f.layer)); w(10, f8(P[0][0])); w(20, f8(P[0][1])); w(30, 0); if (f.name) text(lay(f.layer), P[0], f.name, h * .4); }
-    else pline(lay(f.layer), P); });
+    else if ((col = f.st ? aci(f.st.color) : 256) && f.geom === 'Point') { w(0, 'POINT'); w(8, lay(f.layer)); if (col !== 256) w(62, col); w(10, f8(P[0][0])); w(20, f8(P[0][1])); w(30, 0); if (f.name) text(lay(f.layer), P[0], f.name, h * .4); }
+    else if (f.geom === 'Poly') f.rings.forEach(r => pline(lay(f.layer), r.map(xy), true));
+    else pline(lay(f.layer), P); col = 256; });
   w(0, 'ENDSEC'); w(0, 'EOF'); return o.join('\r\n') + '\r\n';
 }
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); }
@@ -1502,6 +1690,7 @@ const GUIDE = [
   <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de la grille de mots. Chaque point garde ses coordonnées et son adresse en trois mots. Un clic dans la liste recentre la carte dessus.</p>`],
  ['Import / export', `<h3>Échanger avec les autres logiciels</h3>
   <h4>Importer</h4><p>Bouton <b>Choisir un fichier</b> ou glisser-déposer sur la carte : KML, KMZ, DXF, GeoJSON. Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84) ; sinon choisissez-la avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
+  <h4>Décomposer et styler</h4><p>Dans <b>Calques</b>, la flèche devant un calque le décompose pour lister ses objets. Cliquez un objet (dans la liste ou directement sur la carte) pour modifier son <b>nom</b>, son <b>descriptif</b> et son style : contour (couleur, épaisseur, opacité), intérieur (couleur, opacité), taille et symbole des points. Le bouton palette d'un calque règle le style de tout le calque ; « Style du calque » remet un objet au style commun. Le menu « … » permet d'<b>éclater</b> un calque en sous-calques (par calque DXF, dossier KML, ou par type : points, lignes, surfaces). Les styles et descriptifs sont conservés dans le .mmap et repris à l'export KML/KMZ ; le DXF reprend la couleur la plus proche.</p>
   <h4>Calques et dossiers</h4><p>Chaque fichier importé devient un calque. Créez des dossiers avec <b>+ Dossier</b>, puis faites glisser les calques pour les ranger ou changer leur ordre : le haut de la liste s'affiche par-dessus. L'œil masque un calque ou un dossier entier, la loupe recentre la carte, la pastille de couleur change sa teinte, et un double-clic sur le nom le renomme. Les points d'un calque peuvent rejoindre <b>Mes points</b>.</p>
   <h4>Exporter</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : points avec leur nom et leurs trois mots, carrés de 3×3 m, calques visibles, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
   <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> sauve vos points, vos calques et la vue en cours dans un fichier MomoMAP, à rouvrir plus tard ou à transmettre. Le backup automatique se règle dans les Paramètres.</p>`],
