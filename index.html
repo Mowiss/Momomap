@@ -318,6 +318,21 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #drList{max-height:240px;overflow:auto}
 #zTilt b{color:var(--mut)}#zTilt:hover b{color:var(--tx)}
 
+.acc{border-radius:9px;margin-bottom:2px}
+.ach{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:7px 4px;cursor:pointer;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.7px;text-align:left}
+.ach:hover{color:var(--tx)}
+.ach svg{width:13px;height:13px;flex:none;transition:transform .15s}
+.acc.op .ach svg{transform:rotate(90deg)}
+.ach span{flex:none}
+.ach em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--acc);font-size:12px;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ach i{font-style:normal;margin-left:auto;background:var(--accbg);color:var(--acc);border-radius:10px;padding:0 7px;font-size:11px;letter-spacing:0}
+.acb{display:none;padding:0 0 6px 4px}
+.acc.op .acb{display:block}
+.ovr{gap:10px;padding:5px 0}
+.ovr label{flex:1}
+.ovi{width:28px;height:28px;border-radius:7px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.ovi svg{width:17px;height:17px}
+
 /* ---------- toast ---------- */
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:3000;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
@@ -496,12 +511,7 @@ setTimeout(done,4700);
     <div class="lbl">Fond de carte</div>
     <div id="baseList"></div>
     <div class="lbl">Superpositions</div>
-    <div class="row"><label>Grille de mots 3×3 m <span class="dim">(G)</span></label><button class="tg" id="ovGrid"></button></div>
-    <div class="row"><label>Afficher les 3 mots <span class="dim">(L)</span></label><button class="tg" id="ovLabels"></button></div>
-    <div class="row"><label>Parcelles cadastrales (IGN)</label><button class="tg" id="ovCad"></button></div>
-    <div class="row"><label>Carte géologique (BRGM)</label><button class="tg" id="ovGeol"></button></div>
-    <div class="row"><label>Ombrage du relief</label><button class="tg" data-ov="relief"></button></div>
-    <div class="row"><label>Pentes (zones de montagne)</label><button class="tg" data-ov="pentes"></button></div>
+    <div id="ovList"></div>
     <div class="lbl lbl2">Mes calques <button class="btn mini" id="lyFolder">+ Dossier</button></div>
     <div id="lyList"></div>
     <p class="hint">Glissez les calques pour les ranger dans un dossier ou changer l'ordre d'affichage. Double-clic sur un nom pour le renommer.</p>
@@ -587,11 +597,10 @@ setTimeout(done,4700);
   <div class="db">
     <div class="lbl">Coordonnées</div>
     <div class="row"><label>Afficher Lambert 93</label><button class="tg" id="sL93"></button></div>
-    <div class="lbl">Grille de mots</div>
+    <div class="lbl">Grillewords</div>
     <div class="row"><label>Couleur</label><input type="color" id="sGridColor"></div>
     <div class="row"><label>Opacité</label><input type="range" id="sGridOp" min="0.1" max="1" step="0.05"></div>
     <div class="row"><label>Taille mini d'un carré</label><select id="sGridMin"><option value="4">4 px</option><option value="6">6 px</option><option value="10">10 px</option><option value="16">16 px</option></select></div>
-    <div class="row"><label>Mots dans les carrés dès</label><select id="sLabMin"><option value="60">60 px</option><option value="80">80 px</option><option value="110">110 px</option></select></div>
     <div class="row"><label>Couleur de sélection</label><input type="color" id="sSelColor"></div>
     <div class="row"><label>Centrer la carte au clic</label><button class="tg" id="sFly"></button></div>
     <p class="hint" id="dicoInfo"></p>
@@ -860,22 +869,60 @@ function setBase(k){ if (!BASES[k]) k = 'osm'; if (baseLayer) map.removeLayer(ba
   baseLayer = BASES[k].l(); let ok = 0, bad = 0;
   baseLayer.on('tileload', () => ok++).on('tileerror', () => { bad++; if (bad === 8 && ok === 0) toast(`Le fond « ${BASES[k].name} » ne répond pas : essayez un autre fond`); });
   baseLayer.addTo(map); baseLayer.bringToBack(); S.base = k; saveSettings(); renderBases(); }
-function renderBases(){ let g = ''; $('#baseList').innerHTML = Object.entries(BASES).map(([k, b]) => (b.g !== g ? `<div class="bgrp">${(g = b.g)}</div>` : '') +
-  `<div class="opt ${S.base===k?'on':''}" data-b="${k}"><span class="sw" style="background:${b.sw}"></span>${b.name}</div>`).join(''); }
-$('#baseList').onclick = e => { const o = e.target.closest('[data-b]'); if (o) setBase(o.dataset.b); };
-function setCad(on){ S.cad = on; $('#ovCad').classList.toggle('on', on); if (cadLayer) { map.removeLayer(cadLayer); cadLayer = null; }
+function renderBases(){ S.bgOpen = S.bgOpen || {}; const gs = [...new Set(Object.values(BASES).map(b => b.g))], cur = (BASES[S.base] || {}).g;
+  $('#baseList').innerHTML = gs.map(g => { const op = S.bgOpen[g] != null ? S.bgOpen[g] : g === cur, act = Object.entries(BASES).find(([k, b]) => b.g === g && k === S.base);
+    return `<div class="acc${op ? ' op' : ''}" data-bg="${esc(g)}"><button class="ach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg><span>${esc(g)}</span>${act && !op ? `<em>${esc(act[1].name)}</em>` : ''}</button>
+      <div class="acb">${Object.entries(BASES).filter(([, b]) => b.g === g).map(([k, b]) => `<div class="opt ${S.base === k ? 'on' : ''}" data-b="${k}"><span class="sw" style="background:${b.sw}"></span>${b.name}</div>`).join('')}</div></div>`; }).join(''); }
+$('#baseList').onclick = e => { const o = e.target.closest('[data-b]'); if (o) return setBase(o.dataset.b);
+  const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.bg, cur = (BASES[S.base] || {}).g; S.bgOpen = S.bgOpen || {}; const op = S.bgOpen[g] != null ? S.bgOpen[g] : g === cur; S.bgOpen[g] = !op; saveSettings(); renderBases(); } };
+function setCad(on){ S.cad = on; syncOv(); if (cadLayer) { map.removeLayer(cadLayer); cadLayer = null; }
   if (on) cadLayer = L.tileLayer(IGN('CADASTRALPARCELS.PARCELLAIRE_EXPRESS','image/png','PCI vecteur'), { maxNativeZoom:19, maxZoom:25, opacity:.85, attribution:'© IGN cadastre' }).addTo(map); saveSettings(); }
-$('#ovCad').onclick = () => setCad(!S.cad);
-const OVL = {
-  relief: () => L.tileLayer(IGN('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', 'image/png', 'estompage_grayscale'), { maxNativeZoom: 15, maxZoom: 25, opacity: .45, attribution: '© IGN Géoplateforme' }),
-  pentes: () => L.tileLayer(IGN('GEOGRAPHICALGRIDSYSTEMS.SLOPES.MOUNTAIN', 'image/png'), { maxNativeZoom: 17, maxZoom: 25, opacity: .55, attribution: '© IGN Géoplateforme' }),
-};
+const W = (layer, o = {}) => () => L.tileLayer(IGN(layer, 'image/png', o.style), { maxNativeZoom: o.max || 18, maxZoom: 25, opacity: o.op || 1, attribution: '© IGN Géoplateforme' });
+const OI = (d, c) => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const OVG = [
+  ['MomoMAP', [
+    ['grid', 'Grillewords', OI('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>', '#fff200')] ]],
+  ['Foncier & urbanisme', [
+    ['cad', 'Parcelles cadastrales', OI('<path d="M3 5l7-2 11 4-2 13-9 1-6-6z"/><path d="M10 3l-1 9 10 1M9 12l-4 3"/>', '#f0a35e')],
+    ['bati', 'Bâtiments', OI('<path d="M4 21V9l8-5 8 5v12z"/><path d="M9 21v-6h6v6"/>', '#e57373'), W('BUILDINGS.BUILDINGS', { max: 19 })],
+    ['limites', 'Limites administratives', OI('<path d="M4 4l5 2 6-2 5 2v14l-5-2-6 2-5-2z"/><path d="M9 6v14M15 4v14" stroke-dasharray="2 2.5"/>', '#ba68c8'), W('LIMITES_ADMINISTRATIVES_EXPRESS.LATEST', { max: 16 })],
+  ]],
+  ['Réseaux', [
+    ['routes', 'Routes', OI('<path d="M8 3L5 21M16 3l3 18M12 5v3M12 11v3M12 17v3"/>', '#ffb74d'), W('TRANSPORTNETWORKS.ROADS', { max: 18 })],
+    ['rail', 'Voies ferrées', OI('<path d="M8 3L6 21M16 3l2 18M7 7h10M6.5 12h11M6 17h12"/>', '#90a4ae'), W('TRANSPORTNETWORKS.RAILWAYS', { max: 18 })],
+    ['rando', 'Sentiers de randonnée', OI('<circle cx="13" cy="4" r="2"/><path d="M11 9l-2 6 3 2 1 5M11 9l4 2 2 3M9 15l-3 6"/>', '#e53935'), () => L.tileLayer('https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png', { maxNativeZoom: 17, maxZoom: 25, attribution: '© waymarkedtrails.org' })],
+  ]],
+  ['Eau & relief', [
+    ['hydro', 'Cours d\'eau et plans d\'eau', OI('<path d="M3 8c2-2 4 2 6 0s4 2 6 0 4 2 6 0M3 14c2-2 4 2 6 0s4 2 6 0 4 2 6 0"/>', '#4fc3f7'), W('HYDROGRAPHY.HYDROGRAPHY', { max: 18 })],
+    ['courbes', 'Courbes de niveau', OI('<path d="M3 18c4-6 14-6 18 0M6 14c3-5 9-5 12 0M9 10c2-3 4-3 6 0"/>', '#a1887f'), W('ELEVATION.CONTOUR.LINE', { max: 18 })],
+    ['relief', 'Ombrage du relief', OI('<path d="M3 19l6-10 4 6 3-4 5 8z"/>', '#bdbdbd'), W('ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', { max: 15, op: .45, style: 'estompage_grayscale' })],
+    ['pentes', 'Pentes (zones de montagne)', OI('<path d="M3 20L20 5v15z"/><path d="M14 20a6 6 0 0 0-2-4.5"/>', '#ffca28'), W('GEOGRAPHICALGRIDSYSTEMS.SLOPES.MOUNTAIN', { max: 17, op: .55 })],
+    ['geol', 'Carte géologique (BRGM)', OI('<path d="M3 7h18M3 12h18M3 17h18"/><path d="M7 7l3 5-2 5M15 7l-2 5 3 5"/>', '#ff8a65')],
+  ]],
+  ['Nature & agriculture', [
+    ['foret', 'Forêts', OI('<path d="M12 3l5 8h-3l4 6H6l4-6H7z"/><path d="M12 17v4"/>', '#66bb6a'), W('LANDCOVER.FORESTINVENTORY.V2', { max: 18, op: .7 })],
+    ['rpg', 'Parcelles agricoles (RPG)', OI('<path d="M3 6h18v12H3zM9 6v12M15 6v12M3 12h18"/>', '#d4e157'), W('LANDUSE.AGRICULTURE.LATEST', { max: 18, op: .7 })],
+    ['natura', 'Natura 2000 (habitats)', OI('<path d="M12 21c-5-3-8-7-8-12 4 0 7 2 8 5 1-3 4-5 8-5 0 5-3 9-8 12z"/>', '#26a69a'), W('PROTECTEDAREAS.SIC', { max: 18, op: .7 })],
+    ['zps', 'Natura 2000 (oiseaux)', OI('<path d="M3 12c4-1 6-5 9-5s5 3 9 2c-3 3-5 7-9 7s-6-3-9-4z"/>', '#4db6ac'), W('PROTECTEDAREAS.ZPS', { max: 18, op: .7 })],
+  ]],
+];
+const OVL = {}; OVG.forEach(([, items]) => items.forEach(([k, , , f]) => { if (f) OVL[k] = f; }));
 const ovObjs = {}; S.ov = S.ov || {};
-function setOv(k, on){ S.ov[k] = on; document.querySelector(`[data-ov="${k}"]`).classList.toggle('on', on);
-  if (ovObjs[k]) { map.removeLayer(ovObjs[k]); delete ovObjs[k]; } if (on) ovObjs[k] = OVL[k]().addTo(map); saveSettings(); }
-document.querySelectorAll('[data-ov]').forEach(b => b.onclick = () => setOv(b.dataset.ov, !S.ov[b.dataset.ov]));
+const ovOn = k => k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : !!S.ov[k];
+function renderOv(){ S.ovOpen = S.ovOpen || {};
+  $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
+    return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
+      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>`).join('')}</div></div>`; }).join(''); }
+function ovGrpOpen(g, n){ S.ovOpen = S.ovOpen || {}; return S.ovOpen[g] != null ? S.ovOpen[g] : (n > 0 || g === 'MomoMAP'); }
+function syncOv(){ if ($('#ovList')) renderOv(); }
+function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k]); delete ovObjs[k]; }
+  if (on) { const l = OVL[k](); let ok = 0, bad = 0; l.on('tileload', () => ok++).on('tileerror', () => { if (++bad === 8 && !ok) toast('Cette superposition ne répond pas pour le moment'); }); ovObjs[k] = l.addTo(map); }
+  saveSettings(); syncOv(); }
+$('#ovList').addEventListener('click', e => { const t = e.target.closest('[data-ov]');
+  if (t) { const k = t.dataset.ov; if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); return setOv(k, !S.ov[k]); }
+  const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.og, items = (OVG.find(x => x[0] === g) || [, []])[1]; S.ovOpen[g] = !ovGrpOpen(g, items.filter(it => ovOn(it[0])).length); saveSettings(); renderOv(); } });
 let geolLayer = null;
-function setGeol(on){ S.geol = on; $('#ovGeol').classList.toggle('on', on); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
+function setGeol(on){ S.geol = on; syncOv(); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
   if (on) geolLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { layers: 'SCAN_H_GEOL50', format: 'image/png', transparent: true, opacity: S.geolOp || .6, maxZoom: 25, attribution: '© BRGM' }).addTo(map);
   $('#legend').classList.toggle('on', on);
   if (on && !$('#lgImg').dataset.ok) { $('#lgImg').dataset.ok = 1; const im = new Image(); im.alt = 'Légende de la carte géologique';
@@ -887,7 +934,7 @@ function setGeol(on){ S.geol = on; $('#ovGeol').classList.toggle('on', on); if (
 $('#lgOp').value = S.geolOp || .6;
 $('#lgOp').oninput = e => { S.geolOp = +e.target.value; if (geolLayer) geolLayer.setOpacity(S.geolOp); saveSettings(); };
 $('#lgToggle').onclick = () => $('#legend').classList.toggle('min');
-$('#ovGeol').onclick = () => setGeol(!S.geol);
+
 
 /* ---------- calque grille (canvas) ---------- */
 const cv = document.createElement('canvas'); cv.id = 'gridcv'; map.getContainer().appendChild(cv);
@@ -917,7 +964,6 @@ function draw(){
       for (let c = c0; c <= c1; c++) { const x = xW + (-180 + c * step - west) * kx; ctx.moveTo(x, yn); ctx.lineTo(x, ys); }
     }
     ctx.stroke();
-    if (S.labels && cpx >= S.labMin) drawLabels(bd, cpx);
   }
   if (hover && S.grid && cpx >= S.gridMin && !(sel && hover.g === sel.g && hover.c === sel.c)) {
     const r = rectPx(MM3.bounds(hover)); ctx.strokeStyle = hexA(S.selColor, .9); ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.strokeRect(...r); ctx.setLineDash([]); }
@@ -1873,12 +1919,12 @@ $('#rtNav').onclick = () => { if (!rt.data) return toast('Calculez d\'abord un i
 /* ---------- paramètres ---------- */
 function saveSettings(){ store('settings', S); }
 function bindSettings(){
-  $('#sGridColor').value = S.gridColor; $('#sGridOp').value = S.gridOp; $('#sGridMin').value = S.gridMin; $('#sLabMin').value = S.labMin; $('#sSelColor').value = S.selColor; $('#sBackup').value = S.backup;
+  $('#sGridColor').value = S.gridColor; $('#sGridOp').value = S.gridOp; $('#sGridMin').value = S.gridMin; $('#sSelColor').value = S.selColor; $('#sBackup').value = S.backup;
   $('#sFly').classList.toggle('on', S.fly); $('#sL93').classList.toggle('on', S.l93);
-  $('#ovGrid').classList.toggle('on', S.grid); $('#ovLabels').classList.toggle('on', S.labels);
+  syncOv();
 }
 const onS = (id, key, conv = v => v, after) => $(id).addEventListener('input', e => { S[key] = conv(e.target.value); saveSettings(); redraw(); after && after(); });
-onS('#sGridColor', 'gridColor'); onS('#sGridOp', 'gridOp', Number); onS('#sGridMin', 'gridMin', Number); onS('#sLabMin', 'labMin', Number);
+onS('#sGridColor', 'gridColor'); onS('#sGridOp', 'gridOp', Number); onS('#sGridMin', 'gridMin', Number);
 onS('#sSelColor', 'selColor', String, () => renderPoints()); onS('#sBackup', 'backup', Number, setupBackup);
 $('#sFly').onclick = () => { S.fly = !S.fly; saveSettings(); bindSettings(); };
 $('#sL93').onclick = () => { S.l93 = !S.l93; saveSettings(); bindSettings(); if (sel) select(sel); };
@@ -1891,10 +1937,8 @@ function toggleDrawer(id){ const d = $(id), on = !d.classList.contains('on'); do
   if (on) { d.classList.add('on'); if (matchMedia('(max-width:720px)').matches) closeCards(); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => toggleDrawer('#' + b.closest('.drawer').id));
 document.querySelectorAll('#tools [data-d]').forEach(b => b.addEventListener('click', () => toggleDrawer('#' + b.dataset.d)));
-function toggleGrid(){ S.grid = !S.grid; saveSettings(); bindSettings(); redraw(); toast(S.grid ? 'Grille affichée' : 'Grille masquée'); }
-function toggleLabels(){ S.labels = !S.labels; saveSettings(); bindSettings(); redraw();
-  if (S.labels && cellPxAt(map.getCenter().lat) < S.labMin) toast('Mots visibles en zoomant au maximum'); }
-$('#ovGrid').onclick = toggleGrid; $('#ovLabels').onclick = toggleLabels;
+function toggleGrid(){ S.grid = !S.grid; saveSettings(); bindSettings(); redraw(); toast(S.grid ? 'Grillewords affiché' : 'Grillewords masqué'); }
+
 let meMk = null;
 $('#zLoc').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
   navigator.geolocation.getCurrentPosition(p => { const ll = [p.coords.latitude, p.coords.longitude]; if (meMk) map.removeLayer(meMk);
@@ -1913,7 +1957,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { document.querySelectorAll('.modal.on').forEach(m => m.classList.remove('on')); if (mode) setMode(mode); return; }
   if (e.key === '/') { e.preventDefault(); q.focus(); q.value = '///'; return; }
   if (e.key === 'g' || e.key === 'G') toggleGrid();
-  if (e.key === 'l' || e.key === 'L') toggleLabels();
   if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && sel) copy(fmtW(selInfo.words));
   const mv = { ArrowUp:[1,0], ArrowDown:[-1,0], ArrowLeft:[0,-1], ArrowRight:[0,1] }[e.key];
   if (mv && sel) { e.preventDefault(); select(MM3.neighbor(sel, mv[0], mv[1]), { pan: true }); }
@@ -1936,8 +1979,7 @@ const GUIDE = [
  ['Fonds & superpositions', `<h3>Fonds de carte</h3>
   <p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Le zoom va du globe entier jusqu'au détail d'un mètre ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>
   <h4>Superpositions</h4><p>Elles s'activent ou se coupent indépendamment, par-dessus n'importe quel fond :</p>
-  <p><b>Grille de mots 3×3 m</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
-  <b>Afficher les 3 mots</b> (<kbd>L</kbd>) — en zoomant fort, écrit les trois mots dans chaque carré.<br>
+  <p><b>Grillewords</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
   <b>Parcelles cadastrales</b> — le plan cadastral de l'IGN.<br>
   <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.</p>`],
  ['Interroger la parcelle', `<h3>Tout savoir sur une parcelle</h3>
@@ -1963,13 +2005,13 @@ const GUIDE = [
   <h4>Exporter</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : points avec leur nom et leurs trois mots, carrés de 3×3 m, calques visibles, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
   <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> sauve vos points, vos calques et la vue en cours dans un fichier MomoMAP, à rouvrir plus tard ou à transmettre. Le backup automatique se règle dans les Paramètres.</p>`],
  ['Trois mots', `<h3>Une adresse de trois mots pour chaque carré de 3 m</h3>
-  <p>Avec la superposition <b>Grille de mots</b>, chaque carré d'environ 3 × 3 m de la Terre a une adresse unique de trois mots, par exemple <span class="ex">///jambon.calculatrice.arbre</span>. Elle se dicte au téléphone et se note sur un carnet de chantier bien plus facilement que des coordonnées.</p>
+  <p>Avec la superposition <b>Grillewords</b>, chaque carré d'environ 3 × 3 m de la Terre a une adresse unique de trois mots, par exemple <span class="ex">///jambon.calculatrice.arbre</span>. Elle se dicte au téléphone et se note sur un carnet de chantier bien plus facilement que des coordonnées.</p>
   <p>Un carré donne toujours les mêmes trois mots, partout et sans connexion. En France, seuls les 5 000 noms communs les plus courants sont utilisés. Deux carrés voisins ont des adresses sans rapport : une erreur de mot se repère tout de suite.</p>
   <p>Tapez <span class="ex">///trois.mots.ici</span> dans la recherche (accents facultatifs) pour retrouver un carré. Les flèches du clavier passent au carré voisin.</p>`],
  ['Raccourcis', `<h3>Raccourcis</h3><table>
   <tr><td><kbd>Clic droit</kbd></td><td>Menu : parcelle, favori, trois mots, coordonnées</td></tr>
   <tr><td><kbd>/</kbd></td><td>Rechercher une adresse en trois mots</td></tr>
-  <tr><td><kbd>G</kbd> / <kbd>L</kbd></td><td>Grille de mots / trois mots dans les carrés</td></tr>
+  <tr><td><kbd>G</kbd></td><td>Grillewords</td></tr>
   <tr><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></td><td>Carré voisin (grille active)</td></tr>
   <tr><td><kbd>C</kbd></td><td>Copier les trois mots du carré choisi</td></tr>
   <tr><td><kbd>Ctrl</kbd> + <kbd>O</kbd> / <kbd>S</kbd></td><td>Ouvrir / Enregistrer</td></tr>
@@ -1995,7 +2037,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- démarrage ---------- */
-bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
+bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
   const ws = parseWords(h);
