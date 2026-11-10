@@ -488,9 +488,7 @@ setTimeout(done,4700);
     <p class="hint">Ou glissez-déposez le fichier sur la carte. Il apparaît dans Calques.</p>
     <div class="row"><label>Projection des DXF importés</label></div><select id="xCrsIn" style="width:100%"></select>
     <div class="lbl">Exporter</div>
-    <label class="chk"><input type="checkbox" id="xPts" checked> Points favoris (nom + trois mots)</label>
-    <label class="chk"><input type="checkbox" id="xSq"> Carrés 3×3 m des points</label>
-    <label class="chk"><input type="checkbox" id="xLy" checked> Calques visibles (dont Dessins)</label>
+    <p class="hint" style="margin-top:0">Exporte les points favoris et tous les calques visibles (dont Dessins).</p>
     <div class="row" style="margin-top:6px"><label>Projection du DXF exporté</label></div><select id="xCrsOut" style="width:100%"></select>
     <div class="acts" style="padding:12px 0 4px"><button class="btn" data-exp="kml">KML</button><button class="btn" data-exp="kmz">KMZ</button><button class="btn" data-exp="dxf">DXF</button></div>
   </div>
@@ -1120,7 +1118,7 @@ document.addEventListener('dragleave', e => { if (e.target === document.document
 document.addEventListener('drop', async e => { e.preventDefault(); document.body.classList.remove('drop'); for (const f of e.dataTransfer.files) await importFile(f); });
 /* --- export --- */
 function exportFeatures(){
-  const F = [], wP = $('#xPts').checked, wC = $('#xSq').checked, wL = $('#xLy').checked;
+  const F = [], wP = true, wC = false, wL = true;
   points.forEach(p => { const c = MM3.cellAt(p.lat, p.lon), b = MM3.bounds(c);
     if (wP) F.push({ kind: 'point', name: p.nom, words: p.mots, coords: [[p.lon, p.lat]] });
     if (wC) F.push({ kind: 'carre', name: p.nom, words: p.mots, coords: [[b.w, b.s], [b.e, b.s], [b.e, b.n], [b.w, b.n], [b.w, b.s]] }); });
@@ -1163,7 +1161,7 @@ function buildDXF(F, crs){
 }
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); }
 async function exportAs(fmt){
-  const F = exportFeatures(); if (!F.length) return toast('Rien à exporter : ajoutez des points ou cochez les calques importés');
+  const F = exportFeatures(); if (!F.length) return toast('Rien à exporter : aucun point favori ni calque visible');
   const base = fileName === 'sans titre' ? 'momomap' : fileName.replace(/\.mmap$/i, '');
   try {
     if (fmt === 'kml') download(new Blob([buildKML(F)], { type: 'application/vnd.google-earth.kml+xml' }), base + '.kml');
