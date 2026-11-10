@@ -40,6 +40,7 @@ window.addEventListener('appinstalled', () => { window.__installPrompt = null; c
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
   --bg:#0f1115; --panel:#161920; --panel2:#1c2029; --line:#272c38; --line2:#323848;
@@ -89,6 +90,7 @@ svg{display:block}
 .ib svg{width:20px;height:20px}
 .sep{height:1px;background:var(--line);margin:3px 4px}
 .drawer.on~#tools .ib:hover:after,body.drw .ib[data-tip]:hover:after{display:none}
+.ib.on[data-tip]:hover:after{display:none}
 .ib[data-tip]:hover:after{content:attr(data-tip);position:absolute;left:46px;top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:4px 9px;border-radius:7px;font-size:12px;pointer-events:none}
 #topright .ib{background:var(--panel);border:1px solid var(--line);width:44px;height:44px;border-radius:12px}
 #bInstall.ready{background:var(--acc2);border-color:var(--acc2);color:#14161b}
@@ -153,6 +155,10 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .pt .w{font-family:var(--mono);font-size:11.5px;color:var(--acc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pt .ib{width:28px;height:28px;flex:none}.pt .ib svg{width:15px;height:15px}
 .empty{color:var(--mut);font-size:13px;padding:14px 4px;text-align:center}
+.hint{color:var(--mut);font-size:12px;margin:6px 0 4px}
+.chk{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer}
+.chk input{accent-color:var(--acc)}
+body.drop #map{outline:3px dashed var(--acc);outline-offset:-8px}
 
 /* ---------- barre d'état ---------- */
 #status{position:absolute;left:12px;bottom:12px;z-index:880;display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:12px;color:var(--mut);max-width:calc(100% - 24px)}
@@ -316,14 +322,13 @@ setTimeout(done,4700);
   </div>
   <div id="topright">
     <button class="ib hide-m" id="bInstall" data-tip="Installer MomoMAP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
-    <a class="ib" id="bHub" data-tip="MOMOgiciels" href="https://mowiss.github.io/Momohub/" target="_blank" rel="noopener"><svg viewBox="0 0 844 1220" style="width:18px;height:26px"><path fill="#8a8a8a" d="M7 8L424 587L837 8V835H700V438L424 824L145 437V835H7Z"/><path fill="#8a8a8a" d="M7 385L424 964L837 385V1212H700V815L424 1201L145 814V1212H7Z"/></svg></a>
+    <a class="ib" id="bHub" data-tip="MOMOgiciels" href="https://mowiss.github.io/Momohub/"><svg viewBox="0 0 844 1220" style="width:18px;height:26px"><path fill="#8a8a8a" d="M7 8L424 587L837 8V835H700V438L424 824L145 437V835H7Z"/><path fill="#8a8a8a" d="M7 385L424 964L837 385V1212H700V815L424 1201L145 814V1212H7Z"/></svg></a>
   </div>
 </div>
 
 <div id="tools">
   <button class="ib" id="tLayers" data-tip="Fonds de carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
-  <button class="ib on" id="tGrid" data-tip="Grille 3×3 m (G)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/></svg></button>
-  <button class="ib" id="tLabels" data-tip="Mots dans les carrés (L)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M8 9h8M8 12h8M8 15h5"/></svg></button>
+  <button class="ib" id="tXchg" data-tip="Importer / exporter (KML, KMZ, DXF)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12M3 12l4 4 4-4M17 20V8M13 12l4-4 4 4"/></svg></button>
   <button class="ib" id="tLocate" data-tip="Ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button class="ib" id="tPoints" data-tip="Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
   <div class="sep"></div>
@@ -342,9 +347,31 @@ setTimeout(done,4700);
     <div class="lbl">Fond</div>
     <div id="baseList"></div>
     <div class="lbl">Superpositions</div>
+    <div class="row"><label>Grille 3×3 m <span style="color:var(--dim)">(G)</span></label><button class="tg" id="ovGrid"></button></div>
+    <div class="row"><label>Mots dans les carrés <span style="color:var(--dim)">(L)</span></label><button class="tg" id="ovLabels"></button></div>
     <div class="row"><label>Parcelles cadastrales (IGN)</label><button class="tg" id="ovCad"></button></div>
   </div>
 </div>
+
+<!-- Tiroir : échanges -->
+<div class="drawer" id="dXchg">
+  <div class="dh">Importer / exporter <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db">
+    <div class="lbl">Importer</div>
+    <button class="btn pri" id="xImport" style="width:100%">Choisir un fichier KML, KMZ, DXF, GeoJSON…</button>
+    <p class="hint">Ou glissez-déposez le fichier sur la carte.</p>
+    <div class="row"><label>Projection du DXF</label></div><select id="xCrsIn" style="width:100%"></select>
+    <div class="lbl">Calques importés</div>
+    <div id="lyList"></div>
+    <div class="lbl">Exporter</div>
+    <label class="chk"><input type="checkbox" id="xPts" checked> Mes points (nom + trois mots)</label>
+    <label class="chk"><input type="checkbox" id="xSq" checked> Carrés 3×3 m des points</label>
+    <label class="chk"><input type="checkbox" id="xLy"> Calques importés visibles</label>
+    <div class="row" style="margin-top:6px"><label>Projection du DXF</label></div><select id="xCrsOut" style="width:100%"></select>
+    <div class="acts" style="padding:12px 0 4px"><button class="btn" data-exp="kml">KML</button><button class="btn" data-exp="kmz">KMZ</button><button class="btn" data-exp="dxf">DXF</button></div>
+  </div>
+</div>
+<input type="file" id="xFile" accept=".kml,.kmz,.dxf,.geojson,.json,.mmap" multiple hidden>
 
 <!-- Tiroir : points -->
 <div class="drawer" id="dPoints">
@@ -511,6 +538,8 @@ const $ = s => document.querySelector(s);
 const APP = 'MomoMAP', EXT = '.mmap', LS = 'momomap.';
 const DEF = { gridColor:'#ffffff', gridOp:0.45, gridMin:6, labMin:80, selColor:'#fff200', fly:true, l93:true, backup:5, base:'osm', cad:false, grid:true, labels:true };
 let S = Object.assign({}, DEF, load('settings') || {});
+if (S.selColor === '#2fd5a8') S.selColor = DEF.selColor;
+if (S.base === 'dark') S.base = 'osm';
 let points = load('points') || [];
 let sel = null, selInfo = null, hover = null, hoverKey = '';
 let fileHandle = null, fileName = load('fileName') || 'sans titre', dirty = false;
@@ -533,20 +562,22 @@ function dms(v, pos, neg){ const s = v < 0 ? neg : pos; v = Math.abs(v); const d
 /* ---------- carte ---------- */
 const IGN = (layer, fmt, extra = '') => `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=${extra || 'normal'}&TILEMATRIXSET=PM&FORMAT=${fmt}&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`;
 const BASES = {
-  osm:   { name:'Plan OpenStreetMap', sw:'#e8e4da', l: () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom:19, maxZoom:22, attribution:'© OpenStreetMap' }) },
-  dark:  { name:'Plan sombre', sw:'#22262e', l: () => L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxNativeZoom:20, maxZoom:22, attribution:'© OpenStreetMap © CARTO' }) },
-  ignplan:{ name:'Plan IGN', sw:'#f3efe4', l: () => L.tileLayer(IGN('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2','image/png'), { maxNativeZoom:19, maxZoom:22, attribution:'© IGN Géoplateforme' }) },
-  ortho: { name:'Photo aérienne IGN', sw:'#5c6b4c', l: () => L.tileLayer(IGN('ORTHOIMAGERY.ORTHOPHOTOS','image/jpeg'), { maxNativeZoom:20, maxZoom:22, attribution:'© IGN Géoplateforme' }) },
-  esri:  { name:'Satellite (monde)', sw:'#3b4a3a', l: () => L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom:19, maxZoom:22, attribution:'© Esri' }) },
+  osm:   { name:'Plan OpenStreetMap', sw:'#e8e4da', l: () => L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom:19, maxZoom:25, attribution:'© OpenStreetMap' }) },
+  ignplan:{ name:'Plan IGN', sw:'#f3efe4', l: () => L.tileLayer(IGN('GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2','image/png'), { maxNativeZoom:19, maxZoom:25, attribution:'© IGN Géoplateforme' }) },
+  ortho: { name:'Photo aérienne IGN', sw:'#5c6b4c', l: () => L.tileLayer(IGN('ORTHOIMAGERY.ORTHOPHOTOS','image/jpeg'), { maxNativeZoom:19, maxZoom:25, attribution:'© IGN Géoplateforme' }) },
+  esri:  { name:'Satellite (monde)', sw:'#3b4a3a', l: () => L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom:18, maxZoom:25, attribution:'© Esri' }) },
 };
-const map = L.map('map', { zoomControl:false, maxZoom:22, minZoom:2, worldCopyJump:true }).setView([44.5594, 6.0786], 18);
+const map = L.map('map', { zoomControl:false, maxZoom:25, minZoom:0, worldCopyJump:true }).setView([44.5594, 6.0786], 18);
 let baseLayer = null, cadLayer = null;
-function setBase(k){ if (!BASES[k]) k = 'osm'; if (baseLayer) map.removeLayer(baseLayer); baseLayer = BASES[k].l().addTo(map); baseLayer.bringToBack(); S.base = k; saveSettings(); renderBases(); }
+function setBase(k){ if (!BASES[k]) k = 'osm'; if (baseLayer) map.removeLayer(baseLayer);
+  baseLayer = BASES[k].l(); let ok = 0, bad = 0;
+  baseLayer.on('tileload', () => ok++).on('tileerror', () => { bad++; if (bad === 8 && ok === 0) toast(`Le fond « ${BASES[k].name} » ne répond pas : essayez un autre fond`); });
+  baseLayer.addTo(map); baseLayer.bringToBack(); S.base = k; saveSettings(); renderBases(); }
 function renderBases(){ $('#baseList').innerHTML = Object.entries(BASES).map(([k, b]) =>
   `<div class="opt ${S.base===k?'on':''}" data-b="${k}"><span class="sw" style="background:${b.sw}"></span>${b.name}</div>`).join(''); }
 $('#baseList').onclick = e => { const o = e.target.closest('[data-b]'); if (o) setBase(o.dataset.b); };
 function setCad(on){ S.cad = on; $('#ovCad').classList.toggle('on', on); if (cadLayer) { map.removeLayer(cadLayer); cadLayer = null; }
-  if (on) cadLayer = L.tileLayer(IGN('CADASTRALPARCELS.PARCELLAIRE_EXPRESS','image/png','PCI vecteur'), { maxNativeZoom:19, maxZoom:22, opacity:.85, attribution:'© IGN cadastre' }).addTo(map); saveSettings(); }
+  if (on) cadLayer = L.tileLayer(IGN('CADASTRALPARCELS.PARCELLAIRE_EXPRESS','image/png','PCI vecteur'), { maxNativeZoom:19, maxZoom:25, opacity:.85, attribution:'© IGN cadastre' }).addTo(map); saveSettings(); }
 $('#ovCad').onclick = () => setCad(!S.cad);
 
 /* ---------- calque grille (canvas) ---------- */
@@ -590,7 +621,7 @@ function drawLabels(bd, cpx){
   if (half > 14) return;
   const base = MM3.cellAt(c.lat, c.lng), fs = Math.max(9, Math.min(13, cpx / 9));
   ctx.font = `500 ${fs}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const dark = S.base === 'ortho' || S.base === 'esri' || S.base === 'dark';
+  const dark = S.base === 'ortho' || S.base === 'esri';
   for (let dr = -half; dr <= half; dr++) for (let dc = -half; dc <= half; dc++) {
     const cell = MM3.neighbor(base, dr, dc), r = rectPx(MM3.bounds(cell)), cx = r[0] + r[2] / 2, cy = r[1] + r[3] / 2;
     if (cx < -cpx || cy < -cpx || cx > sz.x + cpx || cy > sz.y + cpx) continue;
@@ -724,9 +755,10 @@ $('#ptOk').onclick = addPoint; $('#ptName').onkeydown = e => { if (e.key === 'En
 function changed(){ store('points', points); dirty = true; renderPoints(); updFile(); }
 
 /* ---------- fichiers .mmap ---------- */
-function docData(){ const c = map.getCenter(); return { app: APP, version: 1, grille: 'momomap-3x3-v1', enregistre: new Date().toISOString(), vue: { lat: c.lat, lon: c.lng, zoom: map.getZoom(), fond: S.base }, points }; }
+function docData(){ const c = map.getCenter(); return { app: APP, version: 1, grille: 'momomap-3x3-v1', enregistre: new Date().toISOString(), vue: { lat: c.lat, lon: c.lng, zoom: map.getZoom(), fond: S.base }, points, calques: layers }; }
 function applyDoc(d){ if (!d || d.app !== APP) throw new Error('Ce fichier n\'est pas un fichier MomoMAP');
   points = Array.isArray(d.points) ? d.points : []; store('points', points); renderPoints();
+  layers = Array.isArray(d.calques) ? d.calques : []; saveLayers(); renderLayers();
   if (d.vue) { if (d.vue.fond) setBase(d.vue.fond); map.setView([d.vue.lat, d.vue.lon], d.vue.zoom || 18); } }
 function updFile(){ $('#fileName').textContent = fileName; $('#dirty').textContent = dirty ? '•' : ''; store('fileName', fileName); }
 async function openFile(){
@@ -734,7 +766,7 @@ async function openFile(){
   if (window.showOpenFilePicker) { try { const [h] = await showOpenFilePicker({ types: [{ description: 'Fichier MomoMAP', accept: { 'application/json': [EXT, '.json'] } }] });
       const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch(e){ if (e.name !== 'AbortError') toast(e.message); } return; }
   $('#fileIn').click(); }
-$('#fileIn').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { applyDoc(JSON.parse(await f.text())); fileHandle = null; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch(err){ toast(err.message); } e.target.value = ''; };
+$('#fileIn').onchange = async e => { const f = e.target.files[0]; if (!f) return; await importFile(f); e.target.value = ''; };
 async function saveFile(as){
   const txt = JSON.stringify(docData(), null, 1);
   if (!as && fileHandle) { try { const w = await fileHandle.createWritable(); await w.write(txt); await w.close(); dirty = false; updFile(); return toast('Enregistré'); } catch(e){ toast(e.message); return; } }
@@ -753,12 +785,192 @@ $('#sRestore').onclick = () => { const b = load('backup'); if (!b) return toast(
   applyDoc(b); fileName = b.fichier || 'sans titre'; fileHandle = null; dirty = true; updFile(); toast('Backup restauré'); };
 window.addEventListener('beforeunload', e => { store('view', { ...map.getCenter(), z: map.getZoom() }); if (dirty && points.length && fileHandle) { e.preventDefault(); e.returnValue = ''; } });
 
+/* ---------- échanges : import / export KML, KMZ, DXF, GeoJSON ---------- */
+const CRS_LIST = [['auto','Automatique (DXF)'],['L93','Lambert 93 (EPSG:2154)']];
+for (let z = 42; z <= 50; z++) { CRS_LIST.push(['CC' + z, `Lambert CC${z} (EPSG:${3900 + z})`]);
+  if (HAS_PROJ) proj4.defs('CC' + z, `+proj=lcc +lat_0=${z} +lon_0=3 +lat_1=${z - .75} +lat_2=${z + .75} +x_0=1700000 +y_0=${(z - 41) * 1e6 + 2e5} +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs`); }
+CRS_LIST.push(['WGS84','WGS84 (degrés)']);
+const toCRS = (crs, lat, lon) => crs === 'WGS84' ? [lon, lat] : proj4('EPSG:4326', crs, [lon, lat]);
+const fromCRS = (crs, x, y) => { if (crs === 'WGS84') return [x, y]; const p = proj4(crs, 'EPSG:4326', [x, y]); return [p[0], p[1]]; };
+function guessCRS(xs, ys){ // devine la projection d'un DXF d'après ses coordonnées
+  const mx = xs[Math.floor(xs.length / 2)], my = ys[Math.floor(ys.length / 2)];
+  if (Math.abs(mx) <= 180 && Math.abs(my) <= 90) return 'WGS84';
+  if (mx > 50000 && mx < 1300000 && my > 6000000 && my < 7200000) return 'L93';
+  if (mx > 1000000 && mx < 2500000 && my > 1000000 && my < 9300000) { const z = Math.floor((my - 2e5) / 1e6) + 41; if (z >= 42 && z <= 50) return 'CC' + z; }
+  return null; }
+const LAYER_COLORS = ['#38bdf8','#fb923c','#f472b6','#a3e635','#c084fc','#f87171','#2dd4bf'];
+let layers = load('layers') || [], layerObjs = {};
+function saveLayers(){ try { localStorage.setItem(LS + 'layers', JSON.stringify(layers)); } catch(e){ toast('Calques trop lourds pour la mémoire du navigateur : pensez à enregistrer le fichier .mmap'); } }
+function drawLayer(ly){
+  if (layerObjs[ly.id]) { map.removeLayer(layerObjs[ly.id]); delete layerObjs[ly.id]; }
+  if (!ly.visible) return;
+  layerObjs[ly.id] = L.geoJSON(ly.geo, { renderer: L.canvas({ padding: .3 }),
+    style: () => ({ color: ly.color, weight: 2, opacity: .95, fillOpacity: .12 }),
+    pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 4, color: '#0f1115', weight: 1, fillColor: ly.color, fillOpacity: 1, renderer: L.canvas() }),
+    onEachFeature: (f, l) => { const p = f.properties || {}, t = [p.name, p.layer && 'calque ' + p.layer].filter(Boolean).join(' · '); if (t) l.bindTooltip(esc(t), { className: 'pt-tip', sticky: true }); }
+  }).addTo(map);
+}
+function renderLayers(){
+  Object.keys(layerObjs).forEach(id => { if (!layers.find(l => l.id === id)) { map.removeLayer(layerObjs[id]); delete layerObjs[id]; } });
+  layers.forEach(drawLayer);
+  $('#lyList').innerHTML = layers.length ? layers.map((l, i) => { const n = l.geo.features.length, np = l.geo.features.filter(f => f.geometry.type === 'Point').length;
+    return `<div class="pt" data-i="${i}"><span class="sw" style="width:12px;height:12px;border-radius:3px;background:${l.color};flex:none"></span><div class="m"><div class="n" title="${esc(l.name)}">${esc(l.name)}</div><div class="w" style="color:var(--mut)">${n} objet${n > 1 ? 's' : ''}${l.crs ? ' · ' + l.crs : ''}</div></div>
+    <button class="ib" data-ly="eye" title="${l.visible ? 'Masquer' : 'Afficher'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${l.visible ? '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/>'}</svg></button>
+    <button class="ib" data-ly="zoom" title="Zoomer sur le calque"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></button>
+    ${np ? `<button class="ib" data-ly="pts" title="Ajouter ses ${np} points à Mes points"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 7v5M9.5 9.5h5" stroke-linecap="round"/></svg></button>` : ''}
+    <button class="ib" data-ly="del" title="Retirer le calque"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`; }).join('')
+    : `<div class="empty">Aucun calque importé.<br>Glissez un fichier KML, KMZ, DXF ou GeoJSON sur la carte.</div>`;
+}
+$('#lyList').onclick = e => { const b = e.target.closest('[data-ly]'), row = e.target.closest('.pt'); if (!row) return; const ly = layers[+row.dataset.i], a = b ? b.dataset.ly : 'zoom';
+  if (a === 'eye') { ly.visible = !ly.visible; saveLayers(); renderLayers(); }
+  else if (a === 'zoom') { const bb = L.geoJSON(ly.geo).getBounds(); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 20 }); }
+  else if (a === 'del') { if (confirm(`Retirer le calque « ${ly.name} » ?`)) { layers.splice(+row.dataset.i, 1); saveLayers(); renderLayers(); dirty = true; updFile(); } }
+  else if (a === 'pts') { let n = 0; ly.geo.features.forEach(f => { if (f.geometry.type !== 'Point') return; const [lon, lat] = f.geometry.coordinates; const c = MM3.cellAt(lat, lon), b = MM3.bounds(c);
+      points.push({ id: Date.now().toString(36) + n, nom: (f.properties && f.properties.name) || `${ly.name} ${n + 1}`, mots: MM3.wordsOfCell(c).words.join('.'), lat: +((b.s + b.n) / 2).toFixed(7), lon: +((b.w + b.e) / 2).toFixed(7), date: new Date().toISOString() }); n++; });
+    changed(); toast(`${n} point${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à Mes points`); }
+};
+function addLayer(name, geo, crs){
+  if (!geo.features.length) return toast('Aucun objet lisible dans ' + name);
+  const ly = { id: Date.now().toString(36), name, crs: crs || '', color: LAYER_COLORS[layers.length % LAYER_COLORS.length], visible: true, geo };
+  layers.push(ly); saveLayers(); renderLayers(); dirty = true; updFile();
+  const bb = L.geoJSON(geo).getBounds(); if (bb.isValid()) map.fitBounds(bb, { padding: [40, 40], maxZoom: 19 });
+  toast(`${name} : ${geo.features.length} objet${geo.features.length > 1 ? 's' : ''} importé${geo.features.length > 1 ? 's' : ''}`);
+}
+/* --- lecture KML --- */
+function parseKML(text){
+  const xml = new DOMParser().parseFromString(text, 'text/xml'); if (xml.querySelector('parsererror')) throw new Error('KML illisible');
+  const feats = [], kids = (el, tag) => [...el.getElementsByTagName(tag)];
+  const coords = el => el ? el.textContent.trim().split(/\s+/).map(t => t.split(',').map(Number)).filter(c => c.length >= 2 && isFinite(c[0]) && isFinite(c[1])).map(c => [c[0], c[1]]) : [];
+  kids(xml, 'Placemark').forEach(pm => {
+    const nmEl = [...pm.children].find(c => c.localName === 'name'), name = nmEl ? nmEl.textContent.trim() : '';
+    const props = { name };
+    kids(pm, 'Point').forEach(p => { const c = coords(kids(p, 'coordinates')[0])[0]; if (c) feats.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: c } }); });
+    kids(pm, 'LineString').forEach(p => { const c = coords(kids(p, 'coordinates')[0]); if (c.length > 1) feats.push({ type: 'Feature', properties: props, geometry: { type: 'LineString', coordinates: c } }); });
+    kids(pm, 'Polygon').forEach(p => { const rings = []; kids(p, 'outerBoundaryIs').concat(kids(p, 'innerBoundaryIs')).forEach(b => { const c = coords(kids(b, 'coordinates')[0]); if (c.length > 2) rings.push(c); });
+      if (rings.length) feats.push({ type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: rings } }); });
+  });
+  return { type: 'FeatureCollection', features: feats };
+}
+/* --- lecture DXF (ASCII) --- */
+function parseDXF(text, crsWanted){
+  const ln = text.split(/\r?\n/), P = []; for (let i = 0; i + 1 < ln.length; i += 2) P.push([parseInt(ln[i], 10), ln[i + 1].trim()]);
+  let k = P.findIndex((p, j) => p[0] === 2 && p[1] === 'ENTITIES' && j > 0 && P[j - 1][1] === 'SECTION'); if (k < 0) throw new Error('DXF sans section ENTITIES (les DXF binaires ne sont pas lus)');
+  const ents = []; let cur = null;
+  for (k++; k < P.length; k++) { const [c, v] = P[k]; if (c === 0) { if (cur) ents.push(cur); if (v === 'ENDSEC') { cur = null; break; } cur = { t: v, g: [] }; } else if (cur) cur.g.push([c, v]); }
+  const get = (e, c, d) => { const x = e.g.find(p => p[0] === c); return x ? x[1] : d; }, num = (e, c, d = 0) => parseFloat(get(e, c, d));
+  const raw = []; // géométries en coordonnées DXF
+  const arc = (cx, cy, r, a0, a1) => { if (a1 <= a0) a1 += 360; const n = Math.max(8, Math.ceil((a1 - a0) / 7.5)), out = []; for (let i = 0; i <= n; i++) { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return out; };
+  const clean = s => s.replace(/\\P/g, ' ').replace(/\\[A-Za-z][^;]*;/g, '').replace(/[{}]/g, '').replace(/\\U\+([0-9A-Fa-f]{4})/g, (m, h) => String.fromCharCode(parseInt(h, 16))).replace(/%%[cC]/g, 'Ø').replace(/%%[dD]/g, '°').trim();
+  for (let i = 0; i < ents.length; i++) { const e = ents[i], layer = get(e, 8, '0');
+    if (e.t === 'LINE') raw.push({ layer, type: 'LineString', pts: [[num(e, 10), num(e, 20)], [num(e, 11), num(e, 21)]] });
+    else if (e.t === 'LWPOLYLINE') { const xs = e.g.filter(p => p[0] === 10).map(p => +p[1]), ys = e.g.filter(p => p[0] === 20).map(p => +p[1]), pts = xs.map((x, j) => [x, ys[j]]);
+      if ((+get(e, 70, 0)) & 1 && pts.length > 2) pts.push(pts[0]); if (pts.length > 1) raw.push({ layer, type: 'LineString', pts }); }
+    else if (e.t === 'POLYLINE') { const pts = [], closed = (+get(e, 70, 0)) & 1; while (ents[i + 1] && ents[i + 1].t === 'VERTEX') { i++; pts.push([num(ents[i], 10), num(ents[i], 20)]); }
+      if (ents[i + 1] && ents[i + 1].t === 'SEQEND') i++; if (closed && pts.length > 2) pts.push(pts[0]); if (pts.length > 1) raw.push({ layer, type: 'LineString', pts }); }
+    else if (e.t === 'CIRCLE') raw.push({ layer, type: 'LineString', pts: arc(num(e, 10), num(e, 20), num(e, 40), 0, 360) });
+    else if (e.t === 'ARC') raw.push({ layer, type: 'LineString', pts: arc(num(e, 10), num(e, 20), num(e, 40), num(e, 50), num(e, 51)) });
+    else if (e.t === 'POINT') raw.push({ layer, type: 'Point', pts: [[num(e, 10), num(e, 20)]] });
+    else if (e.t === 'TEXT' || e.t === 'MTEXT') { const tx = clean(e.g.filter(p => p[0] === 3 || p[0] === 1).map(p => p[1]).join('')); if (tx) raw.push({ layer, type: 'Point', name: tx, pts: [[num(e, 10), num(e, 20)]] }); }
+    else if (e.t === 'INSERT') raw.push({ layer, type: 'Point', name: get(e, 2, 'bloc'), pts: [[num(e, 10), num(e, 20)]] });
+  }
+  if (!raw.length) throw new Error('Aucun objet lu dans ce DXF');
+  let crs = crsWanted;
+  if (crs === 'auto') { const all = raw.flatMap(r => r.pts); crs = guessCRS(all.map(p => p[0]).sort((a, b) => a - b), all.map(p => p[1]).sort((a, b) => a - b));
+    if (!crs) throw new Error('Projection du DXF non reconnue : choisissez-la dans la liste avant d\'importer'); }
+  const feats = raw.map(r => { const c = r.pts.map(p => fromCRS(crs, p[0], p[1]));
+    return { type: 'Feature', properties: { layer: r.layer, name: r.name || '' }, geometry: r.type === 'Point' ? { type: 'Point', coordinates: c[0] } : { type: 'LineString', coordinates: c } }; });
+  return { geo: { type: 'FeatureCollection', features: feats }, crs };
+}
+async function importFile(f){
+  const ext = f.name.split('.').pop().toLowerCase(), base = f.name.replace(/\.[^.]+$/, '');
+  try {
+    if (ext === 'mmap') { applyDoc(JSON.parse(await f.text())); fileHandle = null; fileName = f.name; dirty = false; updFile(); return toast('Ouvert : ' + f.name); }
+    if (ext === 'kml') return addLayer(base, parseKML(await f.text()), 'KML');
+    if (ext === 'kmz') { if (typeof JSZip === 'undefined') throw new Error('Lecture KMZ indisponible (pas de connexion)');
+      const z = await JSZip.loadAsync(f), kf = Object.values(z.files).find(x => /\.kml$/i.test(x.name)); if (!kf) throw new Error('Pas de KML dans ce KMZ');
+      return addLayer(base, parseKML(await kf.async('string')), 'KMZ'); }
+    if (ext === 'dxf') { if (!HAS_PROJ) throw new Error('Projections indisponibles (pas de connexion)');
+      let buf = new Uint8Array(await f.arrayBuffer()), txt;
+      try { txt = new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch(e){ txt = new TextDecoder('windows-1252').decode(buf); }
+      const r = parseDXF(txt, $('#xCrsIn').value); return addLayer(base, r.geo, r.crs); }
+    if (ext === 'geojson' || ext === 'json') { const g = JSON.parse(await f.text()); if (g.app === APP) { applyDoc(g); return; }
+      return addLayer(base, g.type === 'FeatureCollection' ? g : { type: 'FeatureCollection', features: [g.type === 'Feature' ? g : { type: 'Feature', properties: {}, geometry: g }] }, 'GeoJSON'); }
+    toast('Format non pris en charge : .' + ext);
+  } catch(e){ toast(e.message || String(e)); }
+}
+$('#xImport').onclick = () => $('#xFile').click();
+$('#xFile').onchange = async e => { for (const f of e.target.files) await importFile(f); e.target.value = ''; };
+document.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); document.body.classList.add('drop'); } });
+document.addEventListener('dragleave', e => { if (e.target === document.documentElement || e.clientX <= 0 || e.clientY <= 0) document.body.classList.remove('drop'); });
+document.addEventListener('drop', async e => { e.preventDefault(); document.body.classList.remove('drop'); for (const f of e.dataTransfer.files) await importFile(f); });
+/* --- export --- */
+function exportFeatures(){
+  const F = [], wP = $('#xPts').checked, wC = $('#xSq').checked, wL = $('#xLy').checked;
+  points.forEach(p => { const c = MM3.cellAt(p.lat, p.lon), b = MM3.bounds(c);
+    if (wP) F.push({ kind: 'point', name: p.nom, words: p.mots, coords: [[p.lon, p.lat]] });
+    if (wC) F.push({ kind: 'carre', name: p.nom, words: p.mots, coords: [[b.w, b.s], [b.e, b.s], [b.e, b.n], [b.w, b.n], [b.w, b.s]] }); });
+  if (wL) layers.filter(l => l.visible).forEach(l => l.geo.features.forEach(f => { const g = f.geometry, nm = (f.properties && f.properties.name) || '', base = { kind: 'calque', layer: (f.properties && f.properties.layer) || l.name, name: nm };
+    if (g.type === 'Point') F.push({ ...base, geom: 'Point', coords: [g.coordinates] });
+    else if (g.type === 'LineString') F.push({ ...base, geom: 'Line', coords: g.coordinates });
+    else if (g.type === 'Polygon') g.coordinates.forEach(r => F.push({ ...base, geom: 'Line', coords: r }));
+    else if (g.type === 'MultiLineString') g.coordinates.forEach(r => F.push({ ...base, geom: 'Line', coords: r }));
+    else if (g.type === 'MultiPolygon') g.coordinates.forEach(p => p.forEach(r => F.push({ ...base, geom: 'Line', coords: r }))); }));
+  return F;
+}
+const xmlEsc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+function buildKML(F){
+  const cs = c => c.map(p => `${p[0].toFixed(8)},${p[1].toFixed(8)},0`).join(' '), folder = (name, items) => items.length ? `<Folder><name>${xmlEsc(name)}</name>\n${items.join('\n')}\n</Folder>` : '';
+  const pm = (f, style, geom) => `<Placemark><name>${xmlEsc(f.name)}</name>${f.words ? `<description>///${xmlEsc(f.words)}</description>` : ''}<styleUrl>#${style}</styleUrl>${geom}</Placemark>`;
+  const pts = F.filter(f => f.kind === 'point').map(f => pm(f, 'pt', `<Point><coordinates>${cs(f.coords)}</coordinates></Point>`));
+  const sq = F.filter(f => f.kind === 'carre').map(f => pm({ ...f, name: f.name + ' (3×3 m)' }, 'sq', `<Polygon><outerBoundaryIs><LinearRing><coordinates>${cs(f.coords)}</coordinates></LinearRing></outerBoundaryIs></Polygon>`));
+  const lys = {}; F.filter(f => f.kind === 'calque').forEach(f => (lys[f.layer] = lys[f.layer] || []).push(pm(f, 'ly', f.geom === 'Point' ? `<Point><coordinates>${cs(f.coords)}</coordinates></Point>` : `<LineString><coordinates>${cs(f.coords)}</coordinates></LineString>`)));
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${xmlEsc(fileName.replace(/\.mmap$/, ''))}</name>
+<Style id="pt"><IconStyle><color>ff00f2ff</color><scale>1.1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href></Icon></IconStyle></Style>
+<Style id="sq"><LineStyle><color>ff00f2ff</color><width>2</width></LineStyle><PolyStyle><color>4000f2ff</color></PolyStyle></Style>
+<Style id="ly"><LineStyle><color>fff8bd38</color><width>2</width></LineStyle></Style>
+${folder('Points MomoMAP', pts)}\n${folder('Carrés 3×3 m', sq)}\n${Object.entries(lys).map(([n, it]) => folder(n, it)).join('\n')}\n</Document></kml>`;
+}
+function buildDXF(F, crs){
+  const o = [], w = (c, v) => o.push(String(c), String(v)), h = crs === 'WGS84' ? 0.000004 : 0.4;
+  const u = s => [...String(s)].map(ch => { const c = ch.codePointAt(0); return c < 128 ? ch : '\\U+' + c.toString(16).toUpperCase().padStart(4, '0'); }).join('');
+  const lay = s => u(String(s).replace(/[<>\/\\":;?*|=,`]/g, '_')).slice(0, 60) || '0';
+  const xy = p => toCRS(crs, p[1], p[0]), f8 = v => v.toFixed(crs === 'WGS84' ? 9 : 4);
+  const text = (layer, p, t, dy) => { w(0, 'TEXT'); w(8, layer); w(10, f8(p[0] + h)); w(20, f8(p[1] + dy)); w(30, 0); w(40, h); w(1, u(t)); };
+  const pline = (layer, pts) => { w(0, 'POLYLINE'); w(8, layer); w(66, 1); w(10, 0); w(20, 0); w(30, 0); pts.forEach(p => { w(0, 'VERTEX'); w(8, layer); w(10, f8(p[0])); w(20, f8(p[1])); w(30, 0); }); w(0, 'SEQEND'); w(8, layer); };
+  w(0, 'SECTION'); w(2, 'HEADER'); w(9, '$ACADVER'); w(1, 'AC1009'); w(0, 'ENDSEC');
+  w(0, 'SECTION'); w(2, 'ENTITIES');
+  F.forEach(f => { const P = f.coords.map(xy);
+    if (f.kind === 'point') { w(0, 'POINT'); w(8, 'MOMOMAP_POINTS'); w(10, f8(P[0][0])); w(20, f8(P[0][1])); w(30, 0); text('MOMOMAP_NOMS', P[0], f.name, h * .4); text('MOMOMAP_MOTS', P[0], '///' + f.words, -h * 1.4); }
+    else if (f.kind === 'carre') pline('MOMOMAP_CARRES', P);
+    else if (f.geom === 'Point') { w(0, 'POINT'); w(8, lay(f.layer)); w(10, f8(P[0][0])); w(20, f8(P[0][1])); w(30, 0); if (f.name) text(lay(f.layer), P[0], f.name, h * .4); }
+    else pline(lay(f.layer), P); });
+  w(0, 'ENDSEC'); w(0, 'EOF'); return o.join('\r\n') + '\r\n';
+}
+function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); }
+async function exportAs(fmt){
+  const F = exportFeatures(); if (!F.length) return toast('Rien à exporter : ajoutez des points ou cochez les calques importés');
+  const base = fileName === 'sans titre' ? 'momomap' : fileName.replace(/\.mmap$/i, '');
+  try {
+    if (fmt === 'kml') download(new Blob([buildKML(F)], { type: 'application/vnd.google-earth.kml+xml' }), base + '.kml');
+    else if (fmt === 'kmz') { if (typeof JSZip === 'undefined') throw new Error('Export KMZ indisponible (pas de connexion)'); const z = new JSZip(); z.file('doc.kml', buildKML(F));
+      download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE', mimeType: 'application/vnd.google-earth.kmz' }), base + '.kmz'); }
+    else if (fmt === 'dxf') { if (!HAS_PROJ) throw new Error('Projections indisponibles (pas de connexion)'); const crs = $('#xCrsOut').value;
+      download(new Blob([buildDXF(F, crs)], { type: 'application/dxf' }), base + '_' + crs + '.dxf'); }
+    toast('Export ' + fmt.toUpperCase() + ' prêt');
+  } catch(e){ toast(e.message); }
+}
+document.querySelectorAll('[data-exp]').forEach(b => b.onclick = () => exportAs(b.dataset.exp));
+$('#xCrsIn').innerHTML = CRS_LIST.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+$('#xCrsOut').innerHTML = CRS_LIST.filter(c => c[0] !== 'auto').map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+$('#xCrsIn').value = S.crsIn || 'auto'; $('#xCrsOut').value = S.crsOut || 'L93';
+$('#xCrsIn').onchange = e => { S.crsIn = e.target.value; saveSettings(); }; $('#xCrsOut').onchange = e => { S.crsOut = e.target.value; saveSettings(); };
+
 /* ---------- paramètres ---------- */
 function saveSettings(){ store('settings', S); }
 function bindSettings(){
   $('#sGridColor').value = S.gridColor; $('#sGridOp').value = S.gridOp; $('#sGridMin').value = S.gridMin; $('#sLabMin').value = S.labMin; $('#sSelColor').value = S.selColor; $('#sBackup').value = S.backup;
   $('#sFly').classList.toggle('on', S.fly); $('#sL93').classList.toggle('on', S.l93);
-  $('#tGrid').classList.toggle('on', S.grid); $('#tLabels').classList.toggle('on', S.labels);
+  $('#ovGrid').classList.toggle('on', S.grid); $('#ovLabels').classList.toggle('on', S.labels);
 }
 const onS = (id, key, conv = v => v, after) => $(id).addEventListener('input', e => { S[key] = conv(e.target.value); saveSettings(); redraw(); after && after(); });
 onS('#sGridColor', 'gridColor'); onS('#sGridOp', 'gridOp', Number); onS('#sGridMin', 'gridMin', Number); onS('#sLabMin', 'labMin', Number);
@@ -770,14 +982,14 @@ $('#dicoInfo').textContent = `${MM3.W.toLocaleString('fr-FR')} mots pour ${(MM3.
 
 /* ---------- outils ---------- */
 function toggleDrawer(id){ const d = $(id), on = !d.classList.contains('on'); document.querySelectorAll('.drawer').forEach(x => x.classList.remove('on'));
-  ['#tLayers','#tPoints','#tSettings'].forEach(b => $(b).classList.remove('on'));
-  if (on) { d.classList.add('on'); $({ '#dLayers':'#tLayers', '#dPoints':'#tPoints', '#dSettings':'#tSettings' }[id]).classList.add('on'); } }
+  ['#tLayers','#tPoints','#tSettings','#tXchg'].forEach(b => $(b).classList.remove('on'));
+  if (on) { d.classList.add('on'); $({ '#dLayers':'#tLayers', '#dPoints':'#tPoints', '#dSettings':'#tSettings', '#dXchg':'#tXchg' }[id]).classList.add('on'); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => toggleDrawer('#' + b.closest('.drawer').id));
-$('#tLayers').onclick = () => toggleDrawer('#dLayers'); $('#tPoints').onclick = () => toggleDrawer('#dPoints'); $('#tSettings').onclick = () => toggleDrawer('#dSettings');
+$('#tLayers').onclick = () => toggleDrawer('#dLayers'); $('#tPoints').onclick = () => toggleDrawer('#dPoints'); $('#tSettings').onclick = () => toggleDrawer('#dSettings'); $('#tXchg').onclick = () => toggleDrawer('#dXchg');
 function toggleGrid(){ S.grid = !S.grid; saveSettings(); bindSettings(); redraw(); toast(S.grid ? 'Grille affichée' : 'Grille masquée'); }
 function toggleLabels(){ S.labels = !S.labels; saveSettings(); bindSettings(); redraw();
   if (S.labels && cellPxAt(map.getCenter().lat) < S.labMin) toast('Mots visibles en zoomant au maximum'); }
-$('#tGrid').onclick = toggleGrid; $('#tLabels').onclick = toggleLabels;
+$('#ovGrid').onclick = toggleGrid; $('#ovLabels').onclick = toggleLabels;
 $('#tLocate').onclick = () => { if (!navigator.geolocation) return toast('Géolocalisation indisponible'); toast('Recherche de votre position…');
   navigator.geolocation.getCurrentPosition(p => { goLatLon(p.coords.latitude, p.coords.longitude, 20); toast(`Position trouvée (précision ± ${Math.round(p.coords.accuracy)} m)`); },
     e => toast('Position refusée ou indisponible'), { enableHighAccuracy: true, timeout: 15000 }); };
@@ -810,9 +1022,9 @@ const GUIDE = [
  ['Naviguer', `<h3>Se déplacer et choisir un carré</h3>
   <p><b>Cliquez</b> n'importe où sur la carte : le carré correspondant s'allume et ses trois mots apparaissent dans le panneau de droite.</p>
   <p>La <b>grille</b> s'affiche dès que les carrés sont assez grands à l'écran (à partir du zoom 18 environ). En survolant la carte, la barre du bas indique en direct les trois mots sous votre souris.</p>
-  <p>Au zoom maximum, le bouton <b>Mots dans les carrés</b> écrit les adresses directement dans chaque case : pratique pour repérer un emplacement sur une photo aérienne.</p>
+  <p>La grille et les mots se règlent dans <b>Fonds de carte → Superpositions</b>, comme le cadastre : on les active ou on les coupe à volonté (touches <kbd>G</kbd> et <kbd>L</kbd>). En zoomant fort, <b>Mots dans les carrés</b> écrit les adresses directement dans chaque case : pratique pour repérer un emplacement sur une photo aérienne.</p>
   <h4>Le voisinage</h4><p>Le panneau montre les 8 carrés qui entourent celui sélectionné. Cliquez sur l'un d'eux, ou utilisez les <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> du clavier, pour vous décaler d'un carré à la fois.</p>
-  <h4>Les fonds de carte</h4><p>Plan OpenStreetMap, plan sombre, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Vous pouvez superposer les <b>parcelles cadastrales</b>.</p>`],
+  <h4>Les fonds de carte</h4><p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Vous pouvez superposer les <b>parcelles cadastrales</b>. Le zoom va du globe entier jusqu'au détail d'un carré ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>`],
  ['Rechercher', `<h3>Trouver un lieu</h3>
   <p>La barre de recherche comprend trois choses :</p>
   <h4>Une adresse postale</h4><p>Tapez une rue ou une commune : les propositions de la Base Adresse Nationale s'affichent pendant la frappe (et une recherche mondiale prend le relais hors de France).</p>
@@ -824,6 +1036,9 @@ const GUIDE = [
   <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> crée un fichier MomoMAP contenant vos points et la vue en cours. Vous pouvez en faire un par chantier et l'<b>Ouvrir</b> plus tard, ou le transmettre à un collègue.</p>
   <p><b>Enregistrer sous</b> permet de choisir un nouveau nom. Le nom du fichier ouvert s'affiche en bas de l'écran, avec un point quand il reste des changements à enregistrer.</p>
   <h4>Backup automatique</h4><p>Dans les Paramètres, choisissez la fréquence du backup. En cas de souci, le bouton <b>Restaurer</b> recharge la dernière copie de sécurité.</p>
+  <h4>Importer KML, KMZ, DXF, GeoJSON</h4><p>Le bouton <b>Importer / exporter</b> (ou un simple glisser-déposer sur la carte) ajoute un fichier comme <b>calque</b> : lignes, polylignes, cercles, arcs, textes et blocs pour un DXF, repères, lignes et polygones pour un KML ou KMZ. Chaque calque peut être masqué, recentré ou retiré, et ses points peuvent être ajoutés à <b>Mes points</b> pour obtenir leurs trois mots.</p>
+  <p>Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84). Si elle ne l'est pas, choisissez-la dans la liste avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
+  <h4>Exporter vers Google Earth ou un logiciel de DAO</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : vos points y arrivent avec leur nom et leurs trois mots, les carrés de 3 × 3 m en polylignes fermées, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
   <h4>Copier et partager</h4><p><b>Copier</b> met l'adresse <span class="ex">///trois.mots.ici</span> dans le presse-papiers. <b>Lien</b> copie un lien qui ouvre MomoMAP directement sur ce carré.</p>`],
  ['Raccourcis', `<h3>Raccourcis clavier</h3><table>
   <tr><td><kbd>Clic</kbd></td><td>Choisir le carré sous la souris</td></tr>
@@ -855,7 +1070,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- démarrage ---------- */
-bindSettings(); setBase(S.base); if (S.cad) setCad(true); renderPoints(); updFile(); setupBackup();
+bindSettings(); setBase(S.base); if (S.cad) setCad(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
   const ws = parseWords(h);
