@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 Mots (Vrais Mots Français)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        #map { height: 100vh; width: 100vw; z-index: 10; }
+        .pointer-events-auto { pointer-events: auto; }
+    </style>
+</head>
+<body class="relative font-sans text-gray-800">
+
+    <div id="loading" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mb-4"></div>
+        <h2 class="text-xl font-bold">Chargement du dictionnaire...</h2>
+        <p class="text-gray-500 mt-2 text-center px-4">Téléchargement et filtrage de 40 000 vrais mots français<br>depuis un dépôt open source</p>
+    </div>
+
+    <div class="absolute inset-0 flex flex-col justify-between p-4 z-40 pointer-events-none">
+        
+        <div class="w-full max-w-md mx-auto pointer-events-auto">
+            <div class="bg-white rounded-full shadow-lg flex items-center p-2 mt-2">
+                <svg class="w-6 h-6 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="search-input" placeholder="Rechercher une adresse..." class="flex-grow bg-transparent outline-none px-4 py-1 text-lg">
+            </div>
+        </div>
+
+        <div id="result-panel" class="w-full max-w-md mx-auto pointer-events-auto transform translate-y-40 transition-transform duration-300">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
+                <p class="text-sm font-semibold text-gray-500 uppercase mb-1">Votre adresse (3x3m)</p>
+                <h1 id="words-display" class="text-3xl font-bold text-red-600 mb-2">///mot.mot.mot</h1>
+                <p id="coords-display" class="text-gray-600 font-mono text-sm"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        let dicoMots = [];
+        let map;
+        let gridSquareLayer;
+
+        const EARTH_CIRCUMFERENCE = 40075016.686;
+        const ORIGIN_SHIFT = EARTH_CIRCUMFERENCE / 2.0;
+
+        function latLonToMeters(lat, lon) {
+            let x = lon * ORIGIN_SHIFT / 180.0;
+            let y = Math.log(Math.tan((90 + lat) * Math.PI / 360.0)) / (Math.PI / 180.0);
+            y = y * ORIGIN_SHIFT / 180.0;
+            return { x, y };
+        }
+
+        function metersToLatLon(x, y) {
+            let lon = (x / ORIGIN_SHIFT) * 180.0;
+            let lat = (y / ORIGIN_SHIFT) * 180.0;
+            lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
+            return { lat, lon };
+        }
+
+        function getWords(gridX, gridY) {
+            let id = BigInt(gridX + 20000000) + (BigInt(gridY + 20000000) * 40000000n);
+            
+            let z = id + 0x9e3779b97f4a7c15n;
+            z = (z ^ (z >> 30n)) * 0xbf58476d1ce4e5b9n;
+            z = (z ^ (z >> 27n)) * 0x94d049bb133111ebn;
+            z = z ^ (z >> 31n);
+            
+            let base = z < 0n ? -z : z;
+            
+            let w1 = Number(base % 40000n);
+            let w2 = Number((base / 40000n) % 40000n);
+            let w3 = Number((base / 1600000000n) % 40000n);
+            
+            return [dicoMots[w1], dicoMots[w2], dicoMots[w3]];
+        }
+
+        async function initApp() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/words/an-array-of-french-words/master/index.json');
+                const allWords = await response.json();
+                
+                let filtered = allWords.filter(m => /^[a-zâäàéèêëîïôöûüùç]{4,8}$/i.test(m));
+                
+                dicoMots = filtered.slice(0, 40000);
+                let fallbackIndex = 0;
+                while (dicoMots.length < 40000 && fallbackIndex < allWords.length) {
+                    if(!dicoMots.includes(allWords[fallbackIndex])) {
+                        dicoMots.push(allWords[fallbackIndex]);
+                    }
+                    fallbackIndex++;
+                }
+
+                document.getElementById('loading').style.display = 'none';
+
+                map = L.map('map', { zoomControl: false }).setView([48.8584, 2.2945], 19);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 21,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+                map.on('click', function(e) {
+                    processLocation(e.latlng.lat, e.latlng.lng);
+                });
+
+                processLocation(48.8584, 2.2945);
+
+            } catch (err) {
+                document.getElementById('loading').innerHTML = '<h2 class="text-red-500 text-xl font-bold">Erreur</h2><p>Impossible de charger le dictionnaire.</p>';
+            }
+        }
+
+        function processLocation(lat, lng) {
+            const meters = latLonToMeters(lat, lng);
+            
+            const gridX = Math.floor(meters.x / 3);
+            const gridY = Math.floor(meters.y / 3);
+            
+            const minX = gridX * 3;
+            const maxX = (gridX + 1) * 3;
+            const minY = gridY * 3;
+            const maxY = (gridY + 1) * 3;
+            
+            const bottomLeft = metersToLatLon(minX, minY);
+            const topRight = metersToLatLon(maxX, maxY);
+            const bounds = [[bottomLeft.lat, bottomLeft.lon], [topRight.lat, topRight.lon]];
+
+            if (gridSquareLayer) map.removeLayer(gridSquareLayer);
+            gridSquareLayer = L.rectangle(bounds, {
+                color: "#ff0000",
+                weight: 2,
+                fillColor: "#ff0000",
+                fillOpacity: 0.2
+            }).addTo(map);
+
+            const words = getWords(gridX, gridY);
+            
+            document.getElementById('words-display').innerText = `///${words[0]}.${words[1]}.${words[2]}`;
+            const centerLat = (bottomLeft.lat + topRight.lat) / 2;
+            const centerLng = (bottomLeft.lon + topRight.lon) / 2;
+            document.getElementById('coords-display').innerText = `${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`;
+            
+            document.getElementById('result-panel').classList.remove('translate-y-40');
+            
+            map.flyTo([centerLat, centerLng], map.getZoom() > 18 ? map.getZoom() : 19);
+        }
+
+        document.getElementById('search-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const query = this.value;
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            processLocation(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                            this.blur();
+                        }
+                    });
+            }
+        });
+
+        initApp();
+    </script>
+</body>
+</html>
