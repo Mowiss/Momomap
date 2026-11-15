@@ -413,7 +413,7 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #gCenter.on{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
 #gCenter svg{width:17px;height:17px}
 .momo{width:52px;height:78px;pointer-events:none;--sp:.42s}
-.mo-torch{position:absolute;left:32px;top:-2px;width:36px;height:53px;overflow:visible}
+.mo-torch{position:absolute;left:27px;top:9px;width:36px;height:53px;overflow:visible}
 .mo-torch .tfl{transform-origin:19px 16px;animation:flame .18s ease-in-out infinite alternate}
 .mo-torch .tglow{animation:glow .3s ease-in-out infinite alternate}
 @keyframes flame{from{transform:scale(.92,1.04) rotate(-4deg)}to{transform:scale(1.06,.95) rotate(4deg)}}
@@ -780,7 +780,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 13:09</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 13:15</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -2323,7 +2323,7 @@ const hatOf = id => id === 'viking' ? HAT_VIKING : HATS.find(h => h[0] === id) |
 function momoHead(id){ const h = hatOf(id), d = h[3];
   if (typeof d === 'object') return `<img class="mb-cap" alt="" src="${MO_BODY}"${d.f ? ` style="filter:${d.f}"` : ''}>`;
   return `<img class="mb-eyes" alt="" src="${MO_EYES}">${d ? `<svg class="mb-hat" viewBox="-1 -60 252 168">${d}</svg>` : ''}`; }
-const MO_TORCH = `<svg class="mo-torch" viewBox="0 0 30 44"><defs><radialGradient id="tg"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#ff9a2a" stop-opacity="0"/></radialGradient></defs><circle class="tglow" cx="19" cy="11" r="11" fill="url(#tg)"/><path d="M2 38 Q9 37 13 31" stroke="#14161b" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M2 38 Q9 37 13 31" stroke="#c9c9c9" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 34 L18 16" stroke="#14161b" stroke-width="5.5" stroke-linecap="round"/><path d="M12 34 L18 16" stroke="#8a5424" stroke-width="3.5" stroke-linecap="round"/><path d="M15.8 19.5 l5 1.6" stroke="#5a5f6a" stroke-width="3" stroke-linecap="round"/><g class="tfl"><path d="M18.5 16 C12.5 12.5 15 6.5 18.8 1.5 C19.6 6 25 8 21.6 14.2 Z" fill="#ff7a00" stroke="#14161b" stroke-width="1.2"/><path d="M19 15 C16.5 12.5 17.6 9.2 19.3 6.6 C20 9.4 22.4 10.6 20.8 13.8 Z" fill="#ffe14a"/></g></svg>`;
+const MO_TORCH = `<svg class="mo-torch" viewBox="0 0 30 44"><defs><radialGradient id="tg"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#ff9a2a" stop-opacity="0"/></radialGradient></defs><circle class="tglow" cx="19" cy="11" r="11" fill="url(#tg)"/><path d="M12 34 L18 16" stroke="#14161b" stroke-width="5.5" stroke-linecap="round"/><path d="M12 34 L18 16" stroke="#8a5424" stroke-width="3.5" stroke-linecap="round"/><path d="M15.8 19.5 l5 1.6" stroke="#5a5f6a" stroke-width="3" stroke-linecap="round"/><g class="tfl"><path d="M18.5 16 C12.5 12.5 15 6.5 18.8 1.5 C19.6 6 25 8 21.6 14.2 Z" fill="#ff7a00" stroke="#14161b" stroke-width="1.2"/><path d="M19 15 C16.5 12.5 17.6 9.2 19.3 6.6 C20 9.4 22.4 10.6 20.8 13.8 Z" fill="#ffe14a"/></g></svg>`;
 const momoHTML = (id, torch) => `<div class="mo"><div class="mo-sh"></div><img class="mo-leg" alt="" src="${MO_LEG}"><div class="mo-body">${momoHead(torch ? 'viking' : id || S.hat)}</div>${torch ? MO_TORCH : ''}</div>`;
 function setHat(id){ S.hat = id; saveSettings(); renderStudio(); renderStOpen(); if (momoMk) momoMk.getElement().innerHTML = momoHTML(null, !!S.ov.quest); }
 document.addEventListener('click', e => { const b = e.target.closest('#studio [data-hat]'); if (b) setHat(b.dataset.hat); });
@@ -2791,7 +2791,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 13:09';
+const APP_VER = '15/11/2026 13:15';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
