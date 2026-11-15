@@ -354,6 +354,8 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 .acc.op .acb{display:block}
 .ovr{gap:10px;padding:5px 0}
 .ovr label{flex:1}
+.ovst{font-size:11.5px;color:var(--mut);margin:-4px 0 4px 38px}
+.ovst.bad{color:var(--err)}
 .ovi{width:28px;height:28px;border-radius:7px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;flex:none}
 .ovi svg{width:17px;height:17px}
 
@@ -661,6 +663,7 @@ setTimeout(done,4700);
     <div class="row"><label>Centrer la carte au clic</label><button class="tg" id="sFly"></button></div>
     <p class="hint" id="dicoInfo"></p>
     <button class="btn" id="sReset" style="width:100%;margin-top:8px">Réinitialiser les paramètres</button>
+    <p class="hint" style="text-align:center;margin-top:12px">MomoMAP · version 15/11/2026 10:21</p>
   </div>
 </div>
 
@@ -972,7 +975,7 @@ const ovOn = k => k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S
 function renderOv(){ S.ovOpen = S.ovOpen || {};
   $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
-      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>`).join('')}</div></div>`; }).join(''); }
+      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
 /* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
 const RAD = { grp: L.layerGroup(), tiles: {}, seen: new Set() };
 const RADAR_SVG = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="${w}" height="${h}"><defs><pattern id="hz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#111"/><rect x="4" width="4" height="8" fill="#ffd400"/></pattern><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#8f8f8f"/><stop offset=".5" stop-color="#a9a9a9"/><stop offset="1" stop-color="#8c8c8c"/></linearGradient><radialGradient id="fl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient></defs><rect x="1" y="1" width="38" height="50" fill="url(#hz)" stroke="#555" stroke-width="1"/><rect x="5" y="5" width="30" height="42" fill="url(#bd)"/><rect x="7.5" y="10" width="11" height="8" rx=".8" fill="#1a1a1a"/><rect x="9" y="12" width="8" height="4" rx="2" fill="url(#fl)"/><rect x="21.5" y="11" width="10" height="7.5" fill="#222"/><rect x="7.5" y="26" width="13" height="12" fill="#151515"/></svg>`;
@@ -985,27 +988,29 @@ function radTiles(bboxes){ const T = .5, out = [];
   return out; }
 const OVP = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 let ovpI = 0, radWarnT = 0, radBusy = Promise.resolve();
-async function overpass(q){
-  for (let n = 0; n < OVP.length; n++) { const url = OVP[(ovpI + n) % OVP.length];
-    try { const c = new AbortController(), t = setTimeout(() => c.abort(), 25000);
-      const r = await fetch(url + '?data=' + encodeURIComponent(q), { signal: c.signal }); clearTimeout(t);
-      if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); ovpI = (ovpI + n) % OVP.length; return j; }
-    catch(e){ console.warn('Overpass', url, e.message || e); } }
-  throw new Error('Overpass injoignable'); }
+async function overpass(q){ // tous les serveurs en parallèle : le premier qui répond gagne
+  const ctrls = OVP.map(() => new AbortController()), errs = [];
+  const one = (url, i) => new Promise(async (ok, ko) => { const t = setTimeout(() => ctrls[i].abort(), 30000);
+    try { const r = await fetch(url + '?data=' + encodeURIComponent(q), { signal: ctrls[i].signal }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); if (!j || !Array.isArray(j.elements)) throw new Error('réponse invalide'); ok(j); }
+    catch(e){ errs.push(new URL(url).host + ' : ' + (e.name === 'AbortError' ? 'délai dépassé' : e.message || 'bloqué')); ko(e); } finally { clearTimeout(t); } });
+  try { const j = await Promise.any(OVP.map(one)); ctrls.forEach(c => c.abort()); return j; }
+  catch(e){ const er = new Error(errs.join(' · ')); throw er; } }
+function radStatus(t, bad){ RAD.status = t; RAD.bad = !!bad; const el = document.getElementById('radSt'); if (el) { el.textContent = t; el.classList.toggle('bad', !!bad); } }
 function fetchRadars(todo, warn){ radBusy = radBusy.then(() => fetchRadarsNow(todo, warn)); return radBusy; }
 async function fetchRadarsNow(todo, warn){
   for (let i = 0; i < todo.length; i += 8) { const part = todo.slice(i, i + 8);
     const bb = part.map(([s_, w, n, e]) => `(${s_},${w},${n},${e})`);
     const q = '[out:json][timeout:25];(' + bb.map(b => `node[highway=speed_camera]${b};`).join('') + bb.map(b => `node[enforcement=maxspeed]${b};`).join('') + ');out body;';
-    try { const j = await overpass(q);
+    radStatus('Chargement des radars…'); try { const j = await overpass(q);
       j.elements.forEach(e => { if (RAD.seen.has(e.id) || e.lat == null) return; RAD.seen.add(e.id); const t = e.tags || {}, v = parseInt(t.maxspeed, 10) || '';
         RAD.fc.push({ type: 'Feature', properties: { v: v ? String(v) : '' }, geometry: { type: 'Point', coordinates: [e.lon, e.lat] } });
         L.marker([e.lat, e.lon], { icon: radIcon(v) }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}${t.direction ? ' · sens ' + esc(t.direction) : ''}${t.ref ? '<br><span style="color:var(--mut)">' + esc(t.ref) + '</span>' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -12] }).addTo(RAD.grp); }); }
-    catch(e){ part.forEach(t => delete RAD.tiles[t[4]]);
-      if (Date.now() - radWarnT > 60000) { radWarnT = Date.now(); toast('Radars : serveurs OpenStreetMap saturés, nouvel essai au prochain déplacement de la carte'); } } }
-  rad3D(); }
+    catch(e){ part.forEach(t => delete RAD.tiles[t[4]]); radStatus('Échec : ' + (e.message || 'serveurs injoignables') + ' — nouvel essai dans 20 s', true);
+      if (Date.now() - radWarnT > 60000) { radWarnT = Date.now(); toast('Radars : serveurs OpenStreetMap injoignables, nouvel essai automatique'); }
+      clearTimeout(RAD.retry); RAD.retry = setTimeout(() => { loadRadars(false); if (g3.on) loadRadarsRoute(); }, 20000); return; } }
+  radStatus(RAD.fc.length ? `${RAD.fc.length} radar${RAD.fc.length > 1 ? 's' : ''} chargé${RAD.fc.length > 1 ? 's' : ''}` : 'Aucun radar recensé dans cette zone'); rad3D(); }
 async function loadRadars(warn){
-  if (!S.radars) return; if (map.getZoom() < 9) { if (warn) toast('Zoomez sur une région pour afficher les radars'); return; }
+  if (!S.radars) return; if (map.getZoom() < 9) { radStatus('Zoomez sur une région pour charger les radars'); if (warn) toast('Zoomez sur une région pour afficher les radars'); return; }
   const b = map.getBounds(); const todo = radTiles([[b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]]); if (todo.length) fetchRadars(todo, warn); }
 function loadRadarsRoute(){ if (!S.radars || !rt.data) return; const c = rt.data.geom.type === 'LineString' ? rt.data.geom.coordinates : rt.data.geom.coordinates.flat();
   const todo = radTiles(c.filter((p, i) => i % 10 === 0 || i === c.length - 1).map(([x, y]) => [y - .05, x - .05, y + .05, x + .05])); if (todo.length) fetchRadars(todo, false); }
