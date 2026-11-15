@@ -375,6 +375,13 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #spd span{font:600 10px var(--ui);color:#555;margin-top:1px}
 body.v3 #spd{bottom:calc(96px + env(safe-area-inset-bottom))}
 
+.ver{font-weight:400;font-size:11.5px;color:var(--dim);margin-left:6px}
+#upd{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:3100;display:none;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--acc2);border-radius:12px;padding:8px 8px 8px 14px;max-width:calc(100% - 24px);font-size:13px}
+#upd.on{display:flex}
+#upd .btn{flex:none;height:32px;padding:0 12px}
+#upd .ib{width:30px;height:30px;flex:none}
+.drawer .db{padding-bottom:28px}
+
 /* ---------- toast ---------- */
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:3000;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
@@ -646,7 +653,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh">Paramètres <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:25</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Ma position</div>
     <div class="row"><label>Afficher ma position (GPS)</label><button class="tg" id="sGeo"></button></div>
@@ -663,7 +670,7 @@ setTimeout(done,4700);
     <div class="row"><label>Centrer la carte au clic</label><button class="tg" id="sFly"></button></div>
     <p class="hint" id="dicoInfo"></p>
     <button class="btn" id="sReset" style="width:100%;margin-top:8px">Réinitialiser les paramètres</button>
-    <p class="hint" style="text-align:center;margin-top:12px">MomoMAP · version 15/11/2026 10:21</p>
+
   </div>
 </div>
 
@@ -796,6 +803,7 @@ setTimeout(done,4700);
 
 <input type="file" id="fileIn" accept=".mmap,.json" hidden>
 <div id="spd" title="Ma vitesse"><b>–</b><span>km/h</span></div>
+<div id="upd"><span>Nouvelle version de MomoMAP disponible</span><button class="btn pri" id="updGo">Mettre à jour</button><button class="ib" id="updX" title="Plus tard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <div id="toast"></div>
 
 <script>
@@ -2145,7 +2153,7 @@ function geoFix(p){
   const cone = meCone.getElement() && meCone.getElement().firstChild;
   if (cone) { const h = fix.heading != null && (fix.speed || 0) > .8 ? fix.heading : null; cone.style.display = h == null ? 'none' : ''; if (h != null) cone.style.transform = `rotate(${h}deg)`; }
   if (GEO.follow) map.panTo(ll, { animate: true, duration: .5 });
-  if (first && GEO.wantCenter) { GEO.wantCenter = false; map.setView(ll, Math.max(map.getZoom(), 17)); }
+  if (first && GEO.wantCenter) { GEO.wantCenter = false; map.setView(ll, Math.max(map.getZoom(), 16), { animate: false }); }
   GEO.subs.forEach(f => { try { f(fix); } catch(e){ console.warn(e); } });
   if (!$('#rtA').value && $('#dRoute').classList.contains('on')) rtUseMe(true);
 }
@@ -2160,7 +2168,7 @@ $('#zLoc').onclick = () => {
   if (GEO.follow) { GEO.follow = false; return updLocBtn(); }
   GEO.follow = true; updLocBtn();
   if (GEO.last) { map.setView([GEO.last.lat, GEO.last.lng], Math.max(map.getZoom(), 17)); toast(`Précision ± ${Math.round(GEO.last.acc)} m`); } else toast('Recherche de votre position…'); };
-map.on('dragstart', () => { if (GEO.follow) { GEO.follow = false; updLocBtn(); } });
+map.on('dragstart', () => { GEO.wantCenter = false; if (GEO.follow) { GEO.follow = false; updLocBtn(); } });
 function rtUseMe(silent){ if (GEO.last) return rtSet('a', GEO.last.lat, GEO.last.lng, 'Ma position');
   if (!silent) { if (GEO.id == null) { S.geoOn = true; saveSettings(); bindSettings(); geoStart(); } toast('Recherche de votre position…'); GEO.pendingA = true; } }
 GEO.subs.add(f => { if (GEO.pendingA) { GEO.pendingA = false; rtSet('a', f.lat, f.lng, 'Ma position'); } });
@@ -2256,6 +2264,15 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   if (dirty && points.length && !confirm('Des modifications ne sont pas enregistrées. Ouvrir « ' + h.name + ' » quand même ?')) return;
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
+/* ---------- mises à jour : vérifie la version publiée ---------- */
+const APP_VER = '15/11/2026 10:25';
+async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
+  try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
+    const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
+$('#updGo').onclick = () => location.replace(location.href.split('#')[0].split('?')[0] + '?v=' + encodeURIComponent(GEO.newVer || Date.now()) + location.hash);
+$('#updX').onclick = () => $('#upd').classList.remove('on');
+setTimeout(checkUpdate, 4000); setInterval(checkUpdate, 10 * 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
 /* ---------- démarrage ---------- */
 bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); if (S.radars) setRadars(true); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
@@ -2265,7 +2282,7 @@ bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); O
   const v = load('view'); if (v) map.setView([v.lat, v.lng], v.z);
 })();
 updZoom(); redraw();
-if (S.geoOn !== false && navigator.geolocation) geoStart();
+if (S.geoOn !== false && navigator.geolocation) { GEO.wantCenter = !parseWords(decodeURIComponent(location.hash.replace(/^#/, ''))); geoStart(); }
 window.addEventListener('hashchange', () => { const ws = parseWords(decodeURIComponent(location.hash.slice(1))); if (ws) { const r = MM3.cellOfWords(ws); if (r.cell && !(sel && sel.g === r.cell.g && sel.c === r.cell.c)) select(r.cell, { fly: true }); } });
 </script>
 </body>
