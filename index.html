@@ -772,7 +772,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:51</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:53</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -1103,6 +1103,7 @@ const OVG = [
   ['MomoMAP', [
     ['grid', 'Grillewords', OI('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>', '#fff200')],
     ['favs', 'Points favoris', OI('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>', '#fff200')],
+    ['quest', 'MomoQuest', OI('<path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M14.8 9.2 13 13l-3.8 1.8L11 11z" fill="#fff200"/>', '#fff200')],
     ['adr', 'Domicile, travail & carnet', OI('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/>', '#fff200')] ]],
   ['Foncier & urbanisme', [
     ['cad', 'Parcelles cadastrales', OI('<path d="M3 5l7-2 11 4-2 13-9 1-6-6z"/><path d="M10 3l-1 9 10 1M9 12l-4 3"/>', '#f0a35e')],
@@ -1135,7 +1136,7 @@ const ovOn = k => k === 'favs' || k === 'adr' ? S.ov[k] !== false : k === 'grid'
 function renderOv(){ S.ovOpen = S.ovOpen || {};
   $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
-      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
+      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'quest' && S.ov.quest ? `<div id="questSt" class="ovst">${esc(qStatText())}</div>` : ''}${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
 /* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
 const RADAR_SVG = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="${w}" height="${h}"><defs><pattern id="hz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#111"/><rect x="4" width="4" height="8" fill="#ffd400"/></pattern><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#8f8f8f"/><stop offset=".5" stop-color="#a9a9a9"/><stop offset="1" stop-color="#8c8c8c"/></linearGradient><radialGradient id="fl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient></defs><rect x="1" y="1" width="38" height="50" fill="url(#hz)" stroke="#555" stroke-width="1"/><rect x="5" y="5" width="30" height="42" fill="url(#bd)"/><rect x="7.5" y="10" width="11" height="8" rx=".8" fill="#1a1a1a"/><rect x="9" y="12" width="8" height="4" rx="2" fill="url(#fl)"/><rect x="21.5" y="11" width="10" height="7.5" fill="#222"/><rect x="7.5" y="26" width="13" height="12" fill="#151515"/></svg>`;
 /* ---------- radars fixes : toute la France en une fois (OpenStreetMap), gardés 7 jours sur l'appareil ---------- */
@@ -1198,6 +1199,7 @@ function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k])
   saveSettings(); syncOv(); }
 $('#ovList').addEventListener('click', e => { const t = e.target.closest('[data-ov]');
   if (t) { const k = t.dataset.ov; if (k === 'favs' || k === 'adr') return setMine(k, S.ov[k] === false);
+    if (k === 'quest') return setQuest(!S.ov.quest);
     if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); if (k === 'radars') return setRadars(!S.radars); return setOv(k, !S.ov[k]); }
   const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.og, items = (OVG.find(x => x[0] === g) || [, []])[1]; S.ovOpen[g] = !ovGrpOpen(g, items.filter(it => ovOn(it[0])).length); saveSettings(); renderOv(); } });
 let geolLayer = null;
@@ -2628,6 +2630,50 @@ map.on('dragstart', () => { GEO.wantCenter = false; if (GEO.follow) { GEO.follow
 function rtUseMe(silent){ if (GEO.last) return rtSet('a', GEO.last.lat, GEO.last.lng, 'Ma position');
   if (!silent) { if (GEO.id == null) { S.geoOn = true; saveSettings(); bindSettings(); geoStart(); } toast('Recherche de votre position…'); GEO.pendingA = true; } }
 GEO.subs.add(f => { if (GEO.pendingA) { GEO.pendingA = false; rtSet('a', f.lat, f.lng, 'Ma position'); } });
+/* ---------- MomoQuest : brouillard de guerre, éclairci là où l'on passe ---------- */
+const QZ = 18, QN = 2 ** QZ, Q_EARTH = 510072000, Q_FR = 551695;
+const QUEST = { set: new Set(), area: 0, last: null, saveT: 0, layer: null };
+(() => { const q = S.quest; if (q && q.c) { q.c.split(',').forEach(k => { if (k) QUEST.set.add(parseInt(k, 36)); }); QUEST.area = q.a || 0; } })();
+const qCell = (lat, lng) => { const s = Math.sin(lat * Math.PI / 180); return [Math.floor((lng + 180) / 360 * QN), Math.floor((.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * QN)]; };
+const qLatY = y => 180 / Math.PI * Math.atan(Math.sinh(Math.PI - 2 * Math.PI * (y + .5) / QN));
+function qAdd(x, y){ const k = x * QN + y; if (QUEST.set.has(k)) return false; QUEST.set.add(k);
+  const w = 40075.016686 / QN * Math.cos(qLatY(y) * Math.PI / 180); QUEST.area += w * w; return true; }
+function qReveal(lat, lng){ const [x, y] = qCell(lat, lng); let n = 0;
+  for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (qAdd(x + dx, y + dy)) n++; return n; }
+function qSave(now){ clearTimeout(QUEST.saveT); QUEST.saveT = setTimeout(() => {
+  S.quest = { v: 1, c: [...QUEST.set].map(k => k.toString(36)).join(','), a: +QUEST.area.toFixed(4) }; saveSettings(); }, now ? 0 : 8000); }
+GEO.subs.add(f => {
+  if ((g3.on && g3.sim) || f.acc > 60) return;
+  let n = 0; const p = QUEST.last;
+  if (p) { const d = geoDist(p, f); if (d > 60 && d < 3000 && f.t - p.t < 180000) { const st = Math.ceil(d / 50); for (let i = 1; i < st; i++) n += qReveal(p.lat + (f.lat - p.lat) * i / st, p.lng + (f.lng - p.lng) * i / st); } }
+  n += qReveal(f.lat, f.lng); QUEST.last = f;
+  if (n) { qSave(); qStats(); if (QUEST.layer) QUEST.layer.draw(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && QUEST.saveT) qSave(true); });
+function qFmt(v){ return v.toLocaleString('fr-FR', { maximumSignificantDigits: 3 }); }
+function qStatText(){ const a = QUEST.area;
+  return `${a < 10 ? a.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) : Math.round(a).toLocaleString('fr-FR')} km² explorés · ${qFmt(a / Q_EARTH * 100)} % du monde · ${qFmt(a / Q_FR * 100)} % de la France`; }
+function qStats(){ const el = document.getElementById('questSt'); if (el) el.textContent = qStatText(); }
+const QSPR = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.55, 'rgba(0,0,0,.95)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return c; })();
+map.createPane('quest'); map.getPane('quest').style.zIndex = 450; map.getPane('quest').style.pointerEvents = 'none';
+const QuestLayer = L.Layer.extend({
+  onAdd(m){ this._c = L.DomUtil.create('canvas', 'quest-fog', m.getPane('quest')); m.on('moveend zoomend resize viewreset', this.draw, this); m.on('zoomstart', this._hide, this); this.draw(); },
+  onRemove(m){ m.off('moveend zoomend resize viewreset', this.draw, this); m.off('zoomstart', this._hide, this); this._c.remove(); },
+  _hide(){ this._c.style.opacity = 0; },
+  draw(){ const m = this._map; if (!m) return; const c = this._c, sz = m.getSize(), pad = sz.multiplyBy(.5), tl = m.containerPointToLayerPoint([-pad.x, -pad.y]).round(), W = sz.x * 2, H = sz.y * 2;
+    L.DomUtil.setPosition(c, tl); if (c.width !== W || c.height !== H) { c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; }
+    const x = c.getContext('2d'), z = m.getZoom(), k = 256 * 2 ** z / QN, o = m.getPixelOrigin(), ox = o.x + tl.x, oy = o.y + tl.y, r = Math.max(k * 1.25, 3), d = r * 2;
+    x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, W, H); x.fillStyle = 'rgba(14,16,26,.74)'; x.fillRect(0, 0, W, H);
+    x.globalCompositeOperation = 'destination-out';
+    for (const key of QUEST.set) { const cx = Math.floor(key / QN), cy = key - cx * QN, px = (cx + .5) * k - ox, py = (cy + .5) * k - oy;
+      if (px < -d || py < -d || px > W + d || py > H + d) continue; x.drawImage(QSPR, px - r, py - r, d, d); }
+    c.style.opacity = 1; }
+});
+function setQuest(on){ S.ov.quest = on; saveSettings();
+  if (on) { if (!QUEST.layer) QUEST.layer = new QuestLayer(); QUEST.layer.addTo(map); if (!GEO.last && GEO.id == null && navigator.geolocation) geoStart(); }
+  else if (QUEST.layer) map.removeLayer(QUEST.layer);
+  syncOv(); toast(on ? 'MomoQuest : le brouillard se lève là où vous passez' : 'MomoQuest masqué'); }
+if (S.ov.quest) { QUEST.layer = new QuestLayer(); QUEST.layer.addTo(map); }
 $('#zIn').onclick = () => map.zoomIn(); $('#zOut').onclick = () => map.zoomOut();
 function updZoom(){ const cpx = cellPxAt(map.getCenter().lat); $('#stZoom').textContent = `z ${map.getZoom()}` + (S.grid && cpx < S.gridMin ? ' · zoomez pour la grille' : ''); }
 
@@ -2680,6 +2726,7 @@ const GUIDE = [
   <h3>Guidage GPS</h3><p><b>Guidage</b> ouvre la vue 3D inclinée : Momo suit votre position GPS le long de l'itinéraire, la carte tourne dans le sens de la marche, et le bandeau vert annonce la prochaine manœuvre (avec la voix, désactivable). Hors itinéraire, le trajet est recalculé. Sans GPS (sur ordinateur), le bouton <b>Simulation</b> fait rouler Momo le long du parcours. Si vous déplacez la carte, le bouton flèche recentre sur Momo.</p>
   <h3>Vue 3D</h3><p>Le bouton <b>3D</b> au-dessus du zoom ouvre la carte inclinée avec le relief : boussole (nord en haut), rotation à gauche ou à droite, inclinaison plus ou moins forte, relief activable. À la souris : clic droit maintenu (ou Ctrl + glisser) pour tourner et incliner ; à deux doigts sur téléphone.</p>
   <h3>Modifier un objet</h3><p>Choisissez le <b>calque d'édition</b> (Dessins ou un calque importé, KMZ compris) : ses objets sont listés et les nouveaux dessins y sont ajoutés. Avec <b>Modifier la forme d'un objet</b>, cliquez un objet : glissez ses sommets, glissez un point milieu pour en créer un, double-clic sur un sommet pour le supprimer.</p>`],
+ ['MomoQuest', `<h3>MomoQuest, le brouillard de guerre</h3><p>Activez <b>MomoQuest</b> dans Calques → Superpositions → MomoMAP : la carte se couvre d'un brouillard qui se lève partout où vous êtes passé avec l'appli ouverte (une bande d'environ 300 m autour de votre trajet). La surface explorée s'affiche sous l'interrupteur, en km² et en pourcentage du monde et de la France.</p><p>L'exploration est enregistrée même quand le brouillard est masqué, avec vos paramètres sur cet appareil. Les positions trop imprécises et la simulation de guidage ne comptent pas.</p>`],
  ['Recherche & carnet', `<h3>Lieux et commerces</h3><p>Tapez une enseigne ou un type de lieu, avec ou sans commune : « macdo aubagne », « pharmacie gap », « station service 50 km », « leroy merlin dans un rayon de 30 km ». Sans commune, la recherche se fait autour de vous. Les résultats (OpenStreetMap) sont listés du plus proche au plus loin et numérotés sur la carte ; touchez-en un pour <b>Chercher</b>, lancer le <b>Guidage</b> ou l'enregistrer.</p><h3>Carnet d'adresses</h3><p>Le bouton marque-page d'une adresse, ou l'appui long sur la carte → « Enregistrer l'adresse », la range en <b>Domicile</b>, <b>Travail</b> ou dans le carnet. Touchez la barre de recherche vide : vos adresses s'affichent pour y aller ou lancer le guidage en un geste. Le carnet se gère dans <b>Mes points</b> et reste sur cet appareil.</p><p>L'appui long sur la carte propose aussi <b>Guidage jusqu'ici</b>.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
   <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de Grillewords. Chaque point garde ses coordonnées et son Trimo. Un clic dans la liste recentre la carte dessus.</p>`],
@@ -2722,7 +2769,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:51';
+const APP_VER = '15/11/2026 12:53';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
