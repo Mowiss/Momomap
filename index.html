@@ -653,7 +653,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:25</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:34</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Ma position</div>
     <div class="row"><label>Afficher ma position (GPS)</label><button class="tg" id="sGeo"></button></div>
@@ -985,47 +985,60 @@ function renderOv(){ S.ovOpen = S.ovOpen || {};
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
       <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
 /* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
-const RAD = { grp: L.layerGroup(), tiles: {}, seen: new Set() };
 const RADAR_SVG = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="${w}" height="${h}"><defs><pattern id="hz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#111"/><rect x="4" width="4" height="8" fill="#ffd400"/></pattern><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#8f8f8f"/><stop offset=".5" stop-color="#a9a9a9"/><stop offset="1" stop-color="#8c8c8c"/></linearGradient><radialGradient id="fl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient></defs><rect x="1" y="1" width="38" height="50" fill="url(#hz)" stroke="#555" stroke-width="1"/><rect x="5" y="5" width="30" height="42" fill="url(#bd)"/><rect x="7.5" y="10" width="11" height="8" rx=".8" fill="#1a1a1a"/><rect x="9" y="12" width="8" height="4" rx="2" fill="url(#fl)"/><rect x="21.5" y="11" width="10" height="7.5" fill="#222"/><rect x="7.5" y="26" width="13" height="12" fill="#151515"/></svg>`;
+/* ---------- radars fixes : toute la France en une fois (OpenStreetMap), gardés 7 jours sur l'appareil ---------- */
+const RAD = { grp: L.layerGroup(), dots: null, fc: [], loading: null, retry: 0 };
 const radIcon = v => L.divIcon({ className: '', iconSize: [24, 44], iconAnchor: [12, 32], html: `<div class="rad">${RADAR_SVG(24, 31)}${v ? `<b>${v}</b>` : ''}</div>` });
-function setRadars(on){ S.radars = on; saveSettings(); syncOv();
-  if (on) { RAD.grp.addTo(map); loadRadars(true); if (g3.on) loadRadarsRoute(); } else map.removeLayer(RAD.grp); rad3D(); }
-RAD.fc = [];
-function radTiles(bboxes){ const T = .5, out = [];
-  bboxes.forEach(([s_, w, n, e]) => { for (let y = Math.floor(s_ / T); y <= Math.floor(n / T); y++) for (let x = Math.floor(w / T); x <= Math.floor(e / T); x++) { const k = x + ':' + y; if (!RAD.tiles[k]) { RAD.tiles[k] = 1; out.push([y * T, x * T, (y + 1) * T, (x + 1) * T, k]); } } });
-  return out; }
 const OVP = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
-let ovpI = 0, radWarnT = 0, radBusy = Promise.resolve();
-async function overpass(q){ // tous les serveurs en parallèle : le premier qui répond gagne
+async function overpass(q, ms = 30000){ // tous les serveurs en parallèle : le premier qui répond gagne
   const ctrls = OVP.map(() => new AbortController()), errs = [];
-  const one = (url, i) => new Promise(async (ok, ko) => { const t = setTimeout(() => ctrls[i].abort(), 30000);
+  const one = (url, i) => new Promise(async (ok, ko) => { const t = setTimeout(() => ctrls[i].abort(), ms);
     try { const r = await fetch(url + '?data=' + encodeURIComponent(q), { signal: ctrls[i].signal }); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); if (!j || !Array.isArray(j.elements)) throw new Error('réponse invalide'); ok(j); }
     catch(e){ errs.push(new URL(url).host + ' : ' + (e.name === 'AbortError' ? 'délai dépassé' : e.message || 'bloqué')); ko(e); } finally { clearTimeout(t); } });
   try { const j = await Promise.any(OVP.map(one)); ctrls.forEach(c => c.abort()); return j; }
-  catch(e){ const er = new Error(errs.join(' · ')); throw er; } }
+  catch(e){ throw new Error(errs.join(' · ')); } }
 function radStatus(t, bad){ RAD.status = t; RAD.bad = !!bad; const el = document.getElementById('radSt'); if (el) { el.textContent = t; el.classList.toggle('bad', !!bad); } }
-function fetchRadars(todo, warn){ radBusy = radBusy.then(() => fetchRadarsNow(todo, warn)); return radBusy; }
-async function fetchRadarsNow(todo, warn){
-  for (let i = 0; i < todo.length; i += 8) { const part = todo.slice(i, i + 8);
-    const bb = part.map(([s_, w, n, e]) => `(${s_},${w},${n},${e})`);
-    const q = '[out:json][timeout:25];(' + bb.map(b => `node[highway=speed_camera]${b};`).join('') + bb.map(b => `node[enforcement=maxspeed]${b};`).join('') + ');out body;';
-    radStatus('Chargement des radars…'); try { const j = await overpass(q);
-      j.elements.forEach(e => { if (RAD.seen.has(e.id) || e.lat == null) return; RAD.seen.add(e.id); const t = e.tags || {}, v = parseInt(t.maxspeed, 10) || '';
-        RAD.fc.push({ type: 'Feature', properties: { v: v ? String(v) : '' }, geometry: { type: 'Point', coordinates: [e.lon, e.lat] } });
-        L.marker([e.lat, e.lon], { icon: radIcon(v) }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}${t.direction ? ' · sens ' + esc(t.direction) : ''}${t.ref ? '<br><span style="color:var(--mut)">' + esc(t.ref) + '</span>' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -12] }).addTo(RAD.grp); }); }
-    catch(e){ part.forEach(t => delete RAD.tiles[t[4]]); radStatus('Échec : ' + (e.message || 'serveurs injoignables') + ' — nouvel essai dans 20 s', true);
-      if (Date.now() - radWarnT > 60000) { radWarnT = Date.now(); toast('Radars : serveurs OpenStreetMap injoignables, nouvel essai automatique'); }
-      clearTimeout(RAD.retry); RAD.retry = setTimeout(() => { loadRadars(false); if (g3.on) loadRadarsRoute(); }, 20000); return; } }
-  radStatus(RAD.fc.length ? `${RAD.fc.length} radar${RAD.fc.length > 1 ? 's' : ''} chargé${RAD.fc.length > 1 ? 's' : ''}` : 'Aucun radar recensé dans cette zone'); rad3D(); }
-async function loadRadars(warn){
-  if (!S.radars) return; if (map.getZoom() < 9) { radStatus('Zoomez sur une région pour charger les radars'); if (warn) toast('Zoomez sur une région pour afficher les radars'); return; }
-  const b = map.getBounds(); const todo = radTiles([[b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]]); if (todo.length) fetchRadars(todo, warn); }
-function loadRadarsRoute(){ if (!S.radars || !rt.data) return; const c = rt.data.geom.type === 'LineString' ? rt.data.geom.coordinates : rt.data.geom.coordinates.flat();
-  const todo = radTiles(c.filter((p, i) => i % 10 === 0 || i === c.length - 1).map(([x, y]) => [y - .05, x - .05, y + .05, x + .05])); if (todo.length) fetchRadars(todo, false); }
+function setRadars(on){ S.radars = on; saveSettings(); syncOv();
+  if (on) { RAD.grp.addTo(map); loadAllRadars(); } else { map.removeLayer(RAD.grp); if (RAD.dots) map.removeLayer(RAD.dots); } rad3D(); }
+function radSet(list, when){
+  RAD.fc = list.map(([lat, lon, v]) => ({ type: 'Feature', properties: { v: v ? String(v) : '' }, geometry: { type: 'Point', coordinates: [lon, lat] } }));
+  const d = new Date(when);
+  radStatus(`${RAD.fc.length.toLocaleString('fr-FR')} radars en France · données du ${d.toLocaleDateString('fr-FR')}`);
+  if (RAD.dots) map.removeLayer(RAD.dots);
+  const cv = L.canvas({ padding: .2 });
+  RAD.dots = L.layerGroup(list.map(([lat, lon, v]) => L.circleMarker([lat, lon], { renderer: cv, radius: 3.5, color: '#111', weight: 1, fillColor: '#ffd400', fillOpacity: 1 }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}`, { className: 'pt-tip', direction: 'top' })));
+  radRender(); rad3D(); }
+async function loadAllRadars(force){
+  if (RAD.loading) return RAD.loading;
+  let cache = null; try { cache = JSON.parse(localStorage.getItem(LS + 'radars') || 'null'); } catch(e){}
+  if (cache && cache.list && !force) { radSet(cache.list, cache.t); if (Date.now() - cache.t < 7 * 864e5) return; }
+  radStatus(cache ? 'Mise à jour des radars…' : 'Chargement de tous les radars de France…');
+  const q = '[out:json][timeout:120];area["ISO3166-1"="FR"]["admin_level"="2"]->.fr;(node["highway"="speed_camera"](area.fr);node["enforcement"="maxspeed"](area.fr););out body qt;';
+  RAD.loading = (async () => {
+    try { const j = await overpass(q, 150000), seen = new Set(), list = [];
+      j.elements.forEach(e => { if (e.lat == null) return; const k = e.lat.toFixed(5) + ',' + e.lon.toFixed(5); if (seen.has(k)) return; seen.add(k);
+        const v = parseInt((e.tags || {}).maxspeed, 10) || 0; list.push([+e.lat.toFixed(6), +e.lon.toFixed(6), v]); });
+      if (list.length < 100) throw new Error(`seulement ${list.length} radars reçus`);
+      const t = Date.now(); try { localStorage.setItem(LS + 'radars', JSON.stringify({ t, list })); } catch(e){}
+      radSet(list, t); RAD.retry = 0; }
+    catch(e){ if (!RAD.fc.length) { radStatus('Échec : ' + (e.message || 'serveurs injoignables') + ' — nouvel essai dans 30 s', true);
+        clearTimeout(RAD.rt); RAD.rt = setTimeout(() => S.radars && loadAllRadars(), 30000); }
+      else radStatus(RAD.status + ' (mise à jour impossible pour le moment)'); }
+    finally { RAD.loading = null; } })();
+  return RAD.loading; }
+/* au zoom régional : petits points ; en zoomant : sprite et vitesse, seulement dans la vue */
+function radRender(){
+  if (!S.radars || !RAD.dots) return; const z = map.getZoom();
+  if (z < 12) { RAD.grp.clearLayers(); RAD.shown = null; if (!map.hasLayer(RAD.dots)) RAD.dots.addTo(map); return; }
+  if (map.hasLayer(RAD.dots)) map.removeLayer(RAD.dots);
+  const b = map.getBounds().pad(.3); RAD.grp.clearLayers();
+  RAD.fc.forEach(f => { const [lon, lat] = f.geometry.coordinates; if (b.contains([lat, lon])) L.marker([lat, lon], { icon: radIcon(f.properties.v) })
+    .bindTooltip(`Radar fixe${f.properties.v ? ' · ' + f.properties.v + ' km/h' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -30] }).addTo(RAD.grp); }); }
+map.on('moveend zoomend', radRender);
+function loadRadarsRoute(){ if (S.radars && !RAD.fc.length) loadAllRadars(); }
 function rad3D(){ if (typeof v3 === 'undefined' || !v3 || !v3.getSource || !v3.getSource('rad')) return;
   v3.getSource('rad').setData({ type: 'FeatureCollection', features: RAD.fc }); if (v3.getSource('radt')) v3.getSource('radt').setData({ type: 'FeatureCollection', features: RAD.fc.filter(f => f.properties.v) });
   ['rad-c', 'rad-t'].forEach(id => v3.getLayer(id) && v3.setLayoutProperty(id, 'visibility', S.radars ? 'visible' : 'none')); }
-map.on('moveend', () => loadRadars(false));
 function ovGrpOpen(g, n){ S.ovOpen = S.ovOpen || {}; return S.ovOpen[g] != null ? S.ovOpen[g] : (n > 0 || g === 'MomoMAP'); }
 function syncOv(){ if ($('#ovList')) renderOv(); }
 function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k]); delete ovObjs[k]; }
@@ -1960,8 +1973,8 @@ function addOverlays(){
   add({ id: 'route', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#3db8ff', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4.5, 18, 14] } }, before);
   add({ id: 'done', type: 'line', source: 'done', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#9aa3b5', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4.5, 18, 14] } }, before);
   add({ id: 'man', type: 'circle', source: 'man', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 5, 18, 11], 'circle-color': '#fff', 'circle-stroke-color': '#0b4a6e', 'circle-stroke-width': 3 } });
-  add({ id: 'rad-c', type: 'symbol', source: 'rad', layout: { 'icon-image': 'radar', 'icon-anchor': 'bottom', 'icon-size': ['interpolate', ['linear'], ['zoom'], 10, .45, 17, 1], 'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-pitch-alignment': 'viewport' } });
-  add({ id: 'rad-t', type: 'symbol', source: 'radt', layout: { 'text-field': ['concat', ['get', 'v'], ' km/h'], 'text-font': ['Noto Sans Bold'], 'text-anchor': 'top', 'text-offset': [0, .3], 'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 17, 13], 'text-allow-overlap': true, 'text-ignore-placement': true }, paint: { 'text-color': '#111', 'text-halo-color': '#ffd400', 'text-halo-width': 2.5 } });
+  add({ id: 'rad-c', type: 'symbol', source: 'rad', layout: { 'icon-image': 'radar', 'icon-anchor': 'bottom', 'icon-size': ['interpolate', ['linear'], ['zoom'], 7, .2, 11, .45, 17, 1], 'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-pitch-alignment': 'viewport' } });
+  add({ id: 'rad-t', type: 'symbol', source: 'radt', layout: { 'text-field': ['concat', ['get', 'v'], ' km/h'], 'text-font': ['Noto Sans Bold'], 'text-anchor': 'top', 'text-offset': [0, .3], 'text-size': ['interpolate', ['linear'], ['zoom'], 10, 0, 11, 9, 17, 13], 'text-allow-overlap': true, 'text-ignore-placement': true }, paint: { 'text-color': '#111', 'text-halo-color': '#ffd400', 'text-halo-width': 2.5 } });
   add({ id: 'ly-pt', type: 'circle', source: 'ly', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-color': ['get', 'fc'], 'circle-radius': 6, 'circle-stroke-color': '#0f1115', 'circle-stroke-width': 1.5 } });
   set3DData(); setTerrain(S.relief3d !== false); rad3D();
 }
@@ -2209,7 +2222,7 @@ const GUIDE = [
   <p><b>Grillewords</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
   <b>Parcelles cadastrales</b> — le plan cadastral de l'IGN.<br>
   <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.<br>
-  <b>Radars fixes</b> — emplacements et vitesses d'après OpenStreetMap, chargés en zoomant sur une région ; ils apparaissent aussi dans la vue 3D et pendant le guidage, le long de l'itinéraire.</p>`],
+  <b>Radars fixes</b> — tous les radars de France d'après OpenStreetMap, chargés en une fois et gardés 7 jours sur l'appareil (points jaunes à l'échelle régionale, sprite et vitesse en zoomant) ; ils apparaissent aussi dans la vue 3D et pendant le guidage, le long de l'itinéraire.</p>`],
  ['Interroger la parcelle', `<h3>Tout savoir sur une parcelle</h3>
   <p>Activez l'outil <b>Interroger la parcelle</b> puis cliquez sur la carte (ou faites un clic droit → « Interroger la parcelle ici »). La parcelle se dessine et sa fiche s'ouvre à droite :</p>
   <h4>Identification</h4><p>Référence cadastrale complète, identifiant IDU, contenance, adresse la plus proche, altitude, coordonnées WGS84 et Lambert 93, trois mots.</p>
@@ -2265,7 +2278,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 10:25';
+const APP_VER = '15/11/2026 10:34';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
