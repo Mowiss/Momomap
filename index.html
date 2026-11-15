@@ -726,7 +726,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:25</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:26</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -1514,11 +1514,12 @@ const ADR_MAP = { home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9
 const adrIcon = k => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ADR_MAP[k]}</svg></div>` });
 function renderAdrMap(){ ADR_GRP.clearLayers();
   ['home', 'work'].forEach(k => { const a = ADR[k]; if (!a) return; const nom = k === 'home' ? 'Domicile' : 'Travail';
-    L.marker([a.lat, a.lon], { icon: adrIcon(k), zIndexOffset: 500 }).bindTooltip(`<b>${nom}</b><br>${esc(a.label || '')}`, { className: 'pt-tip', direction: 'top', offset: [0, -36] })
+    L.marker([a.lat, a.lon], { icon: adrIcon(k), zIndexOffset: 500 }).bindTooltip(`<b>${nom}</b><br>${esc(a.label || '')}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(triw(a.lat, a.lon))}</span>`, { className: 'pt-tip', direction: 'top', offset: [0, -36] })
       .on('click', () => adrGo({ ...a, nom })).addTo(ADR_GRP); }); }
+const triw = (lat, lon) => { try { return MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.'); } catch(e){ return ''; } };
 function renderAdr(){ renderAdrMap();
   const row = (e, k, i) => { const set = !!e, d = set ? e : { nom: k === 'home' ? 'Domicile' : 'Travail' };
-    return `<div class="pt${set ? '' : ' unset'}" data-ak="${k}" data-ai="${i ?? ''}"><span class="ic">${ADR_IC[k].replace('class="sgi" ', '')}</span><div class="m"><div class="n">${esc(k === 'list' ? d.nom : k === 'home' ? 'Domicile' : 'Travail')}</div><div class="lb">${set ? esc(d.label || '') : 'Non défini — appui long sur la carte ou bouton marque-page d\'une adresse'}</div></div>`
+    return `<div class="pt${set ? '' : ' unset'}" data-ak="${k}" data-ai="${i ?? ''}"><span class="ic">${ADR_IC[k].replace('class="sgi" ', '')}</span><div class="m"><div class="n">${esc(k === 'list' ? d.nom : k === 'home' ? 'Domicile' : 'Travail')}</div><div class="lb">${set ? esc(d.label || '') : 'Non défini — appui long sur la carte ou bouton marque-page d\'une adresse'}</div>${set ? `<div class="w">///${esc(triw(d.lat, d.lon))}</div>` : ''}</div>`
       + (set ? `<button class="ib" data-anav title="Guidage">${NAV_IC}</button>` + (k === 'list' ? `<button class="ib" data-aren title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>` : '')
       + `<button class="ib" data-adel title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>` : '') + `</div>`; };
   $('#adrList').innerHTML = row(ADR.home, 'home') + row(ADR.work, 'work') + ADR.list.map((a, i) => row(a, 'list', i)).join(''); }
@@ -2600,7 +2601,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:25';
+const APP_VER = '15/11/2026 12:26';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
