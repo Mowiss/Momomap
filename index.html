@@ -374,11 +374,12 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #zLoc.wait svg{animation:locPulse 1s ease-in-out infinite alternate}
 @keyframes locPulse{from{opacity:1}to{opacity:.3}}
 
-#spd{position:fixed;left:12px;bottom:52px;z-index:1850;width:64px;height:64px;border-radius:50%;background:#fff;color:#111;border:1px solid #d0d4dc;display:none;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);pointer-events:none}
+#spd{position:fixed;left:12px;bottom:52px;z-index:850;width:64px;height:64px;border-radius:50%;background:#fff;color:#111;border:1px solid #d0d4dc;display:none;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);pointer-events:none}
 #spd.on{display:flex}
 #spd b{font:700 24px/1 var(--ui);letter-spacing:-.5px}
 #spd span{font:600 10px var(--ui);color:#555;margin-top:1px}
 body.v3 #spd{bottom:calc(96px + env(safe-area-inset-bottom))}
+#v3d #spd{position:absolute;z-index:4}
 body.gopt #spd{display:none!important}
 
 .ver{font-weight:400;font-size:11.5px;color:var(--dim);margin-left:6px}
@@ -667,7 +668,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:47</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:49</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -2037,7 +2038,7 @@ function addOverlays(){
 }
 async function open3D(guide){
   try { await loadML(); } catch(e){ return toast('Vue 3D indisponible (pas de connexion)'); }
-  $('#v3d').classList.add('on'); document.body.classList.add('v3');
+  $('#v3d').classList.add('on'); document.body.classList.add('v3'); $('#v3d').appendChild($('#spd'));
   const c = map.getCenter();
   if (!v3) {
     v3 = new maplibregl.Map({ container: 'v3map', attributionControl: { compact: true }, pixelRatio: Math.min(window.devicePixelRatio || 1, 2), fadeDuration: 0, style: rasterStyle(), center: [c.lng, c.lat], zoom: Math.min(map.getZoom() - 1, 19), pitch: 55, maxPitch: 80 });
@@ -2061,7 +2062,7 @@ function set3DData(){
 function setTerrain(on, fromNav){ if (fromNav || g3.on) { S.nav.relief = on; renderNavOpt(); } else S.relief3d = on; saveSettings(); $('#vRel').classList.toggle('on', on); try { v3.setTerrain(on ? { source: 'dem', exaggeration: 1.25 } : null); } catch(e){}
   if (v3.getLayer('hill')) v3.setLayoutProperty('hill', 'visibility', on ? 'visible' : 'none'); }
 function upd3D(){ if (!v3) return; $('#vCompass svg').style.transform = `rotate(${-v3.getBearing()}deg)`; $('#vPitch').textContent = Math.round(v3.getPitch()) + '°'; }
-function close3D(){ stopGuide(); $('#v3d').classList.remove('on'); document.body.classList.remove('v3');
+function close3D(){ stopGuide(); $('#v3d').classList.remove('on'); document.body.classList.remove('v3'); document.body.insertBefore($('#spd'), $('#toast'));
   if (v3) { const c = v3.getCenter(); map.setView([c.lat, c.lng], Math.round(v3.getZoom() + 1)); } }
 $('#zTilt').onclick = () => open3D(false);
 $('#vClose').onclick = close3D;
@@ -2338,7 +2339,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 10:47';
+const APP_VER = '15/11/2026 10:49';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
