@@ -181,6 +181,14 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .adr-pin svg{position:absolute;left:8px;top:6px;width:18px;height:18px;color:var(--acc)}
 .adr-pin.emo span{position:absolute;left:0;top:4px;width:34px;text-align:center;font-size:17px;line-height:22px}
 .pt .ic.emo{font-size:18px;color:var(--acc)}
+.pp .leaflet-popup-content-wrapper{background:var(--panel);color:var(--tx);border:1px solid var(--line2);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.pp .leaflet-popup-tip{background:var(--panel);border:1px solid var(--line2)}
+.pp .leaflet-popup-content{margin:12px 14px;font-size:13.5px;line-height:1.4}
+.pp a.leaflet-popup-close-button{color:var(--mut)}
+.pp-t{display:flex;align-items:center;gap:7px;font-size:15px;padding-right:14px}.pp-t span{font-size:20px}
+.pp-n{margin-top:6px;color:var(--tx);opacity:.85;white-space:normal;word-break:break-word;max-height:40vh;overflow:auto}
+.pp-w{margin-top:6px;font:12px var(--mono);color:var(--acc)}
+.pp-a{display:flex;gap:6px;margin-top:10px}.pp-a .btn{height:34px}.pp-a .btn:last-child{flex:none;width:40px}
 .pt-tip .ptn{color:var(--mut);display:inline-block;max-width:240px;white-space:normal}
 #ptedit{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
 #ptedit.on{display:flex}
@@ -741,7 +749,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:38</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:39</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -1481,7 +1489,8 @@ let ptLayer = L.layerGroup(); if (S.ov.favs !== false) ptLayer.addTo(map);
 const emoIcon = e => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin emo"><span>${esc(e)}</span></div>` });
 const EMOS = ['🏡','🏘️','🏠','🏢','🏛️','🏭','🏗️','🚧','🍀','🌳','🌲','🌊','💧','🍄‍🟫','⛰️','🏕️','🚜','⛏️','🔧','⚠️','🔥','⭐','❤️','🚩','📍','📦','🅿️','⛽','🍴','☕','🛒','🏥','⛪','🏫','⚡','🚰'];
 let peI = -1, peIc = '';
-function ptEdit(i){ const p = points[i]; if (!p) return; peI = i; peIc = p.ic || '';
+function ppNav(i){ const p = points[i]; if (p) { map.closePopup(); guideTo(p.lat, p.lon, p.nom); } }
+function ptEdit(i){ map.closePopup(); const p = points[i]; if (!p) return; peI = i; peIc = p.ic || '';
   $('#peNom').value = p.nom; $('#peNote').value = p.note || ''; $('#peW').textContent = '///' + p.mots; peGrid(); $('#ptedit').classList.add('on'); }
 function peGrid(){ $('#peIc').innerHTML = `<button class="${peIc ? '' : 'on'}" data-e="" title="Épingle par défaut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>`
   + EMOS.map(e => `<button class="${peIc === e ? 'on' : ''}" data-e="${e}">${e}</button>`).join(''); }
@@ -1492,10 +1501,12 @@ $('#ptedit').onclick = e => { if (e.target.id === 'ptedit' || e.target.closest('
 function setMine(k, on){ S.ov[k] = on; saveSettings(); const l = k === 'favs' ? ptLayer : ADR_GRP; if (on) l.addTo(map); else map.removeLayer(l); syncOv(); toast((k === 'favs' ? 'Points favoris' : 'Domicile, travail & carnet') + (on ? ' affichés' : ' masqués')); }
 function renderPoints(){
   ptLayer.clearLayers();
-  points.forEach(p => L.marker([p.lat, p.lon], { icon: p.ic ? emoIcon(p.ic) : pinIcon() }).bindTooltip(`<b>${esc(p.nom)}</b>${p.note ? `<br><span class="ptn">${esc(p.note).replace(/\n/g, '<br>')}</span>` : ''}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(p.mots)}</span>`, { className:'pt-tip', direction:'top', offset:[0, p.ic ? -36 : -26] })
-    .on('click', () => { const r = MM3.cellOfWords(p.mots.split('.')); if (r.cell) select(r.cell); }).addTo(ptLayer));
+  points.forEach((p, i) => L.marker([p.lat, p.lon], { icon: p.ic ? emoIcon(p.ic) : pinIcon() })
+    .bindPopup(`<div class="pp-t">${p.ic ? `<span>${esc(p.ic)}</span>` : ''}<b>${esc(p.nom)}</b></div>${p.note ? `<div class="pp-n">${esc(p.note).replace(/\n/g, '<br>')}</div>` : ''}<div class="pp-w">///${esc(p.mots)}</div>
+      <div class="pp-a"><button class="btn pri" onclick="ppNav(${i})">${NAV_IC}Guidage</button><button class="btn" onclick="ptEdit(${i})" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`,
+      { className: 'pp', offset: [0, p.ic ? -34 : -24], maxWidth: 280, minWidth: 200, autoPanPadding: [20, 80] }).addTo(ptLayer));
   $('#ptCount').textContent = points.length ? `(${points.length})` : '';
-  $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><span class="ic emo">${p.ic ? esc(p.ic) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'}</span><div class="m"><div class="n">${esc(p.nom)}</div>${p.note ? `<div class="lb">${esc(p.note.split('\n')[0])}</div>` : ''}<div class="w">///${esc(p.mots)}</div></div>
+  $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><span class="ic emo">${p.ic ? esc(p.ic) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'}</span><div class="m"><div class="n">${esc(p.nom)}</div>${p.note ? '' : ''}<div class="w">///${esc(p.mots)}</div></div>
     <button class="ib" data-nav="${i}" title="Guidage">${NAV_IC}</button>
     <button class="ib" data-ren="${i}" title="Modifier (titre, note, icône)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
     <button class="ib" data-del="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`).join('')
@@ -2640,7 +2651,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:38';
+const APP_VER = '15/11/2026 12:39';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
