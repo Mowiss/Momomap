@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MomoMAP - Cartographie et SIG</title>
-<meta name="description" content="Cartographie et SIG : une adresse de trois mots pour chaque carré de 3 × 3 m.">
+<meta name="description" content="Cartographie et SIG : une adresse Trimo pour chaque carré de 3 × 3 m.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 1230'%3E%3Cpath fill='%23808080' d='M7 8L424 587L837 8V835H700V438L424 824L145 437V835H7Z'/%3E%3Cpath fill='%23808080' d='M7 385L424 964L837 385V1212H700V815L424 1201L145 814V1212H7Z'/%3E%3Cpath fill='%23fff700' d='M881 220C882 83 882 80 886 62C889 51 892 46 897 40C907 30 921 24 940 22C943 21 947 20 948 20C957 17 990 16 1066 16C1154 16 1157 17 1178 22C1193 26 1196 27 1203 34C1216 47 1219 70 1219 145L1220 189L1247 189L1275 189L1275 271L1275 352L1078 352L881 352L881 220ZM1104 185L1104 180L1051 181C994 181 996 181 996 186L996 189L1050 189L1105 189L1104 185ZM962 695C925 693 908 689 898 679C892 673 890 668 887 657C882 639 882 636 881 494L881 360L1078 360L1275 360L1275 442L1275 524L1192 524L1108 524L1108 528L1108 532L1192 532L1275 532L1275 614L1275 696L1122 696C1037 696 966 695 962 695ZM1048 528L1048 524L1022 524L996 524L996 527C996 529 997 530 998 531C999 532 1009 532 1024 532L1048 532L1048 528ZM881 992C882 769 882 763 885 747C890 725 901 714 923 710C939 706 942 706 949 705C953 705 1028 704 1116 704L1275 704L1275 786L1275 869L1136 869L997 869L997 871C996 871 996 873 996 874L996 876L1136 876L1275 876L1275 958L1275 1040L1140 1040C1066 1040 1003 1040 1001 1041L996 1042L996 1045L996 1048L1135 1048L1275 1048L1275 1130L1275 1212L1078 1212L881 1212L881 992Z'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <script>
@@ -15,7 +15,7 @@ function addEmbeddedManifest() {
   const here = location.href.split('#')[0].split('?')[0];
   const manifest = {
     name: 'MomoMAP - Cartographie et SIG', short_name: 'MomoMAP', lang: 'fr',
-    description: 'Cartographie et SIG : une adresse de trois mots pour chaque carré de 3 × 3 m.',
+    description: 'Cartographie et SIG : une adresse Trimo pour chaque carré de 3 × 3 m.',
     id: here.replace(/[^/]*$/, ''), start_url: here, scope: here.replace(/[^/]*$/, ''), display: 'standalone',
     background_color: '#ffffff', theme_color: '#0f1115',
     icons: [
@@ -626,7 +626,7 @@ setTimeout(done,4700);
   <div id="searchwrap">
     <div id="search">
       <button class="ib" id="qGo" title="Rechercher" style="width:32px;height:32px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
-      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, coordonnées ou ///trois.mots.ici…">
+      <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, coordonnées ou ///Trimo…">
       <button class="ib" id="qclear" title="Effacer" style="width:32px;height:32px;display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="sugg"></div>
@@ -749,7 +749,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:39</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:42</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -891,7 +891,7 @@ setTimeout(done,4700);
   <button data-c="parcel">Interroger la parcelle ici</button>
   <button data-c="fav">Ajouter aux favoris ici</button>
   <button data-c="adr">Enregistrer l'adresse (domicile, travail, carnet)</button>
-  <button data-c="words">Trois mots de ce point</button>
+  <button data-c="words">Trimo de ce point</button>
   <button data-c="xy">Copier les coordonnées</button>
 </div>
 
@@ -1474,7 +1474,7 @@ async function submitSearch(){
   const t = q.value.trim(); if (!t) return;
   const ws = parseWords(t);
   if (ws && (t.startsWith('/') || t.includes('.'))) { const r = MM3.cellOfWords(ws);
-    if (r.cell) { showSugg([]); q.blur(); const b = MM3.bounds(r.cell); return placeChoice((b.s + b.n) / 2, (b.w + b.e) / 2, '///' + ws.join('.'), 'Adresse trois mots', 19); }
+    if (r.cell) { showSugg([]); q.blur(); const b = MM3.bounds(r.cell); return placeChoice((b.s + b.n) / 2, (b.w + b.e) / 2, '///' + ws.join('.'), 'Adresse Trimo', 19); }
     if (r.error === 'mot') { const s = r.missing.map(m => `« ${m} »${MM3.suggest(m, 3).length ? ' (vouliez-vous dire ' + MM3.suggest(m, 3).join(', ') + ' ?)' : ''}`); return toast('Mot inconnu : ' + s.join(' ; ')); }
     return toast("Cette combinaison n'existe pas sur la grille"); }
   { const pp = poiParse(t); if (pp && (pp.cat || pp.brand)) return poiSearch(t); }
@@ -1996,7 +1996,7 @@ async function queryParcel(lat, lon){
   safe('pLoc', async () => { const rows = [];
     if (parc) { rows.push(['Référence', `${p.code_dep}${p.code_com} ${p.com_abs || '000'} ${p.section} ${p.numero}`], ['IDU', p.idu || '—'], ['Contenance', p.contenance ? `${(+p.contenance).toLocaleString('fr-FR')} m²` : '—'], ['Feuille', p.feuille || '—']); }
     rows.push(['WGS84', `${lat.toFixed(6)}, ${lon.toFixed(6)}`]); if (l93) rows.push(['Lambert 93', `X ${l93[0].toFixed(2)}  Y ${l93[1].toFixed(2)}`]);
-    rows.push(['3 mots', '///' + MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.')]);
+    rows.push(['Trimo', '///' + MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.')]);
     const [adr, alt] = await Promise.allSettled([jget(`https://data.geopf.fr/geocodage/reverse?lon=${lon}&lat=${lat}&limit=1`), jget(`https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevation.json?lon=${lon}&lat=${lat}&resource=ign_rge_alti_wld&zonly=true`)]);
     if (seq !== parcelSeq) return;
     if (adr.status === 'fulfilled') { const f = feats(adr.value)[0]; if (f) rows.splice(parc ? 0 : 0, 0, ['Adresse proche', f.properties.label]); }
@@ -2579,7 +2579,7 @@ const GUIDE = [
  ['Présentation', `<h3>MomoMAP, cartographie et SIG</h3>
   <p>MomoMAP affiche les fonds de carte de référence (plans, photos aériennes, cadastre, géologie), interroge les parcelles pour connaître leurs règles d'urbanisme et leurs risques, et échange des données avec les autres logiciels au format KML, KMZ, DXF et GeoJSON.</p>
   <h4>La barre d'outils</h4><table>
-  <tr><td><b>Calques</b></td><td>Fond de carte, superpositions (grille de mots, trois mots, cadastre, géologie) et vos calques rangés en dossiers.</td></tr>
+  <tr><td><b>Calques</b></td><td>Fond de carte, superpositions (Grillewords et Trimo, cadastre, géologie) et vos calques rangés en dossiers.</td></tr>
   <tr><td><b>Points</b></td><td>Vos points favoris, ajoutés par clic droit sur la carte.</td></tr>
   <tr><td><b>Dessin</b></td><td>Mesure de distance et de surface, polyligne, polygone, cercle, épingle.</td></tr>
   <tr><td><b>Interroger</b></td><td>Cliquez sur une parcelle : cadastre, PLU, servitudes, risques, géologie, environnement.</td></tr>
@@ -2587,17 +2587,17 @@ const GUIDE = [
   <tr><td><b>Import / export</b></td><td>KML, KMZ, DXF, GeoJSON.</td></tr>
   <tr><td><b>Sauvegarde</b></td><td>Ouvrir, enregistrer le projet .mmap, backup automatique.</td></tr></table>
   <p><b>Ma position</b> est suivie en continu (point bleu, cercle de précision, direction de marche). Le bouton rond en bas à droite centre la carte et la fait suivre vos déplacements ; déplacez la carte pour arrêter le suivi. Le suivi se désactive dans les Paramètres. Sur téléphone, la barre d'outils est en bas de l'écran et les panneaux s'ouvrent depuis le bas.</p>
-  <h4>Le clic droit</h4><p>Un clic droit sur la carte propose d'interroger la parcelle à cet endroit, d'y placer un point favori, d'afficher ses trois mots ou de copier ses coordonnées (en Lambert 93 en France).</p>`],
+  <h4>Le clic droit</h4><p>Un clic droit sur la carte propose d'interroger la parcelle à cet endroit, d'y placer un point favori, d'afficher son Trimo ou de copier ses coordonnées (en Lambert 93 en France).</p>`],
  ['Fonds & superpositions', `<h3>Fonds de carte</h3>
   <p>Plan OpenStreetMap, Plan IGN, photo aérienne IGN (très nette en France) et satellite pour le reste du monde. Le zoom va du globe entier jusqu'au détail d'un mètre ; au-delà de la précision d'un fond, l'image est simplement agrandie.</p>
   <h4>Superpositions</h4><p>Elles s'activent ou se coupent indépendamment, par-dessus n'importe quel fond :</p>
-  <p><b>Grillewords</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
+  <p><b>Grillewords</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse Trimo du carré.<br>
   <b>Parcelles cadastrales</b> — le plan cadastral de l'IGN.<br>
   <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.<br>
   <b>Radars fixes</b> — tous les radars de France d'après OpenStreetMap, chargés en une fois et gardés 7 jours sur l'appareil (points jaunes à l'échelle régionale, sprite et vitesse en zoomant) ; ils apparaissent aussi dans la vue 3D et pendant le guidage, le long de l'itinéraire.</p>`],
  ['Interroger la parcelle', `<h3>Tout savoir sur une parcelle</h3>
   <p>Activez l'outil <b>Interroger la parcelle</b> puis cliquez sur la carte (ou faites un clic droit → « Interroger la parcelle ici »). La parcelle se dessine et sa fiche s'ouvre à droite :</p>
-  <h4>Identification</h4><p>Référence cadastrale complète, identifiant IDU, contenance, adresse la plus proche, altitude, coordonnées WGS84 et Lambert 93, trois mots.</p>
+  <h4>Identification</h4><p>Référence cadastrale complète, identifiant IDU, contenance, adresse la plus proche, altitude, coordonnées WGS84 et Lambert 93, Trimo.</p>
   <h4>Urbanisme</h4><p>Document en vigueur (PLU, PLUi, carte communale ou RNU), zone et lien vers son règlement, prescriptions, informations et servitudes d'utilité publique, d'après le Géoportail de l'urbanisme.</p>
   <h4>Risques</h4><p>Sismicité, retrait-gonflement des argiles, radon, risques naturels et technologiques, plans de prévention (PPR) et arrêtés de catastrophe naturelle, d'après Géorisques.</p>
   <h4>Géologie et environnement</h4><p>Formation géologique du BRGM quand elle est disponible, zones Natura 2000, ZNIEFF, parcs et réserves naturelles.</p>
@@ -2611,23 +2611,23 @@ const GUIDE = [
   <h3>Modifier un objet</h3><p>Choisissez le <b>calque d'édition</b> (Dessins ou un calque importé, KMZ compris) : ses objets sont listés et les nouveaux dessins y sont ajoutés. Avec <b>Modifier la forme d'un objet</b>, cliquez un objet : glissez ses sommets, glissez un point milieu pour en créer un, double-clic sur un sommet pour le supprimer.</p>`],
  ['Recherche & carnet', `<h3>Lieux et commerces</h3><p>Tapez une enseigne ou un type de lieu, avec ou sans commune : « macdo aubagne », « pharmacie gap », « station service 50 km », « leroy merlin dans un rayon de 30 km ». Sans commune, la recherche se fait autour de vous. Les résultats (OpenStreetMap) sont listés du plus proche au plus loin et numérotés sur la carte ; touchez-en un pour <b>Chercher</b>, lancer le <b>Guidage</b> ou l'enregistrer.</p><h3>Carnet d'adresses</h3><p>Le bouton marque-page d'une adresse, ou l'appui long sur la carte → « Enregistrer l'adresse », la range en <b>Domicile</b>, <b>Travail</b> ou dans le carnet. Touchez la barre de recherche vide : vos adresses s'affichent pour y aller ou lancer le guidage en un geste. Le carnet se gère dans <b>Mes points</b> et reste sur cet appareil.</p><p>L'appui long sur la carte propose aussi <b>Guidage jusqu'ici</b>.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
-  <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de la grille de mots. Chaque point garde ses coordonnées et son adresse en trois mots. Un clic dans la liste recentre la carte dessus.</p>`],
+  <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de Grillewords. Chaque point garde ses coordonnées et son Trimo. Un clic dans la liste recentre la carte dessus.</p>`],
  ['Import / export', `<h3>Échanger avec les autres logiciels</h3>
   <h4>Importer</h4><p>Bouton <b>Choisir un fichier</b> ou glisser-déposer sur la carte : KML, KMZ, DXF, GeoJSON. Pour un DXF, la projection est reconnue automatiquement (Lambert 93, coniques CC42 à CC50 ou WGS84) ; sinon choisissez-la avant d'importer. Seuls les DXF texte sont lus, pas les DXF binaires.</p>
   <h4>Décomposer et styler</h4><p>Dans <b>Calques</b>, la flèche devant un calque le décompose pour lister ses objets. Cliquez un objet (dans la liste ou directement sur la carte) pour modifier son <b>nom</b>, son <b>descriptif</b> et son style : contour (couleur, épaisseur, opacité), intérieur (couleur, opacité), taille et symbole des points. Le bouton palette d'un calque règle le style de tout le calque ; « Style du calque » remet un objet au style commun. Le menu « … » permet d'<b>éclater</b> un calque en sous-calques (par calque DXF, dossier KML, ou par type : points, lignes, surfaces). Les styles et descriptifs sont conservés dans le .mmap et repris à l'export KML/KMZ ; le DXF reprend la couleur la plus proche.</p>
   <h4>Calques et dossiers</h4><p>Chaque fichier importé devient un calque. Créez des dossiers avec <b>+ Dossier</b>, puis faites glisser les calques pour les ranger ou changer leur ordre : le haut de la liste s'affiche par-dessus. L'œil masque un calque ou un dossier entier, la loupe recentre la carte, la pastille de couleur change sa teinte, et un double-clic sur le nom le renomme. Les points d'un calque peuvent rejoindre <b>Mes points</b>.</p>
-  <h4>Exporter</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : points avec leur nom et leurs trois mots, carrés de 3×3 m, calques visibles, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
+  <h4>Exporter</h4><p><b>KML</b> et <b>KMZ</b> s'ouvrent dans Google Earth et la plupart des applis de cartographie. Le <b>DXF</b> s'ouvre dans AutoCAD ou MomoCAD : points avec leur nom et leur Trimo, carrés de 3×3 m, calques visibles, chacun sur son calque, dans la projection choisie (Lambert 93 par défaut).</p>
   <h4>Fichiers .mmap</h4><p><b>Enregistrer</b> sauve vos points, vos calques et la vue en cours dans un fichier MomoMAP, à rouvrir plus tard ou à transmettre. Le backup automatique se règle dans les Paramètres.</p>`],
- ['Trois mots', `<h3>Une adresse de trois mots pour chaque carré de 3 m</h3>
-  <p>Avec la superposition <b>Grillewords</b>, chaque carré d'environ 3 × 3 m de la Terre a une adresse unique de trois mots, par exemple <span class="ex">///jambon.calculatrice.arbre</span>. Elle se dicte au téléphone et se note sur un carnet de chantier bien plus facilement que des coordonnées.</p>
-  <p>Un carré donne toujours les mêmes trois mots, partout et sans connexion. En France, seuls les 5 000 noms communs les plus courants sont utilisés. Deux carrés voisins ont des adresses sans rapport : une erreur de mot se repère tout de suite.</p>
-  <p>Tapez <span class="ex">///trois.mots.ici</span> dans la recherche (accents facultatifs) pour retrouver un carré. Les flèches du clavier passent au carré voisin.</p>`],
+ ['Trimo', `<h3>Une adresse Trimo pour chaque carré de 3 m</h3>
+  <p>Avec la superposition <b>Grillewords</b>, chaque carré d'environ 3 × 3 m de la Terre a une adresse Trimo unique, par exemple <span class="ex">///jambon.calculatrice.arbre</span>. Elle se dicte au téléphone et se note sur un carnet de chantier bien plus facilement que des coordonnées.</p>
+  <p>Un carré donne toujours le même Trimo, partout et sans connexion. En France, seuls les 5 000 noms communs les plus courants sont utilisés. Deux carrés voisins ont des adresses sans rapport : une erreur de mot se repère tout de suite.</p>
+  <p>Tapez un Trimo (<span class="ex">///jambon.calculatrice.arbre</span>) dans la recherche (accents facultatifs) pour retrouver un carré. Les flèches du clavier passent au carré voisin.</p>`],
  ['Raccourcis', `<h3>Raccourcis</h3><table>
-  <tr><td><kbd>Clic droit</kbd></td><td>Menu : parcelle, favori, trois mots, coordonnées</td></tr>
-  <tr><td><kbd>/</kbd></td><td>Rechercher une adresse en trois mots</td></tr>
+  <tr><td><kbd>Clic droit</kbd></td><td>Menu : parcelle, favori, Trimo, coordonnées</td></tr>
+  <tr><td><kbd>/</kbd></td><td>Rechercher une adresse ou un Trimo</td></tr>
   <tr><td><kbd>G</kbd></td><td>Grillewords</td></tr>
   <tr><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></td><td>Carré voisin (grille active)</td></tr>
-  <tr><td><kbd>C</kbd></td><td>Copier les trois mots du carré choisi</td></tr>
+  <tr><td><kbd>C</kbd></td><td>Copier le Trimo du carré choisi</td></tr>
   <tr><td><kbd>Ctrl</kbd> + <kbd>O</kbd> / <kbd>S</kbd></td><td>Ouvrir / Enregistrer</td></tr>
   <tr><td><kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>S</kbd></td><td>Enregistrer sous</td></tr>
   <tr><td><kbd>Échap</kbd></td><td>Fermer, quitter l'interrogation</td></tr></table>`],
@@ -2651,7 +2651,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:39';
+const APP_VER = '15/11/2026 12:42';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
