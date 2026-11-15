@@ -723,7 +723,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:14</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:21</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -755,6 +755,7 @@ setTimeout(done,4700);
     <button class="btn pri" id="cCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copier</button>
     <button class="btn" id="cLink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Lien</button>
     <button class="btn" id="cAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 7v5M9.5 9.5h5" stroke-linecap="round"/></svg>Point</button>
+    <button class="btn" id="cNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>Guidage</button>
   </div>
   <div id="savebox"><input class="f" type="text" id="ptName" placeholder="Nom du point (ex. regard EU 4)"><button class="btn pri" id="ptOk" style="flex:none;padding:0 14px">OK</button></div>
   <div class="sec">
@@ -1465,6 +1466,7 @@ $('#ptList').onclick = e => {
   if (r) { const p = points[+r.dataset.ren], n = prompt('Nouveau nom :', p.nom); if (n && n.trim()) { p.nom = n.trim(); changed(); } return; }
   if (it) { const p = points[+it.dataset.i]; map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 18), { duration: .6 }); }
 };
+$('#cNav').onclick = () => { if (!sel) return; const x = MM3.bounds(sel); guideTo((x.s + x.n) / 2, (x.w + x.e) / 2, '///' + selInfo.words.join('.')); };
 $('#cAdd').onclick = () => { if (!sel) return; $('#savebox').classList.add('on'); $('#ptName').value = ''; $('#ptName').focus(); };
 function addPoint(){ const b = MM3.bounds(sel), nom = $('#ptName').value.trim() || `Point ${points.length + 1}`;
   points.push({ id: Date.now().toString(36), nom, mots: selInfo.words.join('.'), lat: +((b.s + b.n) / 2).toFixed(7), lon: +((b.w + b.e) / 2).toFixed(7), date: new Date().toISOString() });
@@ -2585,7 +2587,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 11:14';
+const APP_VER = '15/11/2026 12:21';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
