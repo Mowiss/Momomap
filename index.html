@@ -185,6 +185,11 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .pp .leaflet-popup-tip{background:var(--panel);border:1px solid var(--line2)}
 .pp .leaflet-popup-content{margin:12px 14px;font-size:13.5px;line-height:1.4}
 .pp a.leaflet-popup-close-button{color:var(--mut)}
+.voir-ic{width:28px;height:28px;border-radius:50%;background:#14161b;border:2px solid var(--c);display:grid;place-items:center;color:var(--c);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.voir-ic svg{width:16px;height:16px}
+.vp-img{display:none;height:130px;margin:-12px -14px 10px;border-radius:11px 11px 0 0;background:#222 center/cover no-repeat}.vp-img.on{display:block}
+.vp-s{color:var(--mut);font-size:12px;margin-top:2px}
+.pp-a a.btn{display:grid;place-items:center;text-decoration:none;color:var(--tx)}
 .pp-t{display:flex;align-items:center;gap:7px;font-size:15px;padding-right:14px}.pp-t span{font-size:20px}
 .pp-n{margin-top:6px;color:var(--tx);opacity:.85;white-space:normal;word-break:break-word;max-height:40vh;overflow:auto}
 .pp-w{margin-top:6px;font:12px var(--mono);color:var(--acc)}
@@ -780,7 +785,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 15:13</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 16:16</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -1114,6 +1119,9 @@ const OVG = [
     ['favs', 'Points favoris', OI('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>', '#fff200')],
     ['quest', 'MomoQuest', OI('<path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M14.8 9.2 13 13l-3.8 1.8L11 11z" fill="#fff200"/>', '#fff200')],
     ['adr', 'Domicile, travail & carnet', OI('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/>', '#fff200')] ]],
+  ['Tourisme & patrimoine', [
+    ['voir', 'Patrimoine & à voir', OI('<path d="M3 21h18M5 18h14M6 18V10M10 18V10M14 18V10M18 18V10M4 10h16L12 4z"/>', '#f2c94c')]
+  ]],
   ['Foncier & urbanisme', [
     ['cad', 'Parcelles cadastrales', OI('<path d="M3 5l7-2 11 4-2 13-9 1-6-6z"/><path d="M10 3l-1 9 10 1M9 12l-4 3"/>', '#f0a35e')],
     ['bati', 'Bâtiments', OI('<path d="M4 21V9l8-5 8 5v12z"/><path d="M9 21v-6h6v6"/>', '#e57373'), W('BUILDINGS.BUILDINGS', { max: 19 })],
@@ -1141,11 +1149,11 @@ const OVG = [
 ];
 const OVL = {}; OVG.forEach(([, items]) => items.forEach(([k, , , f]) => { if (f) OVL[k] = f; }));
 const ovObjs = {}; S.ov = S.ov || {};
-const ovOn = k => k === 'favs' || k === 'adr' ? S.ov[k] !== false : k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : k === 'radars' ? !!S.radars : !!S.ov[k];
+const ovOn = k => k === 'voir' ? !!S.ov.voir : k === 'favs' || k === 'adr' ? S.ov[k] !== false : k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : k === 'radars' ? !!S.radars : !!S.ov[k];
 function renderOv(){ S.ovOpen = S.ovOpen || {};
   $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
-      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'quest' && S.ov.quest ? `<div id="questSt" class="ovst">${esc(qStatText())}</div>` : ''}${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
+      <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>${k === 'voir' && S.ov.voir ? `<div id="voirSt" class="ovst">${esc(VOIR.st || 'Zoomez sur une région pour charger les lieux')}</div>` : ''}${k === 'quest' && S.ov.quest ? `<div id="questSt" class="ovst">${esc(qStatText())}</div>` : ''}${k === 'radars' && S.radars ? `<div id="radSt" class="ovst${RAD.bad ? ' bad' : ''}">${esc(RAD.status || '')}</div>` : ''}`).join('')}</div></div>`; }).join(''); }
 /* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
 const RADAR_SVG = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="${w}" height="${h}"><defs><pattern id="hz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#111"/><rect x="4" width="4" height="8" fill="#ffd400"/></pattern><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#8f8f8f"/><stop offset=".5" stop-color="#a9a9a9"/><stop offset="1" stop-color="#8c8c8c"/></linearGradient><radialGradient id="fl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient></defs><rect x="1" y="1" width="38" height="50" fill="url(#hz)" stroke="#555" stroke-width="1"/><rect x="5" y="5" width="30" height="42" fill="url(#bd)"/><rect x="7.5" y="10" width="11" height="8" rx=".8" fill="#1a1a1a"/><rect x="9" y="12" width="8" height="4" rx="2" fill="url(#fl)"/><rect x="21.5" y="11" width="10" height="7.5" fill="#222"/><rect x="7.5" y="26" width="13" height="12" fill="#151515"/></svg>`;
 /* ---------- radars fixes : toute la France en une fois (OpenStreetMap), gardés 7 jours sur l'appareil ---------- */
@@ -1210,6 +1218,7 @@ function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k])
 $('#ovList').addEventListener('click', e => { const t = e.target.closest('[data-ov]');
   if (t) { const k = t.dataset.ov; if (k === 'favs' || k === 'adr') return setMine(k, S.ov[k] === false);
     if (k === 'quest') return setQuest(!S.ov.quest);
+    if (k === 'voir') return setVoir(!S.ov.voir);
     if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); if (k === 'radars') return setRadars(!S.radars); return setOv(k, !S.ov[k]); }
   const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.og, items = (OVG.find(x => x[0] === g) || [, []])[1]; S.ovOpen[g] = !ovGrpOpen(g, items.filter(it => ovOn(it[0])).length); saveSettings(); renderOv(); } });
 let geolLayer = null;
@@ -1442,6 +1451,14 @@ const POI_CAT = [
   [/fleuristes?/, '["shop"="florist"]', 'Fleuriste'],
   [/boucheries?/, '["shop"="butcher"]', 'Boucherie'],
   [/opticiens?/, '["shop"="optician"]', 'Opticien'],
+  [/chateaux?|chateau fort|forteresses?/, '["historic"~"^(castle|fort)$"]', 'Château'],
+  [/points? de vue|panoramas?|belvederes?/, '["tourism"="viewpoint"]', 'Point de vue'],
+  [/musees?/, '["tourism"="museum"]', 'Musée'],
+  [/monuments?( historiques?)?|patrimoine/, '["heritage"]', 'Monument historique'],
+  [/cascades?|chutes? d.eau/, '["natural"="waterfall"]', 'Cascade'],
+  [/grottes?|gouffres?/, '["natural"="cave_entrance"]', 'Grotte'],
+  [/ruines?|sites? archeologiques?/, '["historic"~"^(ruins|archaeological_site)$"]', 'Ruines'],
+  [/abbayes?|monasteres?|cathedrales?/, '["historic"~"^(monastery|abbey|church)$"]', 'Abbaye / cathédrale'],
   [/\bstations?\b/, '["amenity"="fuel"]', 'Station-service']
 ];
 const POI_BRAND = [
@@ -2705,6 +2722,84 @@ function setQuest(on){ S.ov.quest = on; saveSettings(); torchUI();
   else if (QUEST.layer) map.removeLayer(QUEST.layer);
   syncOv(); toast(on ? 'MomoQuest : le brouillard se lève là où vous passez' : 'MomoQuest masqué'); }
 if (S.ov.quest) { QUEST.layer = new QuestLayer(); QUEST.layer.addTo(map); }
+/* ---------- Patrimoine & à voir (OpenStreetMap + Wikipédia, sans clé) ---------- */
+const VC = { // catégorie : libellé, couleur, icône
+  chateau: ['Château, fort', '#e0a43a', '<path d="M4 21V9h3v3h3V9h4v3h3V9h3v12z"/><path d="M10 21v-4h4v4M4 9V6h3v3M17 9V6h3v3"/>'],
+  monument: ['Monument', '#f2c94c', '<path d="M3 21h18M5 18h14M6 18V10M10 18V10M14 18V10M18 18V10M4 10h16L12 4z"/>'],
+  ruines: ['Ruines, site archéologique', '#c08b6a', '<path d="M3 21h18M5 21V11l3-2v12M11 21V8h3v13M17 21v-7l3 1v6"/>'],
+  culte: ['Édifice religieux', '#d7c3a0', '<path d="M12 2v5M10 4h4M7 21V12l5-5 5 5v9z"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/>'],
+  vue: ['Point de vue', '#4fc3f7', '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'],
+  musee: ['Musée', '#c792ea', '<path d="M3 21h18M4 10h16M12 3l8 5H4z"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/>'],
+  nature: ['Site naturel', '#66d17a', '<path d="M3 20l6-11 4 6 2-3 6 8z"/><path d="M14 5h.01"/>'],
+  attraction: ['À voir', '#ff8a65', '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>']
+};
+const VOIR = { tiles: new Map(), items: new Map(), grp: L.layerGroup(), dots: null, busy: 0, st: '', mk: new Map() };
+function voirCat(t){ const h = t.historic, tr = t.tourism, n = t.natural;
+  if (tr === 'viewpoint') return 'vue'; if (tr === 'museum' || tr === 'gallery') return 'musee';
+  if (/^(castle|fort|manor|citywalls|city_gate|castle_wall)$/.test(h)) return 'chateau';
+  if (/^(ruins|archaeological_site)$/.test(h)) return 'ruines';
+  if (/^(church|monastery|chapel|cathedral|abbey)$/.test(h) || (t.heritage && /^(church|cathedral|chapel|monastery)$/.test(t.building || t.amenity === 'place_of_worship' && 'church' || ''))) return 'culte';
+  if (n || t.waterfall) return 'nature';
+  if (h || t.heritage) return 'monument';
+  return 'attraction'; }
+const voirTile = (lat, lng) => { const n = 1024, s = Math.sin(lat * Math.PI / 180); return [Math.floor((lng + 180) / 360 * n), Math.floor((.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n)]; };
+const tile2lat = y => 180 / Math.PI * Math.atan(Math.sinh(Math.PI - 2 * Math.PI * y / 1024)), tile2lng = x => x / 1024 * 360 - 180;
+async function voirFetch(x, y){ const k = x + ',' + y; if (VOIR.tiles.has(k)) return; VOIR.tiles.set(k, 'loading'); VOIR.busy++; voirStatus();
+  const bb = `${tile2lat(y + 1).toFixed(5)},${tile2lng(x).toFixed(5)},${tile2lat(y).toFixed(5)},${tile2lng(x + 1).toFixed(5)}`;
+  const q = `[out:json][timeout:40][bbox:${bb}];(nwr["historic"~"^(castle|fort|manor|citywalls|city_gate|ruins|archaeological_site|monument|monastery|church|chapel|abbey|aqueduct|tower|tomb|palace)$"]["name"];nwr["heritage"]["name"];nwr["tourism"~"^(viewpoint|museum|gallery|attraction|theme_park|zoo)$"];nwr["natural"~"^(waterfall|cave_entrance|arch|gorge)$"]["name"];nwr["natural"="peak"]["name"]["wikipedia"];nwr["waterway"="waterfall"]["name"];);out center tags;`;
+  try { const j = await overpass(q, 45000);
+    j.elements.forEach(e => { const lat = e.lat ?? (e.center && e.center.lat), lon = e.lon ?? (e.center && e.center.lon), t = e.tags || {}; if (lat == null) return;
+      if (t.tourism === 'viewpoint' && !t.name) t.name = 'Point de vue';
+      if (!t.name) return; const id = e.type[0] + e.id; if (VOIR.items.has(id)) return;
+      VOIR.items.set(id, { id, lat, lon, nom: t.name, cat: voirCat(t), t }); });
+    VOIR.tiles.set(k, 'ok'); }
+  catch(e){ VOIR.tiles.delete(k); VOIR.err = true; }
+  finally { VOIR.busy--; voirStatus(); voirRender(); } }
+function voirLoad(){ if (!S.ov.voir) return; const z = map.getZoom(); if (z < 10) return voirStatus();
+  const b = map.getBounds(), [x0, y0] = voirTile(b.getNorth(), b.getWest()), [x1, y1] = voirTile(b.getSouth(), b.getEast()), todo = [];
+  for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) todo.push([x, y]);
+  if (todo.length > 12) return voirStatus(); VOIR.err = false; todo.forEach(([x, y]) => voirFetch(x, y)); }
+function voirStatus(){ const z = map.getZoom();
+  VOIR.st = VOIR.busy ? 'Chargement des lieux à voir…' : VOIR.err ? 'Le service OpenStreetMap ne répond pas, nouvel essai en bougeant la carte' : z < 10 ? `${VOIR.items.size.toLocaleString('fr-FR')} lieux chargés · zoomez sur une région pour en charger d'autres` : `${VOIR.items.size.toLocaleString('fr-FR')} lieux chargés · OpenStreetMap et Wikipédia`;
+  const el = document.getElementById('voirSt'); if (el) { el.textContent = VOIR.st; el.classList.toggle('bad', !!VOIR.err && !VOIR.busy); } }
+const voirIcon = c => L.divIcon({ className: '', iconSize: [28, 28], iconAnchor: [14, 14], html: `<div class="voir-ic" style="--c:${VC[c][1]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${VC[c][2]}</svg></div>` });
+function voirRender(){ if (!S.ov.voir) return; const z = map.getZoom(), b = map.getBounds().pad(.25);
+  if (!map.getPane('voir')) { map.createPane('voir'); map.getPane('voir').style.zIndex = 455; }
+  if (z < 13) { VOIR.grp.clearLayers(); VOIR.mk.clear(); if (!VOIR.dots) VOIR.dots = L.layerGroup(); if (!map.hasLayer(VOIR.dots)) VOIR.dots.addTo(map); VOIR.dots.clearLayers(); const cv = VOIR.cv || (VOIR.cv = L.canvas({ padding: .2, pane: 'voir' }));
+    VOIR.items.forEach(it => { if (b.contains([it.lat, it.lon])) L.circleMarker([it.lat, it.lon], { renderer: cv, pane: 'voir', radius: z < 11 ? 3 : 4.5, color: '#111', weight: 1, fillColor: VC[it.cat][1], fillOpacity: 1 })
+      .bindTooltip(esc(it.nom), { className: 'pt-tip', direction: 'top' }).on('click', () => { map.setView([it.lat, it.lon], Math.max(z + 2, 14)); }).addTo(VOIR.dots); }); return; }
+  if (VOIR.dots) VOIR.dots.clearLayers(); // marqueurs gardés d'un rendu à l'autre : une fiche ouverte n'est pas détruite quand la carte bouge
+  VOIR.mk.forEach((m, id) => { if (!b.contains(m.getLatLng())) { VOIR.grp.removeLayer(m); VOIR.mk.delete(id); } });
+  VOIR.items.forEach(it => { if (VOIR.mk.has(it.id) || !b.contains([it.lat, it.lon])) return;
+    VOIR.mk.set(it.id, L.marker([it.lat, it.lon], { icon: voirIcon(it.cat), pane: 'voir' }).bindTooltip(esc(it.nom), { className: 'pt-tip', direction: 'top', offset: [0, -14] })
+    .on('click', () => voirOpen(it)).addTo(VOIR.grp)); }); }
+function voirOpen(it){ VOIR.pop = L.popup({ className: 'pp', offset: [0, -10], maxWidth: 290, minWidth: 230, autoPanPadding: [20, 90] }).setLatLng([it.lat, it.lon]).setContent(voirPop(it)).openOn(map); }
+function voirPop(it){ const t = it.t, el = document.createElement('div'), mh = t.heritage || t['heritage:operator'] === 'mhs' || t['ref:mhs'];
+  const sub = [VC[it.cat][0], mh ? 'Monument historique' : '', t.start_date ? 'date : ' + t.start_date : ''].filter(Boolean).join(' · ');
+  el.innerHTML = `<div class="vp-img"></div><div class="pp-t"><b>${esc(it.nom)}</b></div><div class="vp-s">${esc(sub)}</div><div class="pp-n vp-x"></div><div class="pp-w">///${esc(triw(it.lat, it.lon))}</div>
+    <div class="pp-a"><button class="btn pri" data-a="nav">${NAV_IC}Guidage</button><button class="btn" data-a="save" title="Enregistrer dans le carnet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button><a class="btn vp-w" target="_blank" rel="noopener" style="display:none;flex:none;width:40px" title="Wikipédia"><b style="font:700 15px Georgia,serif">W</b></a></div>`;
+  el.onclick = e => { const a = e.target.closest('[data-a]'); if (!a) return; map.closePopup();
+    if (a.dataset.a === 'nav') guideTo(it.lat, it.lon, it.nom); else adrAsk(it.lat, it.lon, it.nom, VC[it.cat][0], it.nom); };
+  voirWiki(it).then(w => { if (!w) return; if (w.img) { const d = el.querySelector('.vp-img'); d.style.backgroundImage = `url("${w.img}")`; d.classList.add('on'); }
+    if (w.txt) el.querySelector('.vp-x').textContent = w.txt; const a = el.querySelector('.vp-w'); a.href = w.url; a.style.display = ''; if (VOIR.pop && VOIR.pop.isOpen()) VOIR.pop.update(); });
+  return el; }
+async function voirWiki(it){ if (it.w !== undefined) return it.w; const t = it.t; let title = null, lang = 'fr';
+  try {
+    if (t.wikipedia) { const m = t.wikipedia.match(/^([a-z-]+):(.+)$/); if (m) { lang = m[1]; title = m[2]; } else title = t.wikipedia; }
+    else if (t.wikidata) { const j = await jget(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${t.wikidata}&props=sitelinks&sitefilter=frwiki&format=json&origin=*`, 6000);
+      const s = j && j.entities && j.entities[t.wikidata] && j.entities[t.wikidata].sitelinks && j.entities[t.wikidata].sitelinks.frwiki; if (s) title = s.title; }
+    if (!title) { const j = await jget(`https://fr.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${it.lat}|${it.lon}&gsradius=300&gslimit=8&format=json&origin=*`, 6000), f = s => fold(s).replace(/[^a-z0-9]/g, '');
+      const n = f(it.nom), g = j && j.query && j.query.geosearch || []; const hit = g.find(x => { const h = f(x.title); return h.includes(n) || n.includes(h); }); if (hit) title = hit.title; }
+    if (!title) return it.w = null;
+    const s = await jget(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`, 6000);
+    return it.w = s && s.type !== 'disambiguation' ? { txt: s.extract ? (s.extract.length > 320 ? s.extract.slice(0, 320).replace(/\s+\S*$/, '') + '…' : s.extract) : '', img: s.thumbnail && s.thumbnail.source, url: s.content_urls && s.content_urls.mobile ? s.content_urls.mobile.page : `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}` } : null;
+  } catch(e){ return null; } }
+function setVoir(on){ S.ov.voir = on; saveSettings();
+  if (on) { if (!map.getPane('voir')) { map.createPane('voir'); map.getPane('voir').style.zIndex = 455; } VOIR.grp.addTo(map); if (VOIR.dots) VOIR.dots.addTo(map); voirLoad(); voirRender(); if (map.getZoom() < 10) toast('Zoomez sur une région pour charger les lieux à voir'); }
+  else { map.removeLayer(VOIR.grp); VOIR.grp.clearLayers(); VOIR.mk.clear(); if (VOIR.dots) map.removeLayer(VOIR.dots); }
+  syncOv(); }
+map.on('moveend', () => { if (S.ov.voir) { voirLoad(); voirRender(); voirStatus(); } });
+if (S.ov.voir) setTimeout(() => setVoir(true), 0);
 $('#zIn').onclick = () => map.zoomIn(); $('#zOut').onclick = () => map.zoomOut();
 function updZoom(){ const cpx = cellPxAt(map.getCenter().lat); $('#stZoom').textContent = `z ${map.getZoom()}` + (S.grid && cpx < S.gridMin ? ' · zoomez pour la grille' : ''); }
 
@@ -2757,6 +2852,7 @@ const GUIDE = [
   <h3>Guidage GPS</h3><p><b>Guidage</b> ouvre la vue 3D inclinée : Momo suit votre position GPS le long de l'itinéraire, la carte tourne dans le sens de la marche, et le bandeau vert annonce la prochaine manœuvre (avec la voix, désactivable). Hors itinéraire, le trajet est recalculé. Sans GPS (sur ordinateur), le bouton <b>Simulation</b> fait rouler Momo le long du parcours. Si vous déplacez la carte, le bouton flèche recentre sur Momo.</p>
   <h3>Vue 3D</h3><p>Le bouton <b>3D</b> au-dessus du zoom ouvre la carte inclinée avec le relief : boussole (nord en haut), rotation à gauche ou à droite, inclinaison plus ou moins forte, relief activable. À la souris : clic droit maintenu (ou Ctrl + glisser) pour tourner et incliner ; à deux doigts sur téléphone.</p>
   <h3>Modifier un objet</h3><p>Choisissez le <b>calque d'édition</b> (Dessins ou un calque importé, KMZ compris) : ses objets sont listés et les nouveaux dessins y sont ajoutés. Avec <b>Modifier la forme d'un objet</b>, cliquez un objet : glissez ses sommets, glissez un point milieu pour en créer un, double-clic sur un sommet pour le supprimer.</p>`],
+ ['À voir', `<h3>Patrimoine & à voir</h3><p>Calques → Superpositions → Tourisme & patrimoine → <b>Patrimoine & à voir</b> affiche, partout en France, les châteaux et forts, monuments historiques, édifices religieux, ruines et sites archéologiques, points de vue, musées et sites naturels (cascades, grottes, sommets connus). Les lieux se chargent quand vous zoomez sur une région ; en vue éloignée ce sont des points de couleur, de près des icônes.</p><p>Touchez un lieu : photo et résumé Wikipédia quand il en existe, son Trimo, et les boutons <b>Guidage</b>, enregistrer dans le carnet et Wikipédia. La recherche comprend aussi « château gap », « point de vue », « musée », « cascade », « monuments historiques 20 km »… Données OpenStreetMap et Wikipédia, sans clé.</p>`],
  ['MomoQuest', `<h3>MomoQuest, le brouillard de guerre</h3><p>Activez <b>MomoQuest</b> dans Calques → Superpositions → MomoMAP : la carte se couvre d'un brouillard qui se lève partout où vous êtes passé avec l'appli ouverte (une bande d'environ 100 m autour de votre trajet). La surface explorée s'affiche sous l'interrupteur, en km² et en pourcentage du monde et de la France.</p><p>L'exploration est enregistrée même quand le brouillard est masqué, avec vos paramètres sur cet appareil. Les positions trop imprécises et la simulation de guidage ne comptent pas.</p>`],
  ['Recherche & carnet', `<h3>Lieux et commerces</h3><p>Tapez une enseigne ou un type de lieu, avec ou sans commune : « macdo aubagne », « pharmacie gap », « station service 50 km », « leroy merlin dans un rayon de 30 km ». Sans commune, la recherche se fait autour de vous. Les résultats (OpenStreetMap) sont listés du plus proche au plus loin et numérotés sur la carte ; touchez-en un pour <b>Chercher</b>, lancer le <b>Guidage</b> ou l'enregistrer.</p><h3>Carnet d'adresses</h3><p>Le bouton marque-page d'une adresse, ou l'appui long sur la carte → « Enregistrer l'adresse », la range en <b>Domicile</b>, <b>Travail</b> ou dans le carnet. Touchez la barre de recherche vide : vos adresses s'affichent pour y aller ou lancer le guidage en un geste. Le carnet se gère dans <b>Mes points</b> et reste sur cet appareil.</p><p>L'appui long sur la carte propose aussi <b>Guidage jusqu'ici</b>.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
@@ -2800,7 +2896,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 15:13';
+const APP_VER = '15/11/2026 16:16';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
