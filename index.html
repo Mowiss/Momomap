@@ -780,7 +780,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 13:01</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 13:09</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -2643,21 +2643,25 @@ function rtUseMe(silent){ if (GEO.last) return rtSet('a', GEO.last.lat, GEO.last
   if (!silent) { if (GEO.id == null) { S.geoOn = true; saveSettings(); bindSettings(); geoStart(); } toast('Recherche de votre position…'); GEO.pendingA = true; } }
 GEO.subs.add(f => { if (GEO.pendingA) { GEO.pendingA = false; rtSet('a', f.lat, f.lng, 'Ma position'); } });
 /* ---------- MomoQuest : brouillard de guerre, éclairci là où l'on passe ---------- */
-const QZ = 18, QN = 2 ** QZ, Q_EARTH = 510072000, Q_FR = 551695;
+const QZ = 19, QN = 2 ** QZ, Q_EARTH = 510072000, Q_FR = 551695;
 const QUEST = { set: new Set(), area: 0, last: null, saveT: 0, layer: null };
-(() => { const q = S.quest; if (q && q.c) { q.c.split(',').forEach(k => { if (k) QUEST.set.add(parseInt(k, 36)); }); QUEST.area = q.a || 0; } })();
-const qCell = (lat, lng) => { const s = Math.sin(lat * Math.PI / 180); return [Math.floor((lng + 180) / 360 * QN), Math.floor((.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * QN)]; };
+(() => { const q = S.quest; if (!q || !q.c) return; const old = (q.v || 1) < 2, N18 = 2 ** 18; // v1 = carrés z18 : chacun devient ses 4 sous-carrés z19
+  q.c.split(',').forEach(k => { if (!k) return; const n = parseInt(k, 36); if (!old) return QUEST.set.add(n); const x = Math.floor(n / N18), y = n - x * N18;
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) QUEST.set.add((2 * x + i) * QN + 2 * y + j); });
+  QUEST.area = q.a || 0; })();
+const qCell = (lat, lng) => { const s = Math.sin(lat * Math.PI / 180); return [(lng + 180) / 360 * QN, (.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * QN]; };
 const qLatY = y => 180 / Math.PI * Math.atan(Math.sinh(Math.PI - 2 * Math.PI * (y + .5) / QN));
 function qAdd(x, y){ const k = x * QN + y; if (QUEST.set.has(k)) return false; QUEST.set.add(k);
   const w = 40075.016686 / QN * Math.cos(qLatY(y) * Math.PI / 180); QUEST.area += w * w; return true; }
-function qReveal(lat, lng){ const [x, y] = qCell(lat, lng); let n = 0;
-  for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (qAdd(x + dx, y + dy)) n++; return n; }
+function qReveal(lat, lng){ const [fx, fy] = qCell(lat, lng), x = Math.floor(fx), y = Math.floor(fy), cs = 40075016.686 / QN * Math.cos(lat * Math.PI / 180); let n = 0;
+  for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { // bande d'environ 100 m : carrés dont le centre est à moins de 50 m
+    const d = Math.hypot(x + dx + .5 - fx, y + dy + .5 - fy) * cs; if ((d <= 50 || (!dx && !dy)) && qAdd(x + dx, y + dy)) n++; } return n; }
 function qSave(now){ clearTimeout(QUEST.saveT); QUEST.saveT = setTimeout(() => {
-  S.quest = { v: 1, c: [...QUEST.set].map(k => k.toString(36)).join(','), a: +QUEST.area.toFixed(4) }; saveSettings(); }, now ? 0 : 8000); }
+  S.quest = { v: 2, c: [...QUEST.set].map(k => k.toString(36)).join(','), a: +QUEST.area.toFixed(4) }; saveSettings(); }, now ? 0 : 8000); }
 GEO.subs.add(f => {
   if ((g3.on && g3.sim) || f.acc > 60) return;
   let n = 0; const p = QUEST.last;
-  if (p) { const d = geoDist(p, f); if (d > 60 && d < 3000 && f.t - p.t < 180000) { const st = Math.ceil(d / 50); for (let i = 1; i < st; i++) n += qReveal(p.lat + (f.lat - p.lat) * i / st, p.lng + (f.lng - p.lng) * i / st); } }
+  if (p) { const d = geoDist(p, f); if (d > 60 && d < 3000 && f.t - p.t < 180000) { const st = Math.ceil(d / 25); for (let i = 1; i < st; i++) n += qReveal(p.lat + (f.lat - p.lat) * i / st, p.lng + (f.lng - p.lng) * i / st); } }
   n += qReveal(f.lat, f.lng); QUEST.last = f;
   if (n) { qSave(); qStats(); if (QUEST.layer) QUEST.layer.draw(); } });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && QUEST.saveT) qSave(true); });
@@ -2744,7 +2748,7 @@ const GUIDE = [
   <h3>Guidage GPS</h3><p><b>Guidage</b> ouvre la vue 3D inclinée : Momo suit votre position GPS le long de l'itinéraire, la carte tourne dans le sens de la marche, et le bandeau vert annonce la prochaine manœuvre (avec la voix, désactivable). Hors itinéraire, le trajet est recalculé. Sans GPS (sur ordinateur), le bouton <b>Simulation</b> fait rouler Momo le long du parcours. Si vous déplacez la carte, le bouton flèche recentre sur Momo.</p>
   <h3>Vue 3D</h3><p>Le bouton <b>3D</b> au-dessus du zoom ouvre la carte inclinée avec le relief : boussole (nord en haut), rotation à gauche ou à droite, inclinaison plus ou moins forte, relief activable. À la souris : clic droit maintenu (ou Ctrl + glisser) pour tourner et incliner ; à deux doigts sur téléphone.</p>
   <h3>Modifier un objet</h3><p>Choisissez le <b>calque d'édition</b> (Dessins ou un calque importé, KMZ compris) : ses objets sont listés et les nouveaux dessins y sont ajoutés. Avec <b>Modifier la forme d'un objet</b>, cliquez un objet : glissez ses sommets, glissez un point milieu pour en créer un, double-clic sur un sommet pour le supprimer.</p>`],
- ['MomoQuest', `<h3>MomoQuest, le brouillard de guerre</h3><p>Activez <b>MomoQuest</b> dans Calques → Superpositions → MomoMAP : la carte se couvre d'un brouillard qui se lève partout où vous êtes passé avec l'appli ouverte (une bande d'environ 300 m autour de votre trajet). La surface explorée s'affiche sous l'interrupteur, en km² et en pourcentage du monde et de la France.</p><p>L'exploration est enregistrée même quand le brouillard est masqué, avec vos paramètres sur cet appareil. Les positions trop imprécises et la simulation de guidage ne comptent pas.</p>`],
+ ['MomoQuest', `<h3>MomoQuest, le brouillard de guerre</h3><p>Activez <b>MomoQuest</b> dans Calques → Superpositions → MomoMAP : la carte se couvre d'un brouillard qui se lève partout où vous êtes passé avec l'appli ouverte (une bande d'environ 100 m autour de votre trajet). La surface explorée s'affiche sous l'interrupteur, en km² et en pourcentage du monde et de la France.</p><p>L'exploration est enregistrée même quand le brouillard est masqué, avec vos paramètres sur cet appareil. Les positions trop imprécises et la simulation de guidage ne comptent pas.</p>`],
  ['Recherche & carnet', `<h3>Lieux et commerces</h3><p>Tapez une enseigne ou un type de lieu, avec ou sans commune : « macdo aubagne », « pharmacie gap », « station service 50 km », « leroy merlin dans un rayon de 30 km ». Sans commune, la recherche se fait autour de vous. Les résultats (OpenStreetMap) sont listés du plus proche au plus loin et numérotés sur la carte ; touchez-en un pour <b>Chercher</b>, lancer le <b>Guidage</b> ou l'enregistrer.</p><h3>Carnet d'adresses</h3><p>Le bouton marque-page d'une adresse, ou l'appui long sur la carte → « Enregistrer l'adresse », la range en <b>Domicile</b>, <b>Travail</b> ou dans le carnet. Touchez la barre de recherche vide : vos adresses s'affichent pour y aller ou lancer le guidage en un geste. Le carnet se gère dans <b>Mes points</b> et reste sur cet appareil.</p><p>L'appui long sur la carte propose aussi <b>Guidage jusqu'ici</b>.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
   <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de Grillewords. Chaque point garde ses coordonnées et son Trimo. Un clic dans la liste recentre la carte dessus.</p>`],
@@ -2787,7 +2791,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 13:01';
+const APP_VER = '15/11/2026 13:09';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
