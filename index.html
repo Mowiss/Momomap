@@ -176,6 +176,9 @@ input[type=range]{accent-color:var(--acc);width:130px}
 #adrbox .ab-k .btn{height:44px;font-size:14px}
 #adrbox .ab-k .btn svg{width:18px;height:18px}
 #adrbox .ab-n{display:flex;gap:8px}#adrbox .ab-n input{flex:1;font-size:14px;padding:9px 10px}
+.adr-pin{width:34px;height:40px;position:relative}
+.adr-pin:before{content:'';position:absolute;left:2px;top:0;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#14161b;border:2.5px solid var(--acc);box-sizing:border-box;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.adr-pin svg{position:absolute;left:8px;top:6px;width:18px;height:18px;color:var(--acc)}
 .pt .ic{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;background:var(--panel2);color:var(--acc)}.pt .ic svg{width:17px;height:17px}
 .pt .lb{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pt.unset .n{color:var(--mut)}
@@ -723,7 +726,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:21</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:25</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -849,7 +852,7 @@ setTimeout(done,4700);
 </div>
 <div id="adrbox"><div class="ab-c">
   <div class="ab-h">Enregistrer l'adresse</div><div class="ab-l" id="abLbl"></div>
-  <div class="ab-k"><button class="btn" data-k="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>Domicile</button><button class="btn" data-k="work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Travail</button></div>
+  <div class="ab-k"><button class="btn" data-k="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/><path d="M16 6V4h2v3.6"/></svg>Domicile</button><button class="btn" data-k="work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/></svg>Travail</button></div>
   <div class="ab-n"><input class="f" id="abName" placeholder="Nom dans le carnet"><button class="btn pri" data-k="list" style="flex:none;padding:0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Carnet</button></div>
   <div style="display:flex;justify-content:flex-end"><button class="btn" id="abX" style="flex:none;padding:0 14px">Annuler</button></div>
 </div></div>
@@ -1456,12 +1459,14 @@ function renderPoints(){
     .on('click', () => { const r = MM3.cellOfWords(p.mots.split('.')); if (r.cell) select(r.cell); }).addTo(ptLayer));
   $('#ptCount').textContent = points.length ? `(${points.length})` : '';
   $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><div class="m"><div class="n">${esc(p.nom)}</div><div class="w">///${esc(p.mots)}</div></div>
+    <button class="ib" data-nav="${i}" title="Guidage">${NAV_IC}</button>
     <button class="ib" data-ren="${i}" title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
     <button class="ib" data-del="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`).join('')
     : `<div class="empty">Aucun point favori pour l'instant.</div>`;
 }
 $('#ptList').onclick = e => {
-  const d = e.target.closest('[data-del]'), r = e.target.closest('[data-ren]'), it = e.target.closest('.pt');
+  const d = e.target.closest('[data-del]'), r = e.target.closest('[data-ren]'), it = e.target.closest('.pt'), g = e.target.closest('[data-nav]');
+  if (g) { const p = points[+g.dataset.nav]; toggleDrawer('#dPoints'); return guideTo(p.lat, p.lon, p.nom); }
   if (d) { const p = points[+d.dataset.del]; if (confirm(`Supprimer le point « ${p.nom} » ?`)) { points.splice(+d.dataset.del, 1); changed(); } return; }
   if (r) { const p = points[+r.dataset.ren], n = prompt('Nouveau nom :', p.nom); if (n && n.trim()) { p.nom = n.trim(); changed(); } return; }
   if (it) { const p = points[+it.dataset.i]; map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 18), { duration: .6 }); }
@@ -1478,7 +1483,7 @@ function addFav(lat, lon, nom, silent){
   if (!silent) { changed(); toast(`« ${nom} » ajouté à Mes points`); } }
 /* ---------- carnet d'adresses ---------- */
 const ADR = Object.assign({ home: null, work: null, list: [] }, load('adr') || {});
-const ADR_IC = { home: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>', work: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>', list: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>' };
+const ADR_IC = { home: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/><path d="M16 6V4h2v3.6"/></svg>', work: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/></svg>', list: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>' };
 const NAV_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>';
 function adrEntries(){ const o = [];
   if (ADR.home) o.push({ ...ADR.home, k: 'home', nom: 'Domicile' }); if (ADR.work) o.push({ ...ADR.work, k: 'work', nom: 'Travail' });
@@ -1503,7 +1508,15 @@ $('#adrbox').onclick = e => { if (e.target.id === 'adrbox' || e.target.closest('
 $('#abName').onkeydown = e => { if (e.key === 'Enter') $('#adrbox [data-k="list"]').click(); };
 $('#pkSave').onclick = () => { if (!place) return; adrAsk(place.lat, place.lon, $('#pkName').textContent, $('#pkCtx').textContent, place.label); };
 function adrStore(){ store('adr', ADR); renderAdr(); }
-function renderAdr(){
+const ADR_GRP = L.layerGroup().addTo(map);
+const ADR_MAP = { home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/><path d="M16 6V4h2v3.6"/>',
+  work: '<path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/>' };
+const adrIcon = k => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ADR_MAP[k]}</svg></div>` });
+function renderAdrMap(){ ADR_GRP.clearLayers();
+  ['home', 'work'].forEach(k => { const a = ADR[k]; if (!a) return; const nom = k === 'home' ? 'Domicile' : 'Travail';
+    L.marker([a.lat, a.lon], { icon: adrIcon(k), zIndexOffset: 500 }).bindTooltip(`<b>${nom}</b><br>${esc(a.label || '')}`, { className: 'pt-tip', direction: 'top', offset: [0, -36] })
+      .on('click', () => adrGo({ ...a, nom })).addTo(ADR_GRP); }); }
+function renderAdr(){ renderAdrMap();
   const row = (e, k, i) => { const set = !!e, d = set ? e : { nom: k === 'home' ? 'Domicile' : 'Travail' };
     return `<div class="pt${set ? '' : ' unset'}" data-ak="${k}" data-ai="${i ?? ''}"><span class="ic">${ADR_IC[k].replace('class="sgi" ', '')}</span><div class="m"><div class="n">${esc(k === 'list' ? d.nom : k === 'home' ? 'Domicile' : 'Travail')}</div><div class="lb">${set ? esc(d.label || '') : 'Non défini — appui long sur la carte ou bouton marque-page d\'une adresse'}</div></div>`
       + (set ? `<button class="ib" data-anav title="Guidage">${NAV_IC}</button>` + (k === 'list' ? `<button class="ib" data-aren title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>` : '')
@@ -2587,7 +2600,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:21';
+const APP_VER = '15/11/2026 12:25';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
