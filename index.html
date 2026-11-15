@@ -190,6 +190,16 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .pp-w{margin-top:6px;font:12px var(--mono);color:var(--acc)}
 .pp-a{display:flex;gap:6px;margin-top:10px}.pp-a .btn{height:34px}.pp-a .btn:last-child{flex:none;width:40px}
 .pt-tip .ptn{color:var(--mut);display:inline-block;max-width:240px;white-space:normal}
+.st-open{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0 4px;padding:8px 12px 8px 8px;border:1px solid var(--line2);border-radius:12px;background:var(--panel2);cursor:pointer;color:var(--tx);text-align:left}
+.st-open:hover{border-color:var(--acc)}
+.st-open .st-mini{width:46px;height:56px;flex:none;border-radius:9px;background:#0f1115;overflow:hidden}
+.st-open .st-mini{position:relative}.st-open .st-mini .momo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.62)}
+.st-open .st-t{flex:1;display:flex;flex-direction:column}.st-open .st-t b{font-size:14.5px}.st-open .st-t span{font-size:12.5px;color:var(--mut)}
+.st-open>svg{width:18px;height:18px;color:var(--mut)}
+#stbox{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px}
+#stbox.on{display:flex}
+#stbox .ab-c{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:12px 14px 14px;width:min(440px,100%);max-height:92vh;overflow:auto}
+#stbox .ab-h{display:flex;align-items:center;font-weight:600;font-size:16px;font-family:var(--logo)}
 #ptedit{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
 #ptedit.on{display:flex}
 #ptedit .ab-c{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px;width:min(420px,100%);display:flex;flex-direction:column;gap:9px;max-height:92vh;overflow:auto}
@@ -409,10 +419,10 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 .mo-body .mb-cap{top:0;height:46px}
 .mo-body .mb-eyes{top:25.5px;height:20.6px}
 .mo-body .mb-hat{position:absolute;left:-4.9px;top:-14.7px;width:61.8px;height:41.2px;overflow:visible;transform:scale(1.12);transform-origin:50% 88%}
-#studio .st-prev{display:flex;align-items:center;gap:16px;padding:6px 4px 12px}
+#studio .st-prev{display:flex;align-items:center;gap:16px;padding:22px 4px 12px}
 #studio .st-prev .momo{transform:scale(1.5);transform-origin:50% 60%;margin:14px 14px 6px}
 #studio .st-prev b{display:block;font-size:15px}#studio .st-prev span{display:block;font-size:12.5px;color:var(--mut)}
-#studio .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px}
+#studio .st-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 #studio .st-grid button{height:72px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;display:grid;place-items:center;overflow:hidden;padding:0}
 #studio .st-grid button.on{border-color:var(--acc);background:#3a3610}
 #studio .st-grid .momo{transform:scale(.62) translateY(-6px);transform-origin:50% 50%}
@@ -762,10 +772,9 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:46</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:51</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
-    <div class="lbl">Studio MOMO</div>
-    <div id="studio"></div>
+    <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
     <div class="lbl">Ma position</div>
@@ -889,6 +898,10 @@ setTimeout(done,4700);
   </div>
   <div id="pBody"></div>
 </div>
+<div id="stbox"><div class="ab-c">
+  <div class="ab-h">Studio MOMO<button class="ib" id="stX" title="Fermer" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="studio"></div>
+</div></div>
 <div id="ptedit"><div class="ab-c">
   <div class="ab-h">Point favori <span id="peW"></span></div>
   <label for="peNom">Titre</label><input class="f" id="peNom" placeholder="Nom du point">
@@ -2279,9 +2292,6 @@ const HO = 'stroke="#14161b" stroke-width="4" stroke-linejoin="round"';
 const HATS = [
   ['cap', 'Casquette bleue', 'Originale', { f: '' }],
   ['cap-r', 'Casquette rouge', '', { f: 'hue-rotate(150deg) saturate(1.3)' }],
-  ['cap-v', 'Casquette verte', '', { f: 'hue-rotate(-95deg)' }],
-  ['cap-o', 'Casquette orange', '', { f: 'hue-rotate(180deg) saturate(1.6) brightness(1.15)' }],
-  ['cap-p', 'Casquette violette', '', { f: 'hue-rotate(50deg)' }],
   ['chantier', 'Casque de chantier', 'Sécurité avant tout', `<path d="M28 100 Q26 22 105 18 Q184 22 182 100Z" fill="#ffcc00" ${HO}/><path d="M105 19V95M70 26Q62 60 64 96M140 26Q148 60 146 96" stroke="#d9a800" stroke-width="6" fill="none"/><rect x="6" y="90" width="198" height="16" rx="8" fill="#f2b900" ${HO}/>`],
   ['melon', 'Chapeau melon', '', `<path d="M42 96 Q40 26 105 24 Q170 26 168 96Z" fill="#26272c" ${HO}/><rect x="42" y="78" width="126" height="16" fill="#5a1d24"/><ellipse cx="105" cy="99" rx="92" ry="11" fill="#1d1e22" ${HO}/>`],
   ['haut', 'Haut-de-forme', 'Pour les grandes occasions', `<rect x="55" y="-42" width="100" height="138" rx="6" fill="#1b1c20" ${HO}/><ellipse cx="105" cy="-42" rx="50" ry="8" fill="#2c2d33" ${HO}/><rect x="55" y="68" width="100" height="20" fill="#b3172c"/><ellipse cx="105" cy="99" rx="94" ry="11" fill="#1b1c20" ${HO}/>`],
@@ -2300,10 +2310,13 @@ const MO_EYES = 'data:image/png;base64,' + 'iVBORw0KGgoAAAANSUhEUgAAANQAAABUCAYA
 const hatOf = id => HATS.find(h => h[0] === id) || HATS[0];
 function momoHead(id){ const h = hatOf(id), d = h[3];
   if (typeof d === 'object') return `<img class="mb-cap" alt="" src="${MO_BODY}"${d.f ? ` style="filter:${d.f}"` : ''}>`;
-  return `<img class="mb-eyes" alt="" src="${MO_EYES}">${d ? `<svg class="mb-hat" viewBox="-20 -60 252 168">${d}</svg>` : ''}`; }
+  return `<img class="mb-eyes" alt="" src="${MO_EYES}">${d ? `<svg class="mb-hat" viewBox="-1 -60 252 168">${d}</svg>` : ''}`; }
 const momoHTML = id => `<div class="mo"><div class="mo-sh"></div><img class="mo-leg" alt="" src="${MO_LEG}"><div class="mo-body">${momoHead(id || S.hat)}</div></div>`;
-function setHat(id){ S.hat = id; saveSettings(); renderStudio(); if (momoMk) momoMk.getElement().innerHTML = momoHTML(); }
+function setHat(id){ S.hat = id; saveSettings(); renderStudio(); renderStOpen(); if (momoMk) momoMk.getElement().innerHTML = momoHTML(); }
 document.addEventListener('click', e => { const b = e.target.closest('#studio [data-hat]'); if (b) setHat(b.dataset.hat); });
+function renderStOpen(){ const m = $('#stOpen .st-mini'); if (!m) return; m.innerHTML = `<div class="momo">${momoHTML()}</div>`; $('#stHat').textContent = hatOf(S.hat)[1]; }
+$('#stOpen').onclick = () => { renderStudio(); $('#stbox').classList.add('on'); };
+$('#stbox').onclick = e => { if (e.target.id === 'stbox' || e.target.closest('#stX')) $('#stbox').classList.remove('on'); };
 function renderStudio(){ const el = $('#studio'); if (!el) return; const h = hatOf(S.hat);
   el.innerHTML = `<div class="st-prev"><div class="momo walk" style="--sp:.5s">${momoHTML()}</div><div><b>${esc(h[1])}</b><span>${esc(h[2] || '')}</span><span class="dim">${HATS.indexOf(h) + 1} / ${HATS.length} chapeaux</span></div></div>
     <div class="st-grid">${HATS.map(x => `<button class="${x[0] === h[0] ? 'on' : ''}" data-hat="${x[0]}" title="${esc(x[1])}"><div class="momo">${momoHTML(x[0])}</div></button>`).join('')}</div>`; }
@@ -2709,7 +2722,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:46';
+const APP_VER = '15/11/2026 12:51';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
@@ -2718,7 +2731,7 @@ $('#updX').onclick = () => $('#upd').classList.remove('on');
 setTimeout(checkUpdate, 4000); setInterval(checkUpdate, 10 * 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
 /* ---------- démarrage ---------- */
-bindSettings(); setBase(S.base); renderStudio(); renderNavOpt(); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); if (S.radars) setRadars(true); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
+bindSettings(); setBase(S.base); renderStOpen(); renderNavOpt(); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); if (S.radars) setRadars(true); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
   const ws = parseWords(h);
