@@ -74,6 +74,21 @@ svg{display:block}
 #search input::placeholder{color:var(--dim)}
 #sugg{position:absolute;top:50px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:none}
 #sugg.on{display:block}
+#poi{position:absolute;top:50px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;display:none;flex-direction:column;max-height:min(60vh,520px);overflow:hidden}
+#poi.on{display:flex}
+.poi-h{display:flex;align-items:center;gap:8px;padding:10px 8px 8px 14px;border-bottom:1px solid var(--line)}
+#poiL{overflow:auto;flex:1}
+#poiL .it{display:flex;gap:10px;align-items:center;padding:9px 14px;cursor:pointer;border-top:1px solid var(--line)}
+#poiL .it:first-child{border-top:0}#poiL .it:hover{background:var(--panel2)}
+#poiL .n{width:22px;height:22px;flex:none;border-radius:50%;background:var(--acc);color:#111;font:700 11px var(--ui);display:grid;place-items:center}
+#poiL .a2{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+#poiL .a2 b{font-weight:500;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#poiL .a2 span{color:var(--mut);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#poiL .a2 .h{font-size:11.5px;opacity:.8}
+#poiL .d{color:var(--mut);font-size:12px;white-space:nowrap;flex:none}
+.poi-pin{width:26px;height:32px;position:relative}
+.poi-pin:before{content:'';position:absolute;left:1px;top:0;width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--acc);border:2px solid #111;box-sizing:border-box}
+.poi-pin b{position:absolute;left:0;top:3px;width:26px;text-align:center;font:700 11px var(--ui);color:#111}
 #pick{position:absolute;top:50px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;display:none}
 #pick.on{display:block}
 .pk-h{display:flex;align-items:flex-start;gap:8px}
@@ -152,6 +167,18 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .xl{display:inline-block;margin-top:8px;color:var(--acc);font-size:12.5px;text-decoration:none}
 .xl:hover{text-decoration:underline}
 .leaflet-container.qmode{cursor:help}
+#adrbox{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+#adrbox.on{display:flex}
+#adrbox .ab-c{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px;width:min(380px,100%);display:flex;flex-direction:column;gap:10px}
+#adrbox .ab-h{font-weight:600;font-size:15px}
+#adrbox .ab-l{color:var(--mut);font-size:13px;line-height:1.35}
+#adrbox .ab-k{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#adrbox .ab-k .btn{height:44px;font-size:14px}
+#adrbox .ab-k .btn svg{width:18px;height:18px}
+#adrbox .ab-n{display:flex;gap:8px}#adrbox .ab-n input{flex:1;font-size:14px;padding:9px 10px}
+.pt .ic{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;background:var(--panel2);color:var(--acc)}.pt .ic svg{width:17px;height:17px}
+.pt .lb{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt.unset .n{color:var(--mut)}
 #ctxm{position:absolute;z-index:1500;display:none;flex-direction:column;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:4px;min-width:210px}
 #ctxm.on{display:flex}
 #ctxm button{background:none;border:0;text-align:left;padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px}
@@ -577,11 +604,13 @@ setTimeout(done,4700);
       <button class="ib" id="qclear" title="Effacer" style="width:32px;height:32px;display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="sugg"></div>
+    <div id="poi"><div class="poi-h"><div class="pk-t"><b id="poiT"></b><span id="poiW"></span></div><button class="ib" id="poiX" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="poiL"></div></div>
     <div id="pick">
       <div class="pk-h"><div class="pk-t"><b id="pkName"></b><span id="pkCtx"></span></div><button class="ib" id="pkX" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="pk-a">
         <button class="btn" id="pkSee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Chercher</button>
         <button class="btn pri" id="pkNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>Guidage</button>
+        <button class="btn" id="pkSave" title="Enregistrer l'adresse" style="flex:none;width:48px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
         <button class="btn" id="pk3d" title="Voir le lieu en 3D" style="flex:none;width:48px"><b style="font:700 12px var(--ui)">3D</b></button>
       </div>
     </div>
@@ -620,8 +649,8 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dPoints">
-  <div class="dh"><span>Points favoris <span id="ptCount" class="dim"></span></span><button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <div class="db"><div id="ptList"></div><p class="hint">Clic droit sur la carte (appui long sur téléphone) → « Ajouter aux favoris ici ».</p></div>
+  <div class="dh"><span>Mes adresses et points <span id="ptCount" class="dim"></span></span><button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="db"><div class="lbl">Carnet d'adresses</div><div id="adrList"></div><div class="lbl">Points favoris</div><div id="ptList"></div><p class="hint">Clic droit sur la carte (appui long sur téléphone) → « Ajouter aux favoris ici ».</p></div>
 </div>
 
 <div class="drawer" id="dDraw">
@@ -694,7 +723,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:03</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:14</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -817,9 +846,17 @@ setTimeout(done,4700);
   </div>
   <div id="pBody"></div>
 </div>
+<div id="adrbox"><div class="ab-c">
+  <div class="ab-h">Enregistrer l'adresse</div><div class="ab-l" id="abLbl"></div>
+  <div class="ab-k"><button class="btn" data-k="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>Domicile</button><button class="btn" data-k="work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Travail</button></div>
+  <div class="ab-n"><input class="f" id="abName" placeholder="Nom dans le carnet"><button class="btn pri" data-k="list" style="flex:none;padding:0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Carnet</button></div>
+  <div style="display:flex;justify-content:flex-end"><button class="btn" id="abX" style="flex:none;padding:0 14px">Annuler</button></div>
+</div></div>
 <div id="ctxm">
+  <button data-c="nav">Guidage jusqu'ici</button>
   <button data-c="parcel">Interroger la parcelle ici</button>
   <button data-c="fav">Ajouter aux favoris ici</button>
+  <button data-c="adr">Enregistrer l'adresse (domicile, travail, carnet)</button>
   <button data-c="words">Trois mots de ce point</button>
   <button data-c="xy">Copier les coordonnées</button>
 </div>
@@ -1218,9 +1255,9 @@ sugg.addEventListener('pointerdown', e => { const d = e.target.closest('[data-i]
 sugg.addEventListener('pointerup', e => { const d = e.target.closest('[data-i]'); if (d && d === sDown) { e.preventDefault(); sDown = null; q.blur(); pick(+d.dataset.i); } sDown = null; });
 sugg.addEventListener('pointercancel', () => { sDown = null; });
 $('#qGo').onclick = () => submitSearch();
-q.addEventListener('input', () => { pickClose(); $('#qclear').style.display = q.value ? 'grid' : 'none'; clearTimeout(sTimer); sTimer = setTimeout(liveSearch, 180); });
+q.addEventListener('input', () => { pickClose(); $('#poi').classList.remove('on'); $('#qclear').style.display = q.value ? 'grid' : 'none'; clearTimeout(sTimer); sTimer = setTimeout(liveSearch, 180); });
 q.addEventListener('blur', () => setTimeout(() => { if (!sDown) sugg.classList.remove('on'); }, 150));
-q.addEventListener('focus', () => sItems.length && sugg.classList.add('on'));
+q.addEventListener('focus', () => { if (!q.value.trim()) { pickClose(); showSugg(adrItems('')); } else if (sItems.length) sugg.classList.add('on'); });
 $('#qclear').onclick = () => { q.value = ''; showSugg([]); $('#qclear').style.display = 'none'; q.focus(); };
 q.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!sItems.length) return; sIdx = (sIdx + (e.key === 'ArrowDown' ? 1 : -1) + sItems.length) % sItems.length;
@@ -1231,7 +1268,7 @@ let searchMk = null, place = null;
 function placeChoice(lat, lon, label, ctx, z, full){ place = { lat, lon, label: full || label, ctx, z: z || 18 }; showSugg([]);
   $('#pkName').textContent = label; $('#pkCtx').textContent = ctx || `${lat.toFixed(5)}, ${lon.toFixed(5)}`; $('#pkSee').style.display = ''; $('#pick').classList.add('on'); }
 function pickClose(){ $('#pick').classList.remove('on'); }
-$('#pkX').onclick = () => { pickClose(); place = null; if (searchMk) { map.removeLayer(searchMk); searchMk = null; } };
+$('#pkX').onclick = () => { pickClose(); place = null; if (POI.items.length) $('#poi').classList.add('on'); if (searchMk) { map.removeLayer(searchMk); searchMk = null; } };
 $('#pkSee').onclick = () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); $('#pkSee').style.display = 'none'; };
 $('#pk3d').onclick = async () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); pickClose(); await open3D(false); if (v3) v3.easeTo({ center: [place.lon, place.lat], zoom: 17, pitch: 60, bearing: -20, duration: 1500 }); };
 $('#pkNav').onclick = () => { if (place) guideTo(place.lat, place.lon, place.label); };
@@ -1264,12 +1301,13 @@ function wordsItems(t){
       go: () => { q.value = '///' + full + (parts.length < 3 ? '.' : ''); q.focus(); liveSearch(); } }; });
 }
 async function liveSearch(){
-  const t = q.value.trim(), seq = ++sSeq; if (!t) return showSugg([]);
+  const t = q.value.trim(), seq = ++sSeq; if (!t) return showSugg(document.activeElement === q ? adrItems('') : []);
   if (t.startsWith('/') || /^[^\s\d]+\.[^\s\d]*/.test(t)) return showSugg(wordsItems(t));
   const c = parseCoords(t); if (c) return showSugg([{ html: `<span class="a">${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}</span><span class="b">${c.kind}</span>`, go: () => placeChoice(c.lat, c.lon, `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`, c.kind) }]);
   if (t.length < 3) return showSugg([]);
+  const ps = poiSugg(t), mine = adrItems(t), head = ps && ps.first ? [ps.it, ...mine] : mine, tail = ps && !ps.first ? [ps.it] : []; if (head.length) showSugg(head);
   const res = await geocode(t); if (seq !== sSeq) return;
-  showSugg(res.map(r => ({ html: `<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="a2"><b>${esc(r.l1)}</b><span>${esc(r.l2)}</span></span>`, go: () => { q.value = r.label; placeChoice(r.lat, r.lon, r.l1, r.l2, r.z, r.label); } })));
+  showSugg(head.concat(res.map(r => ({ html: `<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="a2"><b>${esc(r.l1)}</b><span>${esc(r.l2)}</span></span>`, go: () => { q.value = r.label; placeChoice(r.lat, r.lon, r.l1, r.l2, r.z, r.label); } }))).concat(tail));
 }
 const cityCase = t => t ? String(t) : '';
 async function geocode(t){
@@ -1283,6 +1321,118 @@ async function geocode(t){
         return { label: [l1, l2].filter(Boolean).join(', '), l1, l2, lat: +x.lat, lon: +x.lon, z: road ? 18 : 15 }; }); } } catch(e){}
   return [];
 }
+/* ---------- lieux & commerces (OpenStreetMap, via Overpass) ---------- */
+const POI_CAT = [
+  [/stations?[ -]?services?|stations? (d.)?essence|carburants?|gazole|gasoil|essence\b/, '["amenity"="fuel"]', 'Station-service'],
+  [/bornes? (de )?recharge|recharge electrique|superchargeur/, '["amenity"="charging_station"]', 'Borne de recharge'],
+  [/pharmacies?/, '["amenity"="pharmacy"]', 'Pharmacie'],
+  [/boulangeries?|patisseries?/, '["shop"~"^(bakery|pastry)$"]', 'Boulangerie'],
+  [/supermarches?|hypermarches?|superettes?|epiceries?|supermarket/, '["shop"~"^(supermarket|convenience)$"]', 'Supermarché'],
+  [/fast[ -]?food|snacks?|kebabs?|burgers?|pizzerias?/, '["amenity"="fast_food"]', 'Restauration rapide'],
+  [/restaurants?|restos?\b/, '["amenity"="restaurant"]', 'Restaurant'],
+  [/\bcafes?\b|\bbars?\b|\bpubs?\b/, '["amenity"~"^(cafe|bar|pub)$"]', 'Café / bar'],
+  [/hotels?|motels?|chambres? d.hotes|hebergements?/, '["tourism"~"^(hotel|motel|guest_house|hostel)$"]', 'Hôtel'],
+  [/campings?/, '["tourism"="camp_site"]', 'Camping'],
+  [/parkings?|stationnement/, '["amenity"="parking"]', 'Parking'],
+  [/distributeurs?( de billets)?|\bdab\b|retrait/, '["amenity"="atm"]', 'Distributeur'],
+  [/banques?/, '["amenity"="bank"]', 'Banque'],
+  [/\b(la )?poste\b|bureau de poste/, '["amenity"="post_office"]', 'La Poste'],
+  [/hopitals?|hopitaux|urgences|cliniques?/, '["amenity"~"^(hospital|clinic)$"]', 'Hôpital'],
+  [/medecins?|docteurs?|generalistes?/, '["amenity"="doctors"]', 'Médecin'],
+  [/dentistes?/, '["amenity"="dentist"]', 'Dentiste'],
+  [/veterinaires?/, '["amenity"="veterinary"]', 'Vétérinaire'],
+  [/tabacs?|buralistes?|presse|journaux/, '["shop"~"^(tobacco|newsagent)$"]', 'Tabac / presse'],
+  [/garages?|mecaniciens?|carrosseries?|pneus?/, '["shop"~"^(car_repair|tyres)$"]', 'Garage'],
+  [/lavages? auto|stations? de lavage|car ?wash/, '["amenity"="car_wash"]', 'Lavage auto'],
+  [/toilettes|\bwc\b/, '["amenity"="toilets"]', 'Toilettes'],
+  [/police|gendarmeries?|commissariats?/, '["amenity"="police"]', 'Police / gendarmerie'],
+  [/pompiers|casernes?/, '["amenity"="fire_station"]', 'Pompiers'],
+  [/mairies?|hotel de ville/, '["amenity"="townhall"]', 'Mairie'],
+  [/ecoles?|colleges?|lycees?/, '["amenity"~"^(school|college)$"]', 'École'],
+  [/bricolage|quincailleries?/, '["shop"~"^(doityourself|hardware)$"]', 'Bricolage'],
+  [/materiaux|negoces?|negociants?/, '["shop"~"^(trade|building_materials)$"]', 'Matériaux'],
+  [/decheteries?|dechetteries?|recyclerie/, '["amenity"="recycling"]["recycling_type"="centre"]', 'Déchèterie'],
+  [/coiffeurs?|coiffure/, '["shop"="hairdresser"]', 'Coiffeur'],
+  [/laveries?|pressing/, '["shop"~"^(laundry|dry_cleaning)$"]', 'Laverie'],
+  [/cinemas?/, '["amenity"="cinema"]', 'Cinéma'],
+  [/salles? de sport|fitness|musculation/, '["leisure"="fitness_centre"]', 'Salle de sport'],
+  [/centres? commerciaux|centre commercial|galeries? marchandes?/, '["shop"="mall"]', 'Centre commercial'],
+  [/defibrillateurs?|\bdae\b/, '["emergency"="defibrillator"]', 'Défibrillateur'],
+  [/points? d.eau|fontaines?|eau potable/, '["amenity"="drinking_water"]', 'Point d\'eau'],
+  [/aires? de repos|aires? d.autoroute/, '["highway"="rest_area"]', 'Aire de repos'],
+  [/gares?( sncf)?\b/, '["railway"="station"]', 'Gare'],
+  [/fleuristes?/, '["shop"="florist"]', 'Fleuriste'],
+  [/boucheries?/, '["shop"="butcher"]', 'Boucherie'],
+  [/opticiens?/, '["shop"="optician"]', 'Opticien'],
+  [/\bstations?\b/, '["amenity"="fuel"]', 'Station-service']
+];
+const POI_BRAND = [
+  [/\b(mac ?do|mc ?do|mcdonald'?s?|mac ?donald'?s?)\b/, 'McDonald', 'McDonald\'s'], [/\bburger ?king\b|\bbk\b/, 'Burger King', 'Burger King'], [/\bkfc\b/, 'KFC', 'KFC'], [/\bquick\b/, '^Quick', 'Quick'],
+  [/\bsubway\b/, 'Subway', 'Subway'], [/\bdomino'?s?\b/, 'Domino', 'Domino\'s'], [/\bstarbucks\b/, 'Starbucks', 'Starbucks'], [/\bpaul\b/, '^Paul$', 'Paul'], [/\bburger king\b/, 'Burger King', 'Burger King'],
+  [/\bcarrefour( market| contact| city| express)?\b/, 'Carrefour', 'Carrefour'], [/\b(e\.? ?)?leclerc\b/, 'Leclerc', 'E.Leclerc'], [/\bintermarche\b/, 'Intermarch', 'Intermarché'], [/\bauchan\b/, 'Auchan', 'Auchan'],
+  [/\blidl\b/, 'Lidl', 'Lidl'], [/\baldi\b/, 'Aldi', 'Aldi'], [/\b(super|hyper) ?u\b|\bu express\b|\bsysteme u\b/, '(Super U|Hyper U|U Express|Système U|Utile)', 'Système U'], [/\bcasino\b/, 'Casino', 'Casino'],
+  [/\bnetto\b/, 'Netto', 'Netto'], [/\bfranprix\b/, 'Franprix', 'Franprix'], [/\bmonoprix\b/, 'Monoprix', 'Monoprix'], [/\bpicard\b/, 'Picard', 'Picard'], [/\bbiocoop\b/, 'Biocoop', 'Biocoop'], [/\bgrand frais\b/, 'Grand Frais', 'Grand Frais'], [/\bspar\b/, 'Spar', 'Spar'], [/\bvival\b/, 'Vival', 'Vival'],
+  [/\btotal( ?energies)?\b|\btotal access\b/, 'Total', 'TotalEnergies'], [/\besso\b/, 'Esso', 'Esso'], [/\bshell\b/, 'Shell', 'Shell'], [/\bbp\b/, '^BP', 'BP'], [/\bavia\b/, 'Avia', 'Avia'], [/\bagip|\beni\b/, '(Agip|Eni)', 'Eni'],
+  [/\bdecathlon\b/, 'Decathlon', 'Decathlon'], [/\bleroy ?merlin\b/, 'Leroy Merlin', 'Leroy Merlin'], [/\bcastorama\b/, 'Castorama', 'Castorama'], [/\bbrico ?depot\b/, 'Brico D', 'Brico Dépôt'], [/\bbricomarche\b/, 'Bricomarch', 'Bricomarché'], [/\bmr\.? ?bricolage\b/, 'Bricolage', 'Mr.Bricolage'],
+  [/\bpoint ?p\b/, 'Point P', 'Point.P'], [/\bgedimat\b/, 'Gedimat', 'Gedimat'], [/\bkiloutou\b/, 'Kiloutou', 'Kiloutou'], [/\bloxam\b/, 'Loxam', 'Loxam'], [/\bikea\b/, 'IKEA', 'IKEA'], [/\baction\b/, '^Action$', 'Action'],
+  [/\bnorauto\b/, 'Norauto', 'Norauto'], [/\bfeu vert\b/, 'Feu Vert', 'Feu Vert'], [/\bspeedy\b/, 'Speedy', 'Speedy'], [/\bmidas\b/, 'Midas', 'Midas'], [/\bfnac\b/, 'Fnac', 'Fnac'], [/\bdarty\b/, 'Darty', 'Darty'], [/\bboulanger\b/, '^Boulanger$', 'Boulanger'],
+  [/\bibis\b/, 'ibis', 'ibis'], [/\bcampanile\b/, 'Campanile', 'Campanile'], [/\bb ?& ?b\b|\bb and b\b/, 'B&B', 'B&B Hotels'], [/\btesla\b/, 'Tesla', 'Tesla'], [/\bionity\b/, 'Ionity', 'Ionity']
+];
+const POI = { grp: L.layerGroup().addTo(map), items: [], title: '' };
+const STREET_RE = /^(\d+|rue|avenue|av\.?|boulevard|bd|chemin|route|place|impasse|allee|quai|cours|lotissement|lieu[- ]dit|zone|za|zi|zac)\b/;
+function poiParse(t){ let f = fold(t).replace(/[’']/g, "'").replace(/\s+/g, ' ').trim(); if (!f || STREET_RE.test(f)) return null;
+  let r = 0; f = f.replace(/(dans un |a |sur un )?(rayon|perimetre)?( de)? ?(\d+(?:[.,]\d+)?) ?(km|kilometres?|m|metres?)\b/, (m, a, b, c, n, u) => { n = parseFloat(n.replace(',', '.')); r = /^k/.test(u) ? n * 1000 : n; return ' '; });
+  let cat = null, brand = null;
+  for (const c of POI_CAT) { const m = f.match(c[0]); if (m) { cat = c; f = f.replace(m[0], ' '); break; } }
+  for (const b of POI_BRAND) { const m = f.match(b[0]); if (m) { brand = b; f = f.replace(m[0], ' '); break; } }
+  const place = f.replace(/\b(les|le|la|des|du|de|d'|l'|a|au|aux|en|pres( de)?|autour( de)?|vers|dans|sur|proche( de)?|cote|environs?|ville|tous|toutes|plus|proches?|ouverts?)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  return { cat, brand, place, r: Math.min(Math.max(r, 0), 100000) }; }
+function poiLabel(p){ return p.brand ? p.brand[2] + (p.cat ? ' · ' + p.cat[2] : '') : p.cat ? p.cat[2] : `« ${p.name} »`; }
+async function poiCenter(p){
+  if (p.place) { try { const j = await jget(`https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(p.place)}&type=municipality&limit=1`, 8000), x = j && j.features && j.features[0];
+      if (x) return { lat: x.geometry.coordinates[1], lon: x.geometry.coordinates[0], nom: x.properties.city || x.properties.name, town: true }; } catch(e){}
+    return null; }
+  if (GEO.last && Date.now() - GEO.last.t < 300000) return { lat: GEO.last.lat, lon: GEO.last.lng, nom: 'ma position' };
+  const c = map.getCenter(); return { lat: c.lat, lon: c.lng, nom: 'centre de la carte' }; }
+const rxq = s => s.replace(/["\\]/g, '\\$&');
+async function poiSearch(t, free){
+  showSugg([]); pickClose(); q.blur(); let p = poiParse(t);
+  if (!p) p = { cat: null, brand: null, place: '', r: 0 };
+  if (!p.cat && !p.brand) { // texte libre : la fin peut être une commune (« boulangerie dupont gap »)
+    const w = fold(t).replace(/[^a-z0-9' -]/g, ' ').trim().split(/\s+/); p.name = w.join(' '); p.place = '';
+    for (const n of [2, 1]) if (w.length > n) { const c = await poiCenter({ place: w.slice(-n).join(' ') }); if (c) { p.name = w.slice(0, -n).join(' '); p.place = w.slice(-n).join(' '); p.c = c; break; } } }
+  const c = p.c || await poiCenter(p); if (!c) return toast(`Commune introuvable : « ${p.place} »`);
+  const R = p.r || (c.town ? 6000 : 10000), around = `(around:${Math.round(R)},${c.lat.toFixed(5)},${c.lon.toFixed(5)})`, tag = p.cat ? p.cat[1] : '';
+  let sel = [];
+  if (p.brand) sel = [`nwr${tag}["brand"~"${rxq(p.brand[1])}",i]${around};`, `nwr${tag}["name"~"${rxq(p.brand[1])}",i]${around};`];
+  else if (p.cat) sel = [`nwr${tag}${around};`];
+  else { const nm = p.name.split(' ').filter(Boolean).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '')).join('.*'); if (!nm) return toast('Précisez ce que vous cherchez');
+    sel = [`nwr["name"~"${rxq(nm)}",i]["amenity"]${around};`, `nwr["name"~"${rxq(nm)}",i]["shop"]${around};`, `nwr["name"~"${rxq(nm)}",i]["tourism"]${around};`, `nwr["name"~"${rxq(nm)}",i]["office"]${around};`, `nwr["name"~"${rxq(nm)}",i]["craft"]${around};`, `nwr["brand"~"${rxq(nm)}",i]${around};`]; }
+  const title = poiLabel(p), where = `${c.town ? c.nom : 'autour de ' + c.nom} · ${fmtR(R)}`;
+  poiShow(title, where, null); 
+  let j; try { j = await overpass(`[out:json][timeout:25];(${sel.join('')});out center tags 300;`, 30000); }
+  catch(e){ return poiShow(title, where, [], 'Le service des lieux (OpenStreetMap) ne répond pas, réessayez dans un instant'); }
+  const seen = new Set(), items = [], me = GEO.last && Date.now() - GEO.last.t < 300000 ? { lat: GEO.last.lat, lng: GEO.last.lng } : { lat: c.lat, lng: c.lon };
+  j.elements.forEach(e => { const lat = e.lat ?? (e.center && e.center.lat), lon = e.lon ?? (e.center && e.center.lon); if (lat == null) return; const k = e.type + e.id; if (seen.has(k)) return; seen.add(k);
+    const g = e.tags || {}, adr = [[g['addr:housenumber'], g['addr:street']].filter(Boolean).join(' '), g['addr:city']].filter(Boolean).join(', ');
+    items.push({ lat, lon, nom: g.name || g.brand || (p.cat ? p.cat[2] : 'Lieu'), adr, brand: g.brand && g.brand !== g.name ? g.brand : '', h: g.opening_hours || '', d: geoDist(me, { lat, lng: lon }) }); });
+  items.sort((a, b) => a.d - b.d); poiShow(title, where, items); }
+const fmtR = m => m >= 1000 ? (m / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' km' : Math.round(m) + ' m';
+const poiPin = n => L.divIcon({ className: '', iconSize: [26, 32], iconAnchor: [13, 31], html: `<div class="poi-pin"><b>${n}</b></div>` });
+function poiShow(title, where, items, err){ POI.items = items || []; POI.grp.clearLayers(); const el = $('#poi'); el.classList.add('on');
+  $('#poiT').textContent = title; $('#poiW').textContent = items ? `${items.length} résultat${items.length > 1 ? 's' : ''} · ${where}` : `Recherche… · ${where}`;
+  $('#poiL').innerHTML = err ? `<div class="empty">${esc(err)}</div>` : !items ? '<div class="empty">Recherche des lieux…</div>' : !items.length ? '<div class="empty">Aucun lieu trouvé. Élargissez le rayon (ex. « 50 km »).</div>'
+    : items.map((x, i) => `<div class="it" data-i="${i}"><span class="n">${i + 1}</span><span class="a2"><b>${esc(x.nom)}</b><span>${esc([x.adr, x.brand].filter(Boolean).join(' · ') || x.h)}</span>${x.h && (x.adr || x.brand) ? `<span class="h">${esc(x.h)}</span>` : ''}</span><span class="d">${fmtR(x.d)}</span></div>`).join('');
+  if (items && items.length) { items.forEach((x, i) => L.marker([x.lat, x.lon], { icon: poiPin(i + 1) }).on('click', () => poiPick(i)).addTo(POI.grp));
+    map.fitBounds(L.latLngBounds(items.map(x => [x.lat, x.lon])), { padding: [40, 40], maxZoom: 16 }); } }
+function poiPick(i){ const x = POI.items[i]; if (!x) return; $('#poi').classList.remove('on');
+  placeChoice(x.lat, x.lon, x.nom, [x.adr, fmtR(x.d)].filter(Boolean).join(' · '), 18, x.adr ? x.nom + ', ' + x.adr : x.nom); goLatLon(x.lat, x.lon, 18); $('#pkSee').style.display = 'none'; }
+function poiClose(){ $('#poi').classList.remove('on'); POI.items = []; POI.grp.clearLayers(); }
+$('#poiL').onclick = e => { const d = e.target.closest('[data-i]'); if (d) poiPick(+d.dataset.i); };
+$('#poiX').onclick = poiClose;
+function poiSugg(t){ const p = poiParse(t); if (p && (p.cat || p.brand)) return { first: true, it: { html: `<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1.5-5h13L20 10"/><path d="M5 10v10h14V10"/><path d="M4 10c0 1.5 1.3 2.5 2.7 2.5S9.3 11.5 9.3 10c0 1.5 1.3 2.5 2.7 2.5s2.7-1 2.7-2.5c0 1.5 1.3 2.5 2.7 2.5S20 11.5 20 10"/></svg><span class="a2"><b>${esc(poiLabel(p))}</b><span>${p.place ? esc(p.place.replace(/(^|[\s-])\S/g, m => m.toUpperCase())) : 'Autour de moi'}${p.r ? ' · ' + fmtR(p.r) : ''} — lieux et commerces</span></span>`, go: () => poiSearch(t) } };
+  if (t.trim().length < 3 || (p === null)) return null;
+  return { first: false, it: { html: `<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1.5-5h13L20 10"/><path d="M5 10v10h14V10"/></svg><span class="a2"><b>Chercher « ${esc(t.trim())} »</b><span>dans les lieux et commerces</span></span>`, go: () => poiSearch(t, true) } }; }
 async function submitSearch(){
   const t = q.value.trim(); if (!t) return;
   const ws = parseWords(t);
@@ -1290,6 +1440,7 @@ async function submitSearch(){
     if (r.cell) { showSugg([]); q.blur(); const b = MM3.bounds(r.cell); return placeChoice((b.s + b.n) / 2, (b.w + b.e) / 2, '///' + ws.join('.'), 'Adresse trois mots', 19); }
     if (r.error === 'mot') { const s = r.missing.map(m => `« ${m} »${MM3.suggest(m, 3).length ? ' (vouliez-vous dire ' + MM3.suggest(m, 3).join(', ') + ' ?)' : ''}`); return toast('Mot inconnu : ' + s.join(' ; ')); }
     return toast("Cette combinaison n'existe pas sur la grille"); }
+  { const pp = poiParse(t); if (pp && (pp.cat || pp.brand)) return poiSearch(t); }
   const c = parseCoords(t); if (c) { q.blur(); showSugg([]); return placeChoice(c.lat, c.lon, `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`, c.kind); }
   if (sItems.length && sItems[0].go && sugg.classList.contains('on')) return pick(0);
   const res = await geocode(t); if (res.length) { q.blur(); showSugg([]); placeChoice(res[0].lat, res[0].lon, res[0].l1, res[0].l2, res[0].z, res[0].label); } else toast('Aucun résultat');
@@ -1323,6 +1474,46 @@ function addFav(lat, lon, nom, silent){
   if (!silent) { nom = prompt('Nom du point favori :', nom || `Point ${points.length + 1}`); if (nom === null) return; nom = nom.trim() || `Point ${points.length + 1}`; }
   points.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), nom, mots: MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.'), lat: +lat.toFixed(7), lon: +lon.toFixed(7), date: new Date().toISOString() });
   if (!silent) { changed(); toast(`« ${nom} » ajouté à Mes points`); } }
+/* ---------- carnet d'adresses ---------- */
+const ADR = Object.assign({ home: null, work: null, list: [] }, load('adr') || {});
+const ADR_IC = { home: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>', work: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>', list: '<svg class="sgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>' };
+const NAV_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>';
+function adrEntries(){ const o = [];
+  if (ADR.home) o.push({ ...ADR.home, k: 'home', nom: 'Domicile' }); if (ADR.work) o.push({ ...ADR.work, k: 'work', nom: 'Travail' });
+  ADR.list.forEach((a, i) => o.push({ ...a, k: 'list', i })); return o; }
+const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function adrGo(e){ q.value = e.label || e.nom; goLatLon(e.lat, e.lon, 18); placeChoice(e.lat, e.lon, e.nom, e.label, 18, e.label || e.nom); $('#pkSee').style.display = 'none'; }
+function adrItems(t){ const f = fold(t).trim();
+  return adrEntries().filter(e => !f || fold(e.nom).includes(f) || fold(e.label).includes(f)).slice(0, f ? 3 : 8)
+    .map(e => ({ html: `${ADR_IC[e.k]}<span class="a2"><b>${esc(e.nom)}</b><span>${esc(e.label || '')}</span></span>`, go: () => adrGo(e) })); }
+async function revAdr(lat, lon){ const xy = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  try { const j = await jget(`https://data.geopf.fr/geocodage/reverse?lon=${lon}&lat=${lat}&limit=1`, 6000), f = j && j.features && j.features[0];
+    if (f) { const p = f.properties, l2 = [p.postcode, p.city].filter(Boolean).join(' '); return { l1: p.name || p.label, l2, label: p.label || xy }; } } catch(e){}
+  return { l1: 'Point ' + xy, l2: '', label: xy }; }
+let abAt = null;
+function adrAsk(lat, lon, l1, l2, label){ abAt = { lat: +lat.toFixed(7), lon: +lon.toFixed(7), label: label || [l1, l2].filter(Boolean).join(', ') };
+  $('#abLbl').textContent = abAt.label; $('#abName').value = l1 || ''; $('#adrbox').classList.add('on'); }
+$('#adrbox').onclick = e => { if (e.target.id === 'adrbox' || e.target.closest('#abX')) { $('#adrbox').classList.remove('on'); return; }
+  const b = e.target.closest('[data-k]'); if (!b || !abAt) return; const k = b.dataset.k;
+  if (k === 'list') { const nom = $('#abName').value.trim() || abAt.label; ADR.list.push({ nom, ...abAt }); toast(`« ${nom} » ajouté au carnet`); }
+  else { ADR[k] = { ...abAt }; toast((k === 'home' ? 'Domicile' : 'Travail') + ' enregistré'); }
+  $('#adrbox').classList.remove('on'); adrStore(); };
+$('#abName').onkeydown = e => { if (e.key === 'Enter') $('#adrbox [data-k="list"]').click(); };
+$('#pkSave').onclick = () => { if (!place) return; adrAsk(place.lat, place.lon, $('#pkName').textContent, $('#pkCtx').textContent, place.label); };
+function adrStore(){ store('adr', ADR); renderAdr(); }
+function renderAdr(){
+  const row = (e, k, i) => { const set = !!e, d = set ? e : { nom: k === 'home' ? 'Domicile' : 'Travail' };
+    return `<div class="pt${set ? '' : ' unset'}" data-ak="${k}" data-ai="${i ?? ''}"><span class="ic">${ADR_IC[k].replace('class="sgi" ', '')}</span><div class="m"><div class="n">${esc(k === 'list' ? d.nom : k === 'home' ? 'Domicile' : 'Travail')}</div><div class="lb">${set ? esc(d.label || '') : 'Non défini — appui long sur la carte ou bouton marque-page d\'une adresse'}</div></div>`
+      + (set ? `<button class="ib" data-anav title="Guidage">${NAV_IC}</button>` + (k === 'list' ? `<button class="ib" data-aren title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>` : '')
+      + `<button class="ib" data-adel title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>` : '') + `</div>`; };
+  $('#adrList').innerHTML = row(ADR.home, 'home') + row(ADR.work, 'work') + ADR.list.map((a, i) => row(a, 'list', i)).join(''); }
+$('#adrList').onclick = e => { const it = e.target.closest('.pt'); if (!it || it.classList.contains('unset')) return;
+  const k = it.dataset.ak, i = it.dataset.ai === '' ? -1 : +it.dataset.ai, a = k === 'list' ? ADR.list[i] : ADR[k], nom = k === 'list' ? a.nom : k === 'home' ? 'Domicile' : 'Travail';
+  if (e.target.closest('[data-adel]')) { if (!confirm(`Supprimer « ${nom} » du carnet ?`)) return; if (k === 'list') ADR.list.splice(i, 1); else ADR[k] = null; return adrStore(); }
+  if (e.target.closest('[data-aren]')) { const n = prompt('Nouveau nom :', a.nom); if (n && n.trim()) { a.nom = n.trim(); adrStore(); } return; }
+  if (e.target.closest('[data-anav]')) { toggleDrawer('#dPoints'); return guideTo(a.lat, a.lon, a.label || nom); }
+  toggleDrawer('#dPoints'); adrGo({ ...a, nom }); };
+renderAdr();
 function changed(){ store('points', points); dirty = true; renderPoints(); updFile(); }
 
 /* ---------- fichiers .mmap ---------- */
@@ -1805,11 +1996,13 @@ $('#pCopy').onclick = () => { if (parcelData && parcelData.ref) copy(parcelData.
 /* ---------- menu clic droit ---------- */
 const cm = $('#ctxm'); let cmAt = null;
 map.on('contextmenu', e => { cmAt = e.latlng; const p = e.containerPoint, sz = map.getSize();
-  cm.style.left = Math.min(p.x, sz.x - 230) + 'px'; cm.style.top = Math.min(p.y, sz.y - 170) + 'px'; cm.classList.add('on'); });
+  cm.style.left = Math.min(p.x, sz.x - 230) + 'px'; cm.style.top = Math.min(p.y, sz.y - 240) + 'px'; cm.classList.add('on'); });
 ['click', 'movestart', 'zoomstart'].forEach(ev => map.on(ev, () => cm.classList.remove('on')));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') cm.classList.remove('on'); });
 cm.onclick = e => { const a = e.target.closest('[data-c]'); if (!a || !cmAt) return; cm.classList.remove('on'); const { lat, lng } = cmAt;
-  if (a.dataset.c === 'parcel') queryParcel(lat, lng);
+  if (a.dataset.c === 'nav') revAdr(lat, lng).then(r => guideTo(lat, lng, r.label));
+  else if (a.dataset.c === 'adr') revAdr(lat, lng).then(r => adrAsk(lat, lng, r.l1, r.l2, r.label));
+  else if (a.dataset.c === 'parcel') queryParcel(lat, lng);
   else if (a.dataset.c === 'fav') addFav(lat, lng);
   else if (a.dataset.c === 'words') select(MM3.cellAt(lat, lng));
   else if (a.dataset.c === 'xy') { const l = HAS_PROJ && inFranceBox(lat, lng) ? toL93(lat, lng) : null; copy(l ? `${l[0].toFixed(2)} ${l[1].toFixed(2)}` : `${lat.toFixed(6)}, ${lng.toFixed(6)}`); } };
@@ -2350,6 +2543,7 @@ const GUIDE = [
   <h3>Guidage GPS</h3><p><b>Guidage</b> ouvre la vue 3D inclinée : Momo suit votre position GPS le long de l'itinéraire, la carte tourne dans le sens de la marche, et le bandeau vert annonce la prochaine manœuvre (avec la voix, désactivable). Hors itinéraire, le trajet est recalculé. Sans GPS (sur ordinateur), le bouton <b>Simulation</b> fait rouler Momo le long du parcours. Si vous déplacez la carte, le bouton flèche recentre sur Momo.</p>
   <h3>Vue 3D</h3><p>Le bouton <b>3D</b> au-dessus du zoom ouvre la carte inclinée avec le relief : boussole (nord en haut), rotation à gauche ou à droite, inclinaison plus ou moins forte, relief activable. À la souris : clic droit maintenu (ou Ctrl + glisser) pour tourner et incliner ; à deux doigts sur téléphone.</p>
   <h3>Modifier un objet</h3><p>Choisissez le <b>calque d'édition</b> (Dessins ou un calque importé, KMZ compris) : ses objets sont listés et les nouveaux dessins y sont ajoutés. Avec <b>Modifier la forme d'un objet</b>, cliquez un objet : glissez ses sommets, glissez un point milieu pour en créer un, double-clic sur un sommet pour le supprimer.</p>`],
+ ['Recherche & carnet', `<h3>Lieux et commerces</h3><p>Tapez une enseigne ou un type de lieu, avec ou sans commune : « macdo aubagne », « pharmacie gap », « station service 50 km », « leroy merlin dans un rayon de 30 km ». Sans commune, la recherche se fait autour de vous. Les résultats (OpenStreetMap) sont listés du plus proche au plus loin et numérotés sur la carte ; touchez-en un pour <b>Chercher</b>, lancer le <b>Guidage</b> ou l'enregistrer.</p><h3>Carnet d'adresses</h3><p>Le bouton marque-page d'une adresse, ou l'appui long sur la carte → « Enregistrer l'adresse », la range en <b>Domicile</b>, <b>Travail</b> ou dans le carnet. Touchez la barre de recherche vide : vos adresses s'affichent pour y aller ou lancer le guidage en un geste. Le carnet se gère dans <b>Mes points</b> et reste sur cet appareil.</p><p>L'appui long sur la carte propose aussi <b>Guidage jusqu'ici</b>.</p>`],
  ['Mes points', `<h3>Points favoris</h3>
   <p>Ajoutez un favori par clic droit sur la carte, depuis la fiche d'une parcelle (bouton <b>Favori</b>), ou depuis un carré de la grille de mots. Chaque point garde ses coordonnées et son adresse en trois mots. Un clic dans la liste recentre la carte dessus.</p>`],
  ['Import / export', `<h3>Échanger avec les autres logiciels</h3>
@@ -2391,7 +2585,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 11:03';
+const APP_VER = '15/11/2026 11:14';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
