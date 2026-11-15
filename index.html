@@ -74,6 +74,16 @@ svg{display:block}
 #search input::placeholder{color:var(--dim)}
 #sugg{position:absolute;top:50px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:none}
 #sugg.on{display:block}
+#pick{position:absolute;top:50px;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;display:none}
+#pick.on{display:block}
+.pk-h{display:flex;align-items:flex-start;gap:8px}
+.pk-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.pk-t b{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-t span{color:var(--mut);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-h .ib{width:28px;height:28px;flex:none}.pk-h .ib svg{width:15px;height:15px}
+.pk-a{display:flex;gap:8px;margin-top:10px}
+.pk-a .btn{height:40px;font-size:14px}
+.pk-a .btn svg{width:17px;height:17px}
 #sugg .it{display:flex;gap:10px;align-items:center;padding:9px 14px;cursor:pointer;border-top:1px solid var(--line)}
 #sugg .it:first-child{border-top:0}
 #sugg .it:hover,#sugg .it.k{background:var(--panel2)}
@@ -347,6 +357,9 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 .ovi{width:28px;height:28px;border-radius:7px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;flex:none}
 .ovi svg{width:17px;height:17px}
 
+.rad{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #e53935;box-sizing:border-box;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.rad b{font:800 10.5px var(--ui);color:#111;letter-spacing:-.3px}
+.rad svg{stroke:#e53935}
 .me-dot{width:20px;height:20px;border-radius:50%;background:#4cc3ff;border:3px solid #fff;box-sizing:border-box;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .me-cone{width:60px;height:60px;background:conic-gradient(from -28deg at 50% 50%,rgba(76,195,255,.55) 0deg,rgba(76,195,255,0) 56deg,transparent 56deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 0 60%,transparent 61%);mask:radial-gradient(circle,#000 0 60%,transparent 61%);transform-origin:50% 50%}
 #zLoc.on{color:#4cc3ff}
@@ -500,11 +513,19 @@ setTimeout(done,4700);
   </div>
   <div id="searchwrap">
     <div id="search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a92a6" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <button class="ib" id="qGo" title="Rechercher" style="width:32px;height:32px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
       <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, coordonnées ou ///trois.mots.ici…">
       <button class="ib" id="qclear" title="Effacer" style="width:32px;height:32px;display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="sugg"></div>
+    <div id="pick">
+      <div class="pk-h"><div class="pk-t"><b id="pkName"></b><span id="pkCtx"></span></div><button class="ib" id="pkX" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="pk-a">
+        <button class="btn" id="pkSee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Chercher</button>
+        <button class="btn pri" id="pkNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg>Guidage</button>
+        <button class="btn" id="pk3d" title="Voir le lieu en 3D" style="flex:none;width:48px"><b style="font:700 12px var(--ui)">3D</b></button>
+      </div>
+    </div>
   </div>
   <div id="topright">
     <button class="ib hide-m" id="bInstall" data-tip="Installer MomoMAP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
@@ -918,6 +939,7 @@ const OVG = [
   ['Réseaux', [
     ['routes', 'Routes', OI('<path d="M8 3L5 21M16 3l3 18M12 5v3M12 11v3M12 17v3"/>', '#ffb74d'), W('TRANSPORTNETWORKS.ROADS', { max: 18 })],
     ['rail', 'Voies ferrées', OI('<path d="M8 3L6 21M16 3l2 18M7 7h10M6.5 12h11M6 17h12"/>', '#90a4ae'), W('TRANSPORTNETWORKS.RAILWAYS', { max: 18 })],
+    ['radars', 'Radars fixes', OI('<rect x="5" y="7" width="12" height="10" rx="2"/><circle cx="11" cy="12" r="2.5"/><path d="M17 10l4-2v8l-4-2M8 17v4"/>', '#ff5252')],
     ['rando', 'Sentiers de randonnée', OI('<circle cx="13" cy="4" r="2"/><path d="M11 9l-2 6 3 2 1 5M11 9l4 2 2 3M9 15l-3 6"/>', '#e53935'), () => L.tileLayer('https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png', { maxNativeZoom: 17, maxZoom: 25, attribution: '© waymarkedtrails.org' })],
   ]],
   ['Eau & relief', [
@@ -936,18 +958,34 @@ const OVG = [
 ];
 const OVL = {}; OVG.forEach(([, items]) => items.forEach(([k, , , f]) => { if (f) OVL[k] = f; }));
 const ovObjs = {}; S.ov = S.ov || {};
-const ovOn = k => k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : !!S.ov[k];
+const ovOn = k => k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : k === 'radars' ? !!S.radars : !!S.ov[k];
 function renderOv(){ S.ovOpen = S.ovOpen || {};
   $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
       <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>`).join('')}</div></div>`; }).join(''); }
+/* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
+const RAD = { grp: L.layerGroup(), tiles: {}, seen: new Set() };
+const radIcon = v => L.divIcon({ className: '', iconSize: [26, 26], iconAnchor: [13, 13], html: `<div class="rad">${v ? `<b>${v}</b>` : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2"><rect x="4" y="7" width="12" height="10" rx="2"/><circle cx="10" cy="12" r="2.4"/><path d="M16 10l4-2v8l-4-2"/></svg>'}</div>` });
+function setRadars(on){ S.radars = on; saveSettings(); syncOv();
+  if (on) { RAD.grp.addTo(map); loadRadars(true); } else map.removeLayer(RAD.grp); }
+async function loadRadars(warn){
+  if (!S.radars) return; if (map.getZoom() < 9) { if (warn) toast('Zoomez sur une région pour afficher les radars'); return; }
+  const b = map.getBounds(), T = .5, todo = [];
+  for (let y = Math.floor(b.getSouth() / T); y <= Math.floor(b.getNorth() / T); y++) for (let x = Math.floor(b.getWest() / T); x <= Math.floor(b.getEast() / T); x++) { const k = x + ':' + y; if (!RAD.tiles[k]) { RAD.tiles[k] = 1; todo.push([y * T, x * T, (y + 1) * T, (x + 1) * T, k]); } }
+  if (!todo.length) return;
+  const q = '[out:json][timeout:25];(' + todo.map(([s_, w, n, e]) => `node["highway"="speed_camera"](${s_},${w},${n},${e});node["enforcement"="maxspeed"](${s_},${w},${n},${e});`).join('') + ');out body;';
+  try { const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q) }); if (!r.ok) throw 0; const j = await r.json();
+    j.elements.forEach(e => { if (RAD.seen.has(e.id)) return; RAD.seen.add(e.id); const t = e.tags || {}, v = parseInt(t.maxspeed, 10) || '';
+      L.marker([e.lat, e.lon], { icon: radIcon(v) }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}${t.direction ? ' · sens ' + esc(t.direction) : ''}${t.ref ? '<br><span style="color:var(--mut)">' + esc(t.ref) + '</span>' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -12] }).addTo(RAD.grp); }); }
+  catch(e){ todo.forEach(t => delete RAD.tiles[t[4]]); if (warn) toast('Le service des radars (OpenStreetMap) ne répond pas'); } }
+map.on('moveend', () => loadRadars(false));
 function ovGrpOpen(g, n){ S.ovOpen = S.ovOpen || {}; return S.ovOpen[g] != null ? S.ovOpen[g] : (n > 0 || g === 'MomoMAP'); }
 function syncOv(){ if ($('#ovList')) renderOv(); }
 function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k]); delete ovObjs[k]; }
   if (on) { const l = OVL[k](); let ok = 0, bad = 0; l.on('tileload', () => ok++).on('tileerror', () => { if (++bad === 8 && !ok) toast('Cette superposition ne répond pas pour le moment'); }); ovObjs[k] = l.addTo(map); }
   saveSettings(); syncOv(); }
 $('#ovList').addEventListener('click', e => { const t = e.target.closest('[data-ov]');
-  if (t) { const k = t.dataset.ov; if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); return setOv(k, !S.ov[k]); }
+  if (t) { const k = t.dataset.ov; if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); if (k === 'radars') return setRadars(!S.radars); return setOv(k, !S.ov[k]); }
   const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.og, items = (OVG.find(x => x[0] === g) || [, []])[1]; S.ovOpen[g] = !ovGrpOpen(g, items.filter(it => ovOn(it[0])).length); saveSettings(); renderOv(); } });
 let geolLayer = null;
 function setGeol(on){ S.geol = on; syncOv(); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
@@ -1066,7 +1104,8 @@ function parseCoords(t){ const m = t.trim().match(/^(-?\d+(?:[.,]\d+)?)\s*[,;\s]
 function showSugg(items){ sItems = items; sIdx = -1; sugg.innerHTML = items.map((it, i) => `<div class="it" data-i="${i}">${it.html}</div>`).join(''); sugg.classList.toggle('on', items.length > 0); }
 function pick(i){ const it = sItems[i]; if (!it) return; sugg.classList.remove('on'); it.go(); }
 sugg.onmousedown = e => { const d = e.target.closest('[data-i]'); if (d) { e.preventDefault(); pick(+d.dataset.i); } };
-q.addEventListener('input', () => { $('#qclear').style.display = q.value ? 'grid' : 'none'; clearTimeout(sTimer); sTimer = setTimeout(liveSearch, 180); });
+$('#qGo').onclick = () => submitSearch();
+q.addEventListener('input', () => { pickClose(); $('#qclear').style.display = q.value ? 'grid' : 'none'; clearTimeout(sTimer); sTimer = setTimeout(liveSearch, 180); });
 q.addEventListener('blur', () => setTimeout(() => sugg.classList.remove('on'), 150));
 q.addEventListener('focus', () => sItems.length && sugg.classList.add('on'));
 $('#qclear').onclick = () => { q.value = ''; showSugg([]); $('#qclear').style.display = 'none'; q.focus(); };
@@ -1075,7 +1114,26 @@ q.addEventListener('keydown', e => {
     sugg.querySelectorAll('.it').forEach((d, i) => d.classList.toggle('k', i === sIdx)); }
   else if (e.key === 'Enter') { e.preventDefault(); if (sIdx >= 0) pick(sIdx); else submitSearch(); }
   else if (e.key === 'Escape') { sugg.classList.remove('on'); q.blur(); } });
-let searchMk = null;
+let searchMk = null, place = null;
+function placeChoice(lat, lon, label, ctx, z){ place = { lat, lon, label, ctx, z: z || 18 }; showSugg([]);
+  $('#pkName').textContent = label; $('#pkCtx').textContent = ctx || `${lat.toFixed(5)}, ${lon.toFixed(5)}`; $('#pkSee').style.display = ''; $('#pick').classList.add('on'); }
+function pickClose(){ $('#pick').classList.remove('on'); }
+$('#pkX').onclick = () => { pickClose(); place = null; if (searchMk) { map.removeLayer(searchMk); searchMk = null; } };
+$('#pkSee').onclick = () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); $('#pkSee').style.display = 'none'; };
+$('#pk3d').onclick = async () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); pickClose(); await open3D(false); if (v3) v3.easeTo({ center: [place.lon, place.lat], zoom: 17, pitch: 60, bearing: -20, duration: 1500 }); };
+$('#pkNav').onclick = () => { if (place) guideTo(place.lat, place.lon, place.label); };
+async function guideTo(lat, lon, label){
+  pickClose(); q.blur();
+  if (!navigator.geolocation) return toast('Géolocalisation indisponible : le guidage a besoin de votre position');
+  if (GEO.id == null) { S.geoOn = true; saveSettings(); bindSettings(); geoStart(); }
+  let me = GEO.last && Date.now() - GEO.last.t < 60000 ? GEO.last : null;
+  if (!me) { toast('Recherche de votre position…');
+    me = await new Promise(r => { const f = x => { GEO.subs.delete(f); clearTimeout(t); r(x); }, t = setTimeout(() => { GEO.subs.delete(f); r(null); }, 20000); GEO.subs.add(f); }); }
+  if (!me) return toast('Position introuvable : vérifiez que la localisation est autorisée');
+  rtHold = true; rtSet('a', me.lat, me.lng, 'Ma position'); rtSet('b', lat, lon, label); rtHold = false;
+  toast('Calcul de l\'itinéraire…'); await rtCompute(true);
+  if (!rt.data) return toast('Aucun itinéraire trouvé jusqu\'à cette adresse');
+  open3D(true); }
 function goLatLon(lat, lon, z){ if (S.grid) return select(MM3.cellAt(lat, lon), { fly: true, zoom: z || 19 });
   if (searchMk) map.removeLayer(searchMk); searchMk = L.marker([lat, lon], { icon: L.divIcon({ className: '', iconSize: [18, 18], iconAnchor: [9, 9], html: '<div class="sr-dot"></div>' }) }).addTo(map); map.flyTo([lat, lon], z || 18, { duration: .7 }); }
 function wordsItems(t){
@@ -1095,10 +1153,10 @@ function wordsItems(t){
 async function liveSearch(){
   const t = q.value.trim(), seq = ++sSeq; if (!t) return showSugg([]);
   if (t.startsWith('/') || /^[^\s\d]+\.[^\s\d]*/.test(t)) return showSugg(wordsItems(t));
-  const c = parseCoords(t); if (c) return showSugg([{ html: `<span class="a">${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}</span><span class="b">${c.kind}</span>`, go: () => goLatLon(c.lat, c.lon) }]);
+  const c = parseCoords(t); if (c) return showSugg([{ html: `<span class="a">${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}</span><span class="b">${c.kind}</span>`, go: () => placeChoice(c.lat, c.lon, `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`, c.kind) }]);
   if (t.length < 3) return showSugg([]);
   const res = await geocode(t); if (seq !== sSeq) return;
-  showSugg(res.map(r => ({ html: `<span class="a">${esc(r.label)}</span><span class="b">${esc(r.ctx || '')}</span>`, go: () => { q.value = r.label; goLatLon(r.lat, r.lon, r.z); } })));
+  showSugg(res.map(r => ({ html: `<span class="a">${esc(r.label)}</span><span class="b">${esc(r.ctx || '')}</span>`, go: () => { q.value = r.label; placeChoice(r.lat, r.lon, r.label, r.ctx, r.z); } })));
 }
 async function geocode(t){
   try { const r = await fetch('https://data.geopf.fr/geocodage/search?limit=5&q=' + encodeURIComponent(t)); if (r.ok) { const j = await r.json();
@@ -1111,11 +1169,12 @@ async function submitSearch(){
   const t = q.value.trim(); if (!t) return;
   const ws = parseWords(t);
   if (ws && (t.startsWith('/') || t.includes('.'))) { const r = MM3.cellOfWords(ws);
-    if (r.cell) { q.value = ''; showSugg([]); q.blur(); return select(r.cell, { fly: true }); }
+    if (r.cell) { showSugg([]); q.blur(); const b = MM3.bounds(r.cell); return placeChoice((b.s + b.n) / 2, (b.w + b.e) / 2, '///' + ws.join('.'), 'Adresse trois mots', 19); }
     if (r.error === 'mot') { const s = r.missing.map(m => `« ${m} »${MM3.suggest(m, 3).length ? ' (vouliez-vous dire ' + MM3.suggest(m, 3).join(', ') + ' ?)' : ''}`); return toast('Mot inconnu : ' + s.join(' ; ')); }
     return toast("Cette combinaison n'existe pas sur la grille"); }
-  const c = parseCoords(t); if (c) { q.blur(); return goLatLon(c.lat, c.lon); }
-  const res = await geocode(t); if (res.length) { q.blur(); showSugg([]); goLatLon(res[0].lat, res[0].lon, res[0].z); } else toast('Aucun résultat');
+  const c = parseCoords(t); if (c) { q.blur(); showSugg([]); return placeChoice(c.lat, c.lon, `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`, c.kind); }
+  if (sItems.length && sItems[0].go && sugg.classList.contains('on')) return pick(0);
+  const res = await geocode(t); if (res.length) { q.blur(); showSugg([]); placeChoice(res[0].lat, res[0].lon, res[0].label, res[0].ctx, res[0].z); } else toast('Aucun résultat');
 }
 
 /* ---------- points ---------- */
@@ -2147,7 +2206,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- démarrage ---------- */
-bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
+bindSettings(); setBase(S.base); renderDrawTargets(); if (S.cad) setCad(true); Object.keys(OVL).forEach(k => { if (S.ov[k]) setOv(k, true); }); if (S.radars) setRadars(true); renderOv(); if (S.geol) setGeol(true); renderPoints(); renderLayers(); updFile(); setupBackup();
 (function start(){
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
   const ws = parseWords(h);
