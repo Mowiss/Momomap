@@ -694,7 +694,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:01</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:03</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -1213,10 +1213,13 @@ function parseCoords(t){ const m = t.trim().match(/^(-?\d+(?:[.,]\d+)?)\s*[,;\s]
   return null; }
 function showSugg(items){ sItems = items; sIdx = -1; sugg.innerHTML = items.map((it, i) => `<div class="it" data-i="${i}">${it.html}</div>`).join(''); sugg.classList.toggle('on', items.length > 0); }
 function pick(i){ const it = sItems[i]; if (!it) return; sugg.classList.remove('on'); it.go(); }
-sugg.onmousedown = e => { const d = e.target.closest('[data-i]'); if (d) { e.preventDefault(); pick(+d.dataset.i); } };
+let sDown = null;
+sugg.addEventListener('pointerdown', e => { const d = e.target.closest('[data-i]'); sDown = d; if (d && e.pointerType === 'mouse') e.preventDefault(); });
+sugg.addEventListener('pointerup', e => { const d = e.target.closest('[data-i]'); if (d && d === sDown) { e.preventDefault(); sDown = null; q.blur(); pick(+d.dataset.i); } sDown = null; });
+sugg.addEventListener('pointercancel', () => { sDown = null; });
 $('#qGo').onclick = () => submitSearch();
 q.addEventListener('input', () => { pickClose(); $('#qclear').style.display = q.value ? 'grid' : 'none'; clearTimeout(sTimer); sTimer = setTimeout(liveSearch, 180); });
-q.addEventListener('blur', () => setTimeout(() => sugg.classList.remove('on'), 150));
+q.addEventListener('blur', () => setTimeout(() => { if (!sDown) sugg.classList.remove('on'); }, 150));
 q.addEventListener('focus', () => sItems.length && sugg.classList.add('on'));
 $('#qclear').onclick = () => { q.value = ''; showSugg([]); $('#qclear').style.display = 'none'; q.focus(); };
 q.addEventListener('keydown', e => {
@@ -2067,7 +2070,7 @@ function addOverlays(){
   add({ id: 'ly-pt', type: 'circle', source: 'ly', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-color': ['get', 'fc'], 'circle-radius': 6, 'circle-stroke-color': '#0f1115', 'circle-stroke-width': 1.5 } });
   set3DData(); setTerrain(g3.on || g3.entering ? S.nav.relief : S.relief3d !== false, g3.on || g3.entering); rad3D();
 }
-async function open3D(guide){
+async function open3D(guide){ vSide(true);
   try { await loadML(); } catch(e){ return toast('Vue 3D indisponible (pas de connexion)'); }
   $('#v3d').classList.add('on'); document.body.classList.add('v3'); $('#v3d').appendChild($('#spd'));
   const c = map.getCenter();
@@ -2208,7 +2211,7 @@ function updGuideUI(first){
   far.forEach((lim, j) => { const key = k + ':' + j; if (dn <= lim && !g3.spoken[key] && dn > (j < 2 ? far[j + 1] : -1)) { g3.spoken[key] = 1; say(j < 2 ? `Dans ${fmtD(dn)}, ${s.t.charAt(0).toLowerCase() + s.t.slice(1)}` : s.t); } });
   if (left < 12 && !g3.spoken.arr) { g3.spoken.arr = 1; $('#gTxt').textContent = 'Vous êtes arrivé'; $('#gDist').textContent = ''; say('Vous êtes arrivé à destination'); simStop(); }
 }
-function stopGuide(){ g3.on = false; wakeOff(); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
+function stopGuide(){ const was = g3.on; g3.on = false; wakeOff(); if (was) setTimeout(() => $('#rtClear').click(), 0); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
   if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
 function simStop(){ g3.sim = false; $('#gBar').classList.remove('sim'); $('#gSim').classList.remove('on'); $('#gSim').title = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
@@ -2217,9 +2220,9 @@ $('#gSim').onclick = () => { if (!g3.on) return; if (g3.sim) return simStop(); i
 $('#gSpeed').onclick = () => { g3.simSpeed = g3.simSpeed >= 8 ? 1 : g3.simSpeed * 2; $('#gSpeed').textContent = '×' + g3.simSpeed; };
 $('#gRe').onclick = () => { g3.follow = true; $('#gRe').classList.remove('on'); v3.easeTo({ pitch: navPitch(), zoom: rt.profile === 'car' ? 17.4 : 18.4, duration: 600 }); };
 $('#gVoice').onclick = () => { g3.voice = !g3.voice; S.nav.voice = g3.voice; saveSettings(); renderNavOpt(); $('#gVoice').classList.toggle('off', !g3.voice); if (!g3.voice && window.speechSynthesis) speechSynthesis.cancel(); };
-$('#gStop').onclick = () => stopGuide();
+$('#gStop').onclick = () => close3D();
 function vSide(h){ S.vHid = h; saveSettings(); $('#vside').classList.toggle('hid', h); $('#v3d').classList.toggle('vhid', h); }
-$('#vTab').onclick = () => vSide(!S.vHid); vSide(!!S.vHid);
+$('#vTab').onclick = () => vSide(!S.vHid); vSide(true);
 $('#vOpt').onclick = () => { renderNavOpt(); $('#gOpt').classList.toggle('on'); document.body.classList.toggle('gopt', $('#gOpt').classList.contains('on')); }; $('#gOptX').onclick = () => { $('#gOpt').classList.remove('on'); document.body.classList.remove('gopt'); };
 $('#rtNav').onclick = () => { if (!rt.data) return toast('Calculez d\'abord un itinéraire'); open3D(true); };
 /* ---------- paramètres ---------- */
@@ -2388,7 +2391,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 11:01';
+const APP_VER = '15/11/2026 11:03';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
