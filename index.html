@@ -357,15 +357,21 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 .ovi{width:28px;height:28px;border-radius:7px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;flex:none}
 .ovi svg{width:17px;height:17px}
 
-.rad{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #e53935;box-sizing:border-box;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.4)}
-.rad b{font:800 10.5px var(--ui);color:#111;letter-spacing:-.3px}
-.rad svg{stroke:#e53935}
+.rad{display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.rad svg{display:block}
+.rad b{margin-top:1px;font:800 10px var(--ui);color:#111;background:#ffd400;border:1px solid #111;border-radius:4px;padding:0 3px;line-height:12px}
 .me-dot{width:20px;height:20px;border-radius:50%;background:#4cc3ff;border:3px solid #fff;box-sizing:border-box;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .me-cone{width:60px;height:60px;background:conic-gradient(from -28deg at 50% 50%,rgba(76,195,255,.55) 0deg,rgba(76,195,255,0) 56deg,transparent 56deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 0 60%,transparent 61%);mask:radial-gradient(circle,#000 0 60%,transparent 61%);transform-origin:50% 50%}
 #zLoc.on{color:#4cc3ff}
 #zLoc.follow{background:#4cc3ff;color:#06131b}
 #zLoc.wait svg{animation:locPulse 1s ease-in-out infinite alternate}
 @keyframes locPulse{from{opacity:1}to{opacity:.3}}
+
+#spd{position:fixed;left:12px;bottom:52px;z-index:1850;width:64px;height:64px;border-radius:50%;background:#fff;color:#111;border:1px solid #d0d4dc;display:none;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);pointer-events:none}
+#spd.on{display:flex}
+#spd b{font:700 24px/1 var(--ui);letter-spacing:-.5px}
+#spd span{font:600 10px var(--ui);color:#555;margin-top:1px}
+body.v3 #spd{bottom:calc(96px + env(safe-area-inset-bottom))}
 
 /* ---------- toast ---------- */
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:3000;background:var(--panel2);border:1px solid var(--line2);color:var(--tx);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -387,6 +393,9 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
   .drawer .dh:before,.card .ch:before,#card .ch:before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;border-radius:4px;background:var(--line2);transform:translateX(-50%)}
   #card .ch,.card .ch{position:relative}
   #status,#filelbl{display:none}
+  #spd{left:10px;bottom:calc(70px + env(safe-area-inset-bottom));width:58px;height:58px}
+  #spd b{font-size:21px}
+  body.v3 #spd{bottom:calc(150px + env(safe-area-inset-bottom))}
   #zoomc{right:10px;bottom:calc(70px + env(safe-area-inset-bottom))}
   #zoomc #zIn,#zoomc #zOut{display:none}
   body.panel #zoomc{display:none}
@@ -640,6 +649,7 @@ setTimeout(done,4700);
     <div class="lbl">Ma position</div>
     <div class="row"><label>Afficher ma position (GPS)</label><button class="tg" id="sGeo"></button></div>
     <div class="row"><label>Haute précision</label><button class="tg" id="sGeoHigh"></button></div>
+    <div class="row"><label>Afficher ma vitesse</label><button class="tg" id="sSpd"></button></div>
     <p class="hint">La position est mise à jour en continu, dès que l'appareil en fournit une nouvelle. La haute précision utilise la puce GPS (plus précis, consomme plus de batterie).</p>
     <div class="lbl">Coordonnées</div>
     <div class="row"><label>Afficher Lambert 93</label><button class="tg" id="sL93"></button></div>
@@ -695,7 +705,6 @@ setTimeout(done,4700);
     <button class="ib on" id="vRel" title="Relief en 3D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-10 4 6 3-4 5 8z"/></svg></button>
   </div>
   <div id="gBar">
-    <div class="gspd"><b id="gSpd">0</b><span>km/h</span></div>
     <div class="gs"><b id="gEta"></b><span><span id="gTime"></span> · <span id="gLeft"></span></span></div>
     <button class="btn" id="gSim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></svg><span id="gSimL">Simulation</span></button>
     <button class="btn" id="gSpeed" title="Vitesse de la simulation">×4</button>
@@ -783,6 +792,7 @@ setTimeout(done,4700);
 </div></div>
 
 <input type="file" id="fileIn" accept=".mmap,.json" hidden>
+<div id="spd" title="Ma vitesse"><b>–</b><span>km/h</span></div>
 <div id="toast"></div>
 
 <script>
@@ -965,19 +975,43 @@ function renderOv(){ S.ovOpen = S.ovOpen || {};
       <div class="acb">${items.map(([k, nm, icon]) => `<div class="row ovr"><span class="ovi">${icon}</span><label>${nm}${k === 'grid' ? ' <span class="dim">(G)</span>' : ''}</label><button class="tg${ovOn(k) ? ' on' : ''}" data-ov="${k}"></button></div>`).join('')}</div></div>`; }).join(''); }
 /* radars fixes : OpenStreetMap via Overpass, chargés par dalle de 0,5° au zoom 9 et plus */
 const RAD = { grp: L.layerGroup(), tiles: {}, seen: new Set() };
-const radIcon = v => L.divIcon({ className: '', iconSize: [26, 26], iconAnchor: [13, 13], html: `<div class="rad">${v ? `<b>${v}</b>` : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2"><rect x="4" y="7" width="12" height="10" rx="2"/><circle cx="10" cy="12" r="2.4"/><path d="M16 10l4-2v8l-4-2"/></svg>'}</div>` });
+const RADAR_SVG = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="${w}" height="${h}"><defs><pattern id="hz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#111"/><rect x="4" width="4" height="8" fill="#ffd400"/></pattern><linearGradient id="bd" x1="0" x2="1"><stop offset="0" stop-color="#8f8f8f"/><stop offset=".5" stop-color="#a9a9a9"/><stop offset="1" stop-color="#8c8c8c"/></linearGradient><radialGradient id="fl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient></defs><rect x="1" y="1" width="38" height="50" fill="url(#hz)" stroke="#555" stroke-width="1"/><rect x="5" y="5" width="30" height="42" fill="url(#bd)"/><rect x="7.5" y="10" width="11" height="8" rx=".8" fill="#1a1a1a"/><rect x="9" y="12" width="8" height="4" rx="2" fill="url(#fl)"/><rect x="21.5" y="11" width="10" height="7.5" fill="#222"/><rect x="7.5" y="26" width="13" height="12" fill="#151515"/></svg>`;
+const radIcon = v => L.divIcon({ className: '', iconSize: [24, 44], iconAnchor: [12, 32], html: `<div class="rad">${RADAR_SVG(24, 31)}${v ? `<b>${v}</b>` : ''}</div>` });
 function setRadars(on){ S.radars = on; saveSettings(); syncOv();
-  if (on) { RAD.grp.addTo(map); loadRadars(true); } else map.removeLayer(RAD.grp); }
+  if (on) { RAD.grp.addTo(map); loadRadars(true); if (g3.on) loadRadarsRoute(); } else map.removeLayer(RAD.grp); rad3D(); }
+RAD.fc = [];
+function radTiles(bboxes){ const T = .5, out = [];
+  bboxes.forEach(([s_, w, n, e]) => { for (let y = Math.floor(s_ / T); y <= Math.floor(n / T); y++) for (let x = Math.floor(w / T); x <= Math.floor(e / T); x++) { const k = x + ':' + y; if (!RAD.tiles[k]) { RAD.tiles[k] = 1; out.push([y * T, x * T, (y + 1) * T, (x + 1) * T, k]); } } });
+  return out; }
+const OVP = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+let ovpI = 0, radWarnT = 0, radBusy = Promise.resolve();
+async function overpass(q){
+  for (let n = 0; n < OVP.length; n++) { const url = OVP[(ovpI + n) % OVP.length];
+    try { const c = new AbortController(), t = setTimeout(() => c.abort(), 25000);
+      const r = await fetch(url + '?data=' + encodeURIComponent(q), { signal: c.signal }); clearTimeout(t);
+      if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); ovpI = (ovpI + n) % OVP.length; return j; }
+    catch(e){ console.warn('Overpass', url, e.message || e); } }
+  throw new Error('Overpass injoignable'); }
+function fetchRadars(todo, warn){ radBusy = radBusy.then(() => fetchRadarsNow(todo, warn)); return radBusy; }
+async function fetchRadarsNow(todo, warn){
+  for (let i = 0; i < todo.length; i += 8) { const part = todo.slice(i, i + 8);
+    const bb = part.map(([s_, w, n, e]) => `(${s_},${w},${n},${e})`);
+    const q = '[out:json][timeout:25];(' + bb.map(b => `node[highway=speed_camera]${b};`).join('') + bb.map(b => `node[enforcement=maxspeed]${b};`).join('') + ');out body;';
+    try { const j = await overpass(q);
+      j.elements.forEach(e => { if (RAD.seen.has(e.id) || e.lat == null) return; RAD.seen.add(e.id); const t = e.tags || {}, v = parseInt(t.maxspeed, 10) || '';
+        RAD.fc.push({ type: 'Feature', properties: { v: v ? String(v) : '' }, geometry: { type: 'Point', coordinates: [e.lon, e.lat] } });
+        L.marker([e.lat, e.lon], { icon: radIcon(v) }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}${t.direction ? ' · sens ' + esc(t.direction) : ''}${t.ref ? '<br><span style="color:var(--mut)">' + esc(t.ref) + '</span>' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -12] }).addTo(RAD.grp); }); }
+    catch(e){ part.forEach(t => delete RAD.tiles[t[4]]);
+      if (Date.now() - radWarnT > 60000) { radWarnT = Date.now(); toast('Radars : serveurs OpenStreetMap saturés, nouvel essai au prochain déplacement de la carte'); } } }
+  rad3D(); }
 async function loadRadars(warn){
   if (!S.radars) return; if (map.getZoom() < 9) { if (warn) toast('Zoomez sur une région pour afficher les radars'); return; }
-  const b = map.getBounds(), T = .5, todo = [];
-  for (let y = Math.floor(b.getSouth() / T); y <= Math.floor(b.getNorth() / T); y++) for (let x = Math.floor(b.getWest() / T); x <= Math.floor(b.getEast() / T); x++) { const k = x + ':' + y; if (!RAD.tiles[k]) { RAD.tiles[k] = 1; todo.push([y * T, x * T, (y + 1) * T, (x + 1) * T, k]); } }
-  if (!todo.length) return;
-  const q = '[out:json][timeout:25];(' + todo.map(([s_, w, n, e]) => `node["highway"="speed_camera"](${s_},${w},${n},${e});node["enforcement"="maxspeed"](${s_},${w},${n},${e});`).join('') + ');out body;';
-  try { const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q) }); if (!r.ok) throw 0; const j = await r.json();
-    j.elements.forEach(e => { if (RAD.seen.has(e.id)) return; RAD.seen.add(e.id); const t = e.tags || {}, v = parseInt(t.maxspeed, 10) || '';
-      L.marker([e.lat, e.lon], { icon: radIcon(v) }).bindTooltip(`Radar fixe${v ? ' · ' + v + ' km/h' : ''}${t.direction ? ' · sens ' + esc(t.direction) : ''}${t.ref ? '<br><span style="color:var(--mut)">' + esc(t.ref) + '</span>' : ''}`, { className: 'pt-tip', direction: 'top', offset: [0, -12] }).addTo(RAD.grp); }); }
-  catch(e){ todo.forEach(t => delete RAD.tiles[t[4]]); if (warn) toast('Le service des radars (OpenStreetMap) ne répond pas'); } }
+  const b = map.getBounds(); const todo = radTiles([[b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]]); if (todo.length) fetchRadars(todo, warn); }
+function loadRadarsRoute(){ if (!S.radars || !rt.data) return; const c = rt.data.geom.type === 'LineString' ? rt.data.geom.coordinates : rt.data.geom.coordinates.flat();
+  const todo = radTiles(c.filter((p, i) => i % 10 === 0 || i === c.length - 1).map(([x, y]) => [y - .05, x - .05, y + .05, x + .05])); if (todo.length) fetchRadars(todo, false); }
+function rad3D(){ if (typeof v3 === 'undefined' || !v3 || !v3.getSource || !v3.getSource('rad')) return;
+  v3.getSource('rad').setData({ type: 'FeatureCollection', features: RAD.fc }); if (v3.getSource('radt')) v3.getSource('radt').setData({ type: 'FeatureCollection', features: RAD.fc.filter(f => f.properties.v) });
+  ['rad-c', 'rad-t'].forEach(id => v3.getLayer(id) && v3.setLayoutProperty(id, 'visibility', S.radars ? 'visible' : 'none')); }
 map.on('moveend', () => loadRadars(false));
 function ovGrpOpen(g, n){ S.ovOpen = S.ovOpen || {}; return S.ovOpen[g] != null ? S.ovOpen[g] : (n > 0 || g === 'MomoMAP'); }
 function syncOv(){ if ($('#ovList')) renderOv(); }
@@ -1903,8 +1937,9 @@ function addOverlays(){
   try { v3.setSky({ 'sky-color': '#8fb8e0', 'horizon-color': '#dbe6f0', 'fog-color': '#dbe6f0', 'sky-horizon-blend': .6, 'horizon-fog-blend': .5, 'fog-ground-blend': .15 }); } catch(e){}
   const src = (id, o) => { if (!v3.getSource(id)) v3.addSource(id, o); }, empty = { type: 'FeatureCollection', features: [] }, before = firstSymbol();
   src('dem', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 14, attribution: 'Relief © Mapzen / AWS' });
-  ['ly', 'route', 'done', 'man'].forEach(id => src(id, { type: 'geojson', data: empty }));
+  ['ly', 'route', 'done', 'man', 'rad', 'radt'].forEach(id => src(id, { type: 'geojson', data: empty }));
   const add = (o, b) => { if (!v3.getLayer(o.id)) v3.addLayer(o, b); };
+  if (!v3.hasImage('radar')) { const im = new Image(80, 104); im.onload = () => { if (!v3.hasImage('radar')) v3.addImage('radar', im, { pixelRatio: 2 }); }; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(RADAR_SVG(80, 104)); }
   add({ id: 'hill', type: 'hillshade', source: 'dem', paint: { 'hillshade-exaggeration': .3, 'hillshade-shadow-color': '#1b2230' } }, before);
   add({ id: 'ly-fill', type: 'fill', source: 'ly', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': ['get', 'fc'], 'fill-opacity': ['get', 'fo'] } }, before);
   add({ id: 'ly-line', type: 'line', source: 'ly', filter: ['!=', ['geometry-type'], 'Point'], paint: { 'line-color': ['get', 'c'], 'line-width': ['get', 'w'], 'line-opacity': ['get', 'o'] } }, before);
@@ -1912,8 +1947,10 @@ function addOverlays(){
   add({ id: 'route', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#3db8ff', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4.5, 18, 14] } }, before);
   add({ id: 'done', type: 'line', source: 'done', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#9aa3b5', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4.5, 18, 14] } }, before);
   add({ id: 'man', type: 'circle', source: 'man', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 5, 18, 11], 'circle-color': '#fff', 'circle-stroke-color': '#0b4a6e', 'circle-stroke-width': 3 } });
+  add({ id: 'rad-c', type: 'symbol', source: 'rad', layout: { 'icon-image': 'radar', 'icon-anchor': 'bottom', 'icon-size': ['interpolate', ['linear'], ['zoom'], 10, .45, 17, 1], 'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-pitch-alignment': 'viewport' } });
+  add({ id: 'rad-t', type: 'symbol', source: 'radt', layout: { 'text-field': ['concat', ['get', 'v'], ' km/h'], 'text-font': ['Noto Sans Bold'], 'text-anchor': 'top', 'text-offset': [0, .3], 'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 17, 13], 'text-allow-overlap': true, 'text-ignore-placement': true }, paint: { 'text-color': '#111', 'text-halo-color': '#ffd400', 'text-halo-width': 2.5 } });
   add({ id: 'ly-pt', type: 'circle', source: 'ly', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-color': ['get', 'fc'], 'circle-radius': 6, 'circle-stroke-color': '#0f1115', 'circle-stroke-width': 1.5 } });
-  set3DData(); setTerrain(S.relief3d !== false);
+  set3DData(); setTerrain(S.relief3d !== false); rad3D();
 }
 async function open3D(guide){
   try { await loadML(); } catch(e){ return toast('Vue 3D indisponible (pas de connexion)'); }
@@ -1978,7 +2015,7 @@ let momoMk = null;
 /* --- guidage --- */
 function startGuide(){
   if (!rt.data) return toast('Calculez d\'abord un itinéraire');
-  prepRoute(); set3DData(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
+  prepRoute(); set3DData(); loadRadarsRoute(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
   const a = pointAt(0); g3.pos = { ...a }; g3.tpos = null;
   $('#gBar').classList.add('on'); $('#gTop').classList.add('on'); $('#gRe').classList.remove('on'); $('#gInfo').textContent = '';
   if (!momoMk) { const el = document.createElement('div'); el.className = 'momo'; el.innerHTML = MOMO_SVG; momoMk = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }); }
@@ -2004,7 +2041,7 @@ async function onFix(fix){
     if ((g3.offN >= 2 || !g3.fixT) && Date.now() - reT > 10000 && acc < 150) { reT = Date.now(); g3.busy = true;
       toast('Nouveau calcul depuis votre position…'); if (g3.fixT) say('Recalcul de l\'itinéraire');
       try { rt.a = { lat: pos.lat, lon: pos.lng }; rt.aTxt = $('#rtA').value = 'Ma position'; await rtCompute(true); } finally { g3.busy = false; }
-      if (!rt.data || !g3.on) return; prepRoute(); set3DData(); g3.along = g3.target = 0; g3.offN = 0; g3.fixT = Date.now(); g3.brg = bearingAt(0); $('#gInfo').textContent = ''; return; }
+      if (!rt.data || !g3.on) return; prepRoute(); set3DData(); loadRadarsRoute(); g3.along = g3.target = 0; g3.offN = 0; g3.fixT = Date.now(); g3.brg = bearingAt(0); $('#gInfo').textContent = ''; return; }
     $('#gInfo').textContent = acc >= 150 ? `Signal GPS faible (± ${Math.round(acc)} m)` : '';
     return; }
   g3.offN = 0; $('#gInfo').textContent = '';
@@ -2034,12 +2071,12 @@ function updGuideUI(first){
   v3.getSource('done').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: g3.coords.slice(0, g3.pos.i).concat([[g3.pos.lng, g3.pos.lat]]) } });
   const sec = rt.data.dur * left / (g3.total || 1), eta = new Date(Date.now() + sec * 1000);
   $('#gLeft').textContent = fmtL(left); $('#gTime').textContent = fmtT(sec); $('#gEta').textContent = eta.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  $('#gSpd').textContent = Math.round(g3.speed * 3.6);
+  setSpeed(g3.speed);
   const far = rt.profile === 'car' ? [800, 250, 40] : [200, 60, 12];
   far.forEach((lim, j) => { const key = k + ':' + j; if (dn <= lim && !g3.spoken[key] && dn > (j < 2 ? far[j + 1] : -1)) { g3.spoken[key] = 1; say(j < 2 ? `Dans ${fmtD(dn)}, ${s.t.charAt(0).toLowerCase() + s.t.slice(1)}` : s.t); } });
   if (left < 12 && !g3.spoken.arr) { g3.spoken.arr = 1; $('#gTxt').textContent = 'Vous êtes arrivé'; $('#gDist').textContent = ''; say('Vous êtes arrivé à destination'); simStop(); }
 }
-function stopGuide(){ g3.on = false; cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
+function stopGuide(){ g3.on = false; setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
   if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
 function simStop(){ g3.sim = false; $('#gSim').classList.remove('on'); $('#gSimL').textContent = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
@@ -2054,12 +2091,13 @@ $('#rtNav').onclick = () => { if (!rt.data) return toast('Calculez d\'abord un i
 function saveSettings(){ store('settings', S); }
 function bindSettings(){
   $('#sGridColor').value = S.gridColor; $('#sGridOp').value = S.gridOp; $('#sGridMin').value = S.gridMin; $('#sSelColor').value = S.selColor; $('#sBackup').value = S.backup;
-  $('#sFly').classList.toggle('on', S.fly); $('#sGeo').classList.toggle('on', S.geoOn !== false); $('#sGeoHigh').classList.toggle('on', S.geoHigh !== false); $('#sL93').classList.toggle('on', S.l93);
+  $('#sFly').classList.toggle('on', S.fly); $('#sGeo').classList.toggle('on', S.geoOn !== false); $('#sSpd').classList.toggle('on', S.spdOn !== false); $('#sGeoHigh').classList.toggle('on', S.geoHigh !== false); $('#sL93').classList.toggle('on', S.l93);
   syncOv();
 }
 const onS = (id, key, conv = v => v, after) => $(id).addEventListener('input', e => { S[key] = conv(e.target.value); saveSettings(); redraw(); after && after(); });
 onS('#sGridColor', 'gridColor'); onS('#sGridOp', 'gridOp', Number); onS('#sGridMin', 'gridMin', Number);
 onS('#sSelColor', 'selColor', String, () => renderPoints()); onS('#sBackup', 'backup', Number, setupBackup);
+$('#sSpd').onclick = () => { S.spdOn = S.spdOn === false; saveSettings(); bindSettings(); setSpeed(GEO.spd); };
 $('#sGeo').onclick = () => { S.geoOn = S.geoOn === false; saveSettings(); bindSettings(); S.geoOn ? geoStart() : geoStop(); };
 $('#sGeoHigh').onclick = () => { S.geoHigh = S.geoHigh === false; saveSettings(); bindSettings(); if (GEO.id != null) { navigator.geolocation.clearWatch(GEO.id); GEO.id = null; geoStart(); } };
 $('#sFly').onclick = () => { S.fly = !S.fly; saveSettings(); bindSettings(); };
@@ -2087,7 +2125,11 @@ function geoErr(e){ if (e.code === 1) { GEO.denied = true; geoStop(); S.geoOn = 
 let meMk = null, meDot = null, meAcc = null, meCone = null;
 function geoFix(p){
   const c = p.coords, fix = { lat: c.latitude, lng: c.longitude, acc: c.accuracy || 0, speed: c.speed != null && c.speed >= 0 ? c.speed : null, heading: c.heading != null && !isNaN(c.heading) ? c.heading : null, t: p.timestamp || Date.now() };
+  if (fix.speed == null && GEO.last) { const dt = (fix.t - GEO.last.t) / 1000; if (dt > .4 && dt < 10) fix.speed = geoDist(GEO.last, fix) / dt; }
+  if (fix.speed != null && fix.acc > 80) fix.speed = null;
   const first = !GEO.last; GEO.last = fix; $('#zLoc').classList.remove('wait');
+  GEO.spd = fix.speed == null ? GEO.spd : GEO.spd == null ? fix.speed : GEO.spd * .4 + fix.speed * .6; GEO.spdT = Date.now();
+  if (!(g3.on && g3.sim)) setSpeed(GEO.spd);
   // point bleu + cercle de précision + cône de direction
   const ll = [fix.lat, fix.lng];
   if (!meMk) { meAcc = L.circle(ll, { radius: fix.acc, color: '#4cc3ff', weight: 1, fillOpacity: .1, interactive: false });
@@ -2102,7 +2144,10 @@ function geoFix(p){
   GEO.subs.forEach(f => { try { f(fix); } catch(e){ console.warn(e); } });
   if (!$('#rtA').value && $('#dRoute').classList.contains('on')) rtUseMe(true);
 }
-function updLocBtn(){ const b = $('#zLoc'); b.classList.toggle('on', GEO.id != null); b.classList.toggle('follow', GEO.follow);
+function setSpeed(ms){ const on = S.spdOn !== false && (GEO.id != null || g3.on); $('#spd').classList.toggle('on', on); if (!on) return;
+  $('#spd b').textContent = ms == null ? '–' : Math.round(Math.max(0, ms) * 3.6 < 2 ? 0 : ms * 3.6); }
+setInterval(() => { if (GEO.spdT && Date.now() - GEO.spdT > 8000 && !(g3.on && g3.sim)) { GEO.spd = null; setSpeed(null); } }, 3000);
+function updLocBtn(){ setSpeed(GEO.spd); const b = $('#zLoc'); b.classList.toggle('on', GEO.id != null); b.classList.toggle('follow', GEO.follow);
   b.title = GEO.id == null ? 'Activer ma position' : GEO.follow ? 'Suivi actif : cliquez pour arrêter de suivre' : 'Centrer et suivre ma position'; }
 $('#zLoc').onclick = () => {
   if (!navigator.geolocation) return toast('Géolocalisation indisponible sur cet appareil');
@@ -2150,7 +2195,8 @@ const GUIDE = [
   <h4>Superpositions</h4><p>Elles s'activent ou se coupent indépendamment, par-dessus n'importe quel fond :</p>
   <p><b>Grillewords</b> (<kbd>G</kbd>) — découpe la carte en carrés de 3 mètres ; un clic sur la carte donne alors l'adresse du carré en trois mots.<br>
   <b>Parcelles cadastrales</b> — le plan cadastral de l'IGN.<br>
-  <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.</p>`],
+  <b>Carte géologique</b> — la carte géologique au 1/50 000 du BRGM.<br>
+  <b>Radars fixes</b> — emplacements et vitesses d'après OpenStreetMap, chargés en zoomant sur une région ; ils apparaissent aussi dans la vue 3D et pendant le guidage, le long de l'itinéraire.</p>`],
  ['Interroger la parcelle', `<h3>Tout savoir sur une parcelle</h3>
   <p>Activez l'outil <b>Interroger la parcelle</b> puis cliquez sur la carte (ou faites un clic droit → « Interroger la parcelle ici »). La parcelle se dessine et sa fiche s'ouvre à droite :</p>
   <h4>Identification</h4><p>Référence cadastrale complète, identifiant IDU, contenance, adresse la plus proche, altitude, coordonnées WGS84 et Lambert 93, trois mots.</p>
