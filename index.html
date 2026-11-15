@@ -305,8 +305,14 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #v3d{position:fixed;inset:0;z-index:1800;background:#0b0d11;display:none}
 #v3d.on{display:block}
 #v3map{position:absolute;inset:0}
-.vctl{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;z-index:5}
-.vctl .ib{width:38px;height:38px}
+#vside{position:absolute;right:0;top:12px;z-index:5;display:flex;align-items:flex-start;transition:transform .25s ease}
+#vside .vctl{margin-right:10px}
+#vside.hid{transform:translateX(calc(100% - 26px))}
+#vTab{width:26px;height:56px;margin-top:8px;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;padding:0}
+#vTab svg{width:16px;height:16px;transform:rotate(180deg);transition:transform .25s}
+#vside.hid #vTab svg{transform:none}
+.vctl{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+.vctl .ib{width:36px;height:36px}
 .vctl .ib.on{color:var(--acc)}
 .vsep{width:24px;height:1px;background:var(--line);margin:3px 0}
 .vp{font:600 11px var(--mono);color:var(--mut);padding:2px 0}
@@ -320,11 +326,25 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #gIco svg{width:52px;height:52px;display:block}
 .gt{display:flex;flex-direction:column;min-width:0}
 .gt b{font-size:30px;line-height:1.05}.gt span{font-size:16px;font-weight:500}
-#gBar{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:none;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;z-index:5;max-width:640px;margin:0 auto}
+#gBar{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:none;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;z-index:5;max-width:640px;margin:0 auto}
 #gBar.on{display:flex}
-.gs{flex:1;display:flex;flex-direction:column}.gs b{font-size:22px}.gs span{color:var(--mut);font-size:13px}
-#gBar .btn{flex:none;padding:0 12px;height:40px}
-#gBar .btn.on{border-color:var(--acc);color:var(--acc)}
+.gs{flex:1;min-width:0;display:flex;flex-direction:column}.gs b{font-size:21px;line-height:1.1}.gs span{color:var(--mut);font-size:12.5px;white-space:nowrap}
+.gv{display:flex;align-items:center;gap:6px;flex:none}
+.gcur{width:52px;height:52px;border-radius:50%;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gcur b{font:700 19px/1 var(--ui)}.gcur span{font:600 9px var(--ui);color:#555}
+.gcur.over{background:#e53935;color:#fff}.gcur.over span{color:#ffe0e0}
+.glim{width:44px;height:44px;border-radius:50%;background:#fff;border:4px solid #e53935;box-sizing:border-box;display:none;align-items:center;justify-content:center}
+.glim.on{display:flex}.glim b{font:800 16px/1 var(--ui);color:#111;letter-spacing:-.5px}
+.gbtn{display:flex;gap:4px;flex:none}
+.gbtn .ib{width:38px;height:38px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}
+.gbtn .ib svg{width:18px;height:18px}
+.gbtn .ib.on{border-color:var(--acc);color:var(--acc)}
+#gSpeed{font:700 12px var(--ui);display:none}
+#gBar.sim #gSpeed{display:grid}
+#gBar{box-sizing:border-box;overflow:hidden}
+#v3d #gTop{right:90px}
+#v3d.vhid #gTop{right:38px}
+.gbtn .ib.stop{color:#fff;background:#c62828;border-color:#c62828}
 #gVoice.off{opacity:.45}
 #gRe.on{border-color:var(--acc);color:var(--acc)}
 .momo{width:52px;height:78px;pointer-events:none;--sp:.42s}
@@ -425,13 +445,20 @@ body.gopt #spd{display:none!important}
   .leaflet-control-attribution{display:none}
   #toast{top:62px;max-width:calc(100% - 24px)}
   .tool{height:44px}
-  .vctl{top:auto;bottom:calc(84px + env(safe-area-inset-bottom));transform:none;right:8px}
+  #vside{top:8px}
+  #vside .vctl{margin-right:6px}
+  .vctl .ib{width:34px;height:34px}
   .vctl #vZin,.vctl #vZout{display:none}
   #gOpt{left:8px;right:8px;width:auto;top:auto;bottom:calc(140px + env(safe-area-inset-bottom));transform:none;max-height:60vh}
-  #gTop{right:62px;left:8px}
+  #gTop{right:52px;left:8px}
   .gt b{font-size:22px}
-  #gBar{left:8px;right:8px;flex-wrap:wrap}
-  #gBar .gs{flex-basis:100%}
+  #gBar{left:6px;right:6px;gap:8px;padding:8px 8px}
+  .gsep{display:none}.gs>span{display:flex;flex-direction:column}
+  .gs b{font-size:17px}.gs span{font-size:11px;white-space:normal;line-height:1.25}
+  #v3d #gTop{right:84px}
+  #v3d.vhid #gTop{right:32px}
+  #gBar{gap:6px}.gbtn{gap:3px}.gbtn .ib{width:33px;height:33px}.gbtn .ib svg{width:16px;height:16px}
+  .gbtn .ib{width:34px;height:34px}.gcur{width:46px;height:46px}.gcur b{font-size:17px}.glim{width:38px;height:38px}.glim b{font-size:14px}
   input.f,select{font-size:16px}
 }
 </style>
@@ -668,7 +695,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:49</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:55</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -715,6 +742,7 @@ setTimeout(done,4700);
 <div id="v3d">
   <div id="v3map"></div>
   <div id="gTop"><div class="gmain"><div id="gIco"></div><div class="gt"><b id="gDist"></b><span id="gTxt"></span><span id="gInfo"></span></div></div><div id="gNext"></div></div>
+  <div id="vside"><button id="vTab" title="Afficher / masquer les commandes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
   <div class="vctl">
     <button class="ib" id="vClose" title="Revenir à la carte 2D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="vsep"></div>
@@ -732,14 +760,18 @@ setTimeout(done,4700);
     <button class="ib" id="vSty" title="Style de carte : GPS (bâtiments 3D) ou fond choisi"><b id="vStyL" style="font:700 9.5px var(--ui)">Fond</b></button>
     <button class="ib on" id="vRel" title="Relief en 3D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-10 4 6 3-4 5 8z"/></svg></button>
   </div>
+  </div>
   <div id="gOpt"><div class="dh">Affichage du guidage <button class="ib x" id="gOptX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="db navopt"></div></div>
   <div id="gBar">
-    <div class="gs"><b id="gEta"></b><span><span id="gTime"></span> · <span id="gLeft"></span></span></div>
-    <button class="btn" id="gSim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></svg><span id="gSimL">Simulation</span></button>
-    <button class="btn" id="gSpeed" title="Vitesse de la simulation">×4</button>
-    <button class="btn" id="gRe" title="Recentrer sur Momo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg></button>
-    <button class="btn" id="gVoice" title="Voix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
-    <button class="btn" id="gStop">Arrêter</button>
+    <div class="gv"><div class="gcur"><b id="gCur">–</b><span>km/h</span></div><div class="glim" id="gLim" title="Vitesse limite"><b>–</b></div></div>
+    <div class="gs"><b id="gEta"></b><span><span id="gTime"></span><i class="gsep"> · </i><span id="gLeft"></span></span></div>
+    <div class="gbtn">
+      <button class="ib" id="gSim" title="Simulation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></svg></button>
+      <button class="ib" id="gSpeed" title="Vitesse de la simulation">×4</button>
+      <button class="ib" id="gRe" title="Recentrer sur Momo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg></button>
+      <button class="ib" id="gVoice" title="Annonces vocales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
+      <button class="ib stop" id="gStop" title="Arrêter le guidage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
   </div>
 </div>
 
@@ -1884,7 +1916,7 @@ const MOD = { left: 'à gauche', right: 'à droite', 'slight left': 'légèremen
 function stepText(type, mod, name, exit){ const m = MOD[mod] || '', on = name ? ` sur ${name}` : '';
   switch (type) { case 'depart': return `Partir${on}`; case 'arrive': return 'Arrivée';
     case 'roundabout': case 'rotary': case 'exit roundabout': return `Au rond-point, prendre la ${exit ? exit + (exit === 1 ? 're' : 'e') + ' ' : ''}sortie${on}`;
-    case 'turn': case 'end of road': return `Tourner ${m}${on}`; case 'fork': return `À la bifurcation, rester ${m}${on}`;
+    case 'turn': case 'end of road': return mod === 'straight' || !m ? `Continuer tout droit${on}` : `Tourner ${m}${on}`; case 'fork': return `À la bifurcation, rester ${m}${on}`;
     case 'merge': return `Rejoindre${on}`; case 'on ramp': return `Prendre la bretelle ${m}${on}`; case 'off ramp': return `Sortir ${m}${on}`;
     default: return m && mod !== 'straight' ? `Continuer ${m}${on}` : `Continuer${on}`; } }
 const fmtT = s => { s = Math.round(s / 60); return s < 60 ? `${s} min` : `${Math.floor(s / 60)} h ${String(s % 60).padStart(2, '0')}`; };
@@ -2099,7 +2131,7 @@ let momoMk = null;
 /* --- guidage --- */
 function startGuide(){
   if (!rt.data) return toast('Calculez d\'abord un itinéraire');
-  prepRoute(); set3DData(); loadRadarsRoute(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
+  LIM.v = null; LIM.at = null; renderLimit(); prepRoute(); set3DData(); loadRadarsRoute(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
   const a = pointAt(0); g3.pos = { ...a }; g3.tpos = null;
   $('#gBar').classList.add('on'); $('#gTop').classList.add('on'); $('#gRe').classList.remove('on'); $('#gInfo').textContent = '';
   if (!momoMk) { const el = document.createElement('div'); el.className = 'momo'; el.innerHTML = MOMO_SVG; momoMk = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }); }
@@ -2133,6 +2165,17 @@ async function onFix(fix){
   g3.target = pr.along < g3.target - Math.max(15, acc) ? pr.along : Math.max(pr.along, g3.target - 3);
   if (!g3.fixT) g3.along = g3.target; g3.fixT = Date.now();
 }
+const LIM = { t: 0, at: null, v: null, busy: false };
+function parseMax(t){ if (!t) return null; t = String(t).trim(); const n = parseInt(t, 10); if (n) return /mph/.test(t) ? Math.round(n * 1.609) : n;
+  return { 'FR:urban': 50, 'FR:rural': 80, 'FR:motorway': 130, 'FR:zone30': 30, 'FR:walk': 6, walk: 6, 'FR:living_street': 20 }[t] || null; }
+async function updLimit(pos, stepName){
+  if (LIM.busy || (LIM.at && Date.now() - LIM.t < 12000 && geoDist(LIM.at, pos) < 200)) return; LIM.busy = true; LIM.t = Date.now(); LIM.at = { lat: pos.lat, lng: pos.lng };
+  const q = `[out:json][timeout:10];way(around:18,${pos.lat.toFixed(6)},${pos.lng.toFixed(6)})[highway][maxspeed];out tags;`;
+  try { const j = await overpass(q, 12000), ws = j.elements.map(e => e.tags || {});
+    const nm = (stepName || '').toLowerCase(), w = ws.find(t => (t.ref && nm.includes(t.ref.toLowerCase())) || (t.name && nm.includes(t.name.toLowerCase()))) || ws[0];
+    LIM.v = w ? parseMax(w['maxspeed']) : null; }
+  catch(e){} finally { LIM.busy = false; renderLimit(); } }
+function renderLimit(){ const el = $('#gLim'); el.classList.toggle('on', !!LIM.v); el.querySelector('b').textContent = LIM.v || '–'; }
 function angLerp(a, b, t){ let d = ((b - a + 540) % 360) - 180; return (a + d * t + 360) % 360; }
 function navFrame(now, dt){
   if (g3.sim) { g3.target = Math.min(g3.total, g3.target + (rt.data.dist / rt.data.dur) * g3.simSpeed * dt); g3.speed = (rt.data.dist / rt.data.dur) * g3.simSpeed; if (g3.target >= g3.total) simStop(); }
@@ -2157,7 +2200,7 @@ function updGuideUI(first){
   if (Date.now() - g3.doneT > 2000) { g3.doneT = Date.now(); v3.getSource('done').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: g3.coords.slice(0, g3.pos.i).concat([[g3.pos.lng, g3.pos.lat]]) } }); }
   const sec = rt.data.dur * left / (g3.total || 1), eta = new Date(Date.now() + sec * 1000);
   put('gLeft', fmtL(Math.round(left / 10) * 10)); put('gTime', fmtT(sec)); put('gEta', eta.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
-  setSpeed(g3.speed);
+  setSpeed(g3.speed); updLimit(g3.pos, s && s.t);
   const far = rt.profile === 'car' ? [800, 250, 40] : [200, 60, 12];
   far.forEach((lim, j) => { const key = k + ':' + j; if (dn <= lim && !g3.spoken[key] && dn > (j < 2 ? far[j + 1] : -1)) { g3.spoken[key] = 1; say(j < 2 ? `Dans ${fmtD(dn)}, ${s.t.charAt(0).toLowerCase() + s.t.slice(1)}` : s.t); } });
   if (left < 12 && !g3.spoken.arr) { g3.spoken.arr = 1; $('#gTxt').textContent = 'Vous êtes arrivé'; $('#gDist').textContent = ''; say('Vous êtes arrivé à destination'); simStop(); }
@@ -2165,13 +2208,15 @@ function updGuideUI(first){
 function stopGuide(){ g3.on = false; setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
   if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
-function simStop(){ g3.sim = false; $('#gSim').classList.remove('on'); $('#gSimL').textContent = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
+function simStop(){ g3.sim = false; $('#gBar').classList.remove('sim'); $('#gSim').classList.remove('on'); $('#gSim').title = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
 $('#gSim').onclick = () => { if (!g3.on) return; if (g3.sim) return simStop(); if (g3.target >= g3.total - 1) { g3.along = g3.target = 0; g3.spoken = {}; }
-  g3.sim = true; g3.follow = true; $('#gRe').classList.remove('on'); $('#gSim').classList.add('on'); $('#gSimL').textContent = 'Pause'; $('#gSim svg path').setAttribute('d', 'M8 5v14M16 5v14'); $('#gInfo').textContent = ''; };
+  g3.sim = true; g3.follow = true; $('#gRe').classList.remove('on'); $('#gSim').classList.add('on'); $('#gSim').title = 'Pause'; $('#gBar').classList.add('sim'); $('#gSim svg path').setAttribute('d', 'M8 5v14M16 5v14'); $('#gInfo').textContent = ''; };
 $('#gSpeed').onclick = () => { g3.simSpeed = g3.simSpeed >= 8 ? 1 : g3.simSpeed * 2; $('#gSpeed').textContent = '×' + g3.simSpeed; };
 $('#gRe').onclick = () => { g3.follow = true; $('#gRe').classList.remove('on'); v3.easeTo({ pitch: navPitch(), zoom: rt.profile === 'car' ? 17.4 : 18.4, duration: 600 }); };
 $('#gVoice').onclick = () => { g3.voice = !g3.voice; S.nav.voice = g3.voice; saveSettings(); renderNavOpt(); $('#gVoice').classList.toggle('off', !g3.voice); if (!g3.voice && window.speechSynthesis) speechSynthesis.cancel(); };
 $('#gStop').onclick = () => stopGuide();
+function vSide(h){ S.vHid = h; saveSettings(); $('#vside').classList.toggle('hid', h); $('#v3d').classList.toggle('vhid', h); }
+$('#vTab').onclick = () => vSide(!S.vHid); vSide(!!S.vHid);
 $('#vOpt').onclick = () => { renderNavOpt(); $('#gOpt').classList.toggle('on'); document.body.classList.toggle('gopt', $('#gOpt').classList.contains('on')); }; $('#gOptX').onclick = () => { $('#gOpt').classList.remove('on'); document.body.classList.remove('gopt'); };
 $('#rtNav').onclick = () => { if (!rt.data) return toast('Calculez d\'abord un itinéraire'); open3D(true); };
 /* ---------- paramètres ---------- */
@@ -2231,8 +2276,9 @@ function geoFix(p){
   GEO.subs.forEach(f => { try { f(fix); } catch(e){ console.warn(e); } });
   if (!$('#rtA').value && $('#dRoute').classList.contains('on')) rtUseMe(true);
 }
-function setSpeed(ms){ const on = S.spdOn !== false && (GEO.id != null || g3.on); $('#spd').classList.toggle('on', on); if (!on) return;
-  $('#spd b').textContent = ms == null ? '–' : Math.round(Math.max(0, ms) * 3.6 < 2 ? 0 : ms * 3.6); }
+function setSpeed(ms){ const kmh = ms == null ? null : Math.max(0, ms) * 3.6 < 2 ? 0 : Math.round(ms * 3.6), txt = kmh == null ? '–' : kmh;
+  if (g3.on) { const el = $('#gCur'); if (el.textContent != txt) el.textContent = txt; el.parentNode.classList.toggle('over', kmh != null && LIM.v && kmh > LIM.v + 2); $('#spd').classList.remove('on'); return; }
+  const on = S.spdOn !== false && GEO.id != null; $('#spd').classList.toggle('on', on); if (!on) return; $('#spd b').textContent = txt; }
 setInterval(() => { if (GEO.spdT && Date.now() - GEO.spdT > 8000 && !(g3.on && g3.sim)) { GEO.spd = null; setSpeed(null); } }, 3000);
 function updLocBtn(){ setSpeed(GEO.spd); const b = $('#zLoc'); b.classList.toggle('on', GEO.id != null); b.classList.toggle('follow', GEO.follow);
   b.title = GEO.id == null ? 'Activer ma position' : GEO.follow ? 'Suivi actif : cliquez pour arrêter de suivre' : 'Centrer et suivre ma position'; }
@@ -2339,7 +2385,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 10:49';
+const APP_VER = '15/11/2026 10:55';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
