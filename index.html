@@ -694,7 +694,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:59</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 11:01</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -2128,7 +2128,11 @@ const fmtD = m => m >= 1000 ? fmtL(Math.round(m / 100) * 100) : m >= 100 ? `${Ma
 function say(t){ if (!g3.voice || !window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR'; u.rate = 1.05; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 let momoMk = null;
 /* --- guidage --- */
-function startGuide(){
+const WL = {l:null};
+async function wakeOn(){ try { if ('wakeLock' in navigator && !WL.l && document.visibilityState === 'visible'){ WL.l = await navigator.wakeLock.request('screen'); WL.l.addEventListener('release', () => { WL.l = null; }); } } catch(e){} }
+function wakeOff(){ try { WL.l && WL.l.release(); } catch(e){} WL.l = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && g3.on) wakeOn(); });
+function startGuide(){ wakeOn();
   if (!rt.data) return toast('Calculez d\'abord un itinéraire');
   LIM.v = null; LIM.at = null; renderLimit(); prepRoute(); set3DData(); loadRadarsRoute(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
   const a = pointAt(0); g3.pos = { ...a }; g3.tpos = null;
@@ -2204,7 +2208,7 @@ function updGuideUI(first){
   far.forEach((lim, j) => { const key = k + ':' + j; if (dn <= lim && !g3.spoken[key] && dn > (j < 2 ? far[j + 1] : -1)) { g3.spoken[key] = 1; say(j < 2 ? `Dans ${fmtD(dn)}, ${s.t.charAt(0).toLowerCase() + s.t.slice(1)}` : s.t); } });
   if (left < 12 && !g3.spoken.arr) { g3.spoken.arr = 1; $('#gTxt').textContent = 'Vous êtes arrivé'; $('#gDist').textContent = ''; say('Vous êtes arrivé à destination'); simStop(); }
 }
-function stopGuide(){ g3.on = false; setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
+function stopGuide(){ g3.on = false; wakeOff(); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
   if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
 function simStop(){ g3.sim = false; $('#gBar').classList.remove('sim'); $('#gSim').classList.remove('on'); $('#gSim').title = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
@@ -2384,7 +2388,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 10:59';
+const APP_VER = '15/11/2026 11:01';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
