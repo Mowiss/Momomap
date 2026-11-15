@@ -179,6 +179,21 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .adr-pin{width:34px;height:40px;position:relative}
 .adr-pin:before{content:'';position:absolute;left:2px;top:0;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#14161b;border:2.5px solid var(--acc);box-sizing:border-box;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .adr-pin svg{position:absolute;left:8px;top:6px;width:18px;height:18px;color:var(--acc)}
+.adr-pin.emo span{position:absolute;left:0;top:4px;width:34px;text-align:center;font-size:17px;line-height:22px}
+.pt .ic.emo{font-size:18px;color:var(--acc)}
+.pt-tip .ptn{color:var(--mut);display:inline-block;max-width:240px;white-space:normal}
+#ptedit{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+#ptedit.on{display:flex}
+#ptedit .ab-c{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px;width:min(420px,100%);display:flex;flex-direction:column;gap:9px;max-height:92vh;overflow:auto}
+#ptedit .ab-h{font-weight:600;font-size:15px;display:flex;align-items:baseline;gap:8px}
+#ptedit .ab-h span{font:400 12px var(--mono);color:var(--acc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ptedit label{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+#ptedit textarea{min-height:90px;resize:vertical;font:inherit;font-size:14px;padding:9px 10px}
+#ptedit input{font-size:14px;padding:9px 10px}
+#peIc{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
+#peIc button{height:40px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);font-size:20px;cursor:pointer;display:grid;place-items:center;color:var(--acc)}
+#peIc button svg{width:20px;height:20px}
+#peIc button.on{border-color:var(--acc);background:#3a3610}
 .pt .ic{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;background:var(--panel2);color:var(--acc)}.pt .ic svg{width:17px;height:17px}
 .pt .lb{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pt.unset .n{color:var(--mut)}
@@ -726,7 +741,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:26</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:38</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -850,6 +865,13 @@ setTimeout(done,4700);
   </div>
   <div id="pBody"></div>
 </div>
+<div id="ptedit"><div class="ab-c">
+  <div class="ab-h">Point favori <span id="peW"></span></div>
+  <label for="peNom">Titre</label><input class="f" id="peNom" placeholder="Nom du point">
+  <label for="peNote">Note</label><textarea class="f" id="peNote" placeholder="Ce que vous voulez : accès, code portail, contact, observations…"></textarea>
+  <label>Icône</label><div id="peIc"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px"><button class="btn" id="peX" style="flex:none;padding:0 14px">Annuler</button><button class="btn pri" id="peOk" style="flex:none;padding:0 18px">Enregistrer</button></div>
+</div></div>
 <div id="adrbox"><div class="ab-c">
   <div class="ab-h">Enregistrer l'adresse</div><div class="ab-l" id="abLbl"></div>
   <div class="ab-k"><button class="btn" data-k="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/><path d="M16 6V4h2v3.6"/></svg>Domicile</button><button class="btn" data-k="work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/></svg>Travail</button></div>
@@ -1042,7 +1064,9 @@ const W = (layer, o = {}) => () => L.tileLayer(IGN(layer, 'image/png', o.style),
 const OI = (d, c) => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const OVG = [
   ['MomoMAP', [
-    ['grid', 'Grillewords', OI('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>', '#fff200')] ]],
+    ['grid', 'Grillewords', OI('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>', '#fff200')],
+    ['favs', 'Points favoris', OI('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>', '#fff200')],
+    ['adr', 'Domicile, travail & carnet', OI('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/>', '#fff200')] ]],
   ['Foncier & urbanisme', [
     ['cad', 'Parcelles cadastrales', OI('<path d="M3 5l7-2 11 4-2 13-9 1-6-6z"/><path d="M10 3l-1 9 10 1M9 12l-4 3"/>', '#f0a35e')],
     ['bati', 'Bâtiments', OI('<path d="M4 21V9l8-5 8 5v12z"/><path d="M9 21v-6h6v6"/>', '#e57373'), W('BUILDINGS.BUILDINGS', { max: 19 })],
@@ -1070,7 +1094,7 @@ const OVG = [
 ];
 const OVL = {}; OVG.forEach(([, items]) => items.forEach(([k, , , f]) => { if (f) OVL[k] = f; }));
 const ovObjs = {}; S.ov = S.ov || {};
-const ovOn = k => k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : k === 'radars' ? !!S.radars : !!S.ov[k];
+const ovOn = k => k === 'favs' || k === 'adr' ? S.ov[k] !== false : k === 'grid' ? S.grid : k === 'cad' ? S.cad : k === 'geol' ? S.geol : k === 'radars' ? !!S.radars : !!S.ov[k];
 function renderOv(){ S.ovOpen = S.ovOpen || {};
   $('#ovList').innerHTML = OVG.map(([g, items]) => { const n = items.filter(it => ovOn(it[0])).length, op = ovGrpOpen(g, n);
     return `<div class="acc${op ? ' op' : ''}" data-og="${esc(g)}"><button class="ach">${OI('<path d="M9 6l6 6-6 6"/>', 'currentColor')}<span>${esc(g)}</span>${n ? `<i>${n}</i>` : ''}</button>
@@ -1136,7 +1160,8 @@ function setOv(k, on){ S.ov[k] = on; if (ovObjs[k]) { map.removeLayer(ovObjs[k])
   if (on) { const l = OVL[k](); let ok = 0, bad = 0; l.on('tileload', () => ok++).on('tileerror', () => { if (++bad === 8 && !ok) toast('Cette superposition ne répond pas pour le moment'); }); ovObjs[k] = l.addTo(map); }
   saveSettings(); syncOv(); }
 $('#ovList').addEventListener('click', e => { const t = e.target.closest('[data-ov]');
-  if (t) { const k = t.dataset.ov; if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); if (k === 'radars') return setRadars(!S.radars); return setOv(k, !S.ov[k]); }
+  if (t) { const k = t.dataset.ov; if (k === 'favs' || k === 'adr') return setMine(k, S.ov[k] === false);
+    if (k === 'grid') return toggleGrid(); if (k === 'cad') return setCad(!S.cad); if (k === 'geol') return setGeol(!S.geol); if (k === 'radars') return setRadars(!S.radars); return setOv(k, !S.ov[k]); }
   const h = e.target.closest('.ach'); if (h) { const g = h.parentNode.dataset.og, items = (OVG.find(x => x[0] === g) || [, []])[1]; S.ovOpen[g] = !ovGrpOpen(g, items.filter(it => ovOn(it[0])).length); saveSettings(); renderOv(); } });
 let geolLayer = null;
 function setGeol(on){ S.geol = on; syncOv(); if (geolLayer) { map.removeLayer(geolLayer); geolLayer = null; }
@@ -1452,15 +1477,27 @@ async function submitSearch(){
 
 /* ---------- points ---------- */
 const pinIcon = () => L.divIcon({ className:'', iconSize:[24,30], iconAnchor:[12,29], html:`<svg width="24" height="30" viewBox="0 0 24 30"><path d="M12 29s-10-8.6-10-16.5A10 10 0 0 1 22 12.5C22 20.4 12 29 12 29z" fill="${S.selColor}" stroke="#0f1115" stroke-width="1.5"/><circle cx="12" cy="12.5" r="3.6" fill="#0f1115"/></svg>` });
-let ptLayer = L.layerGroup().addTo(map);
+let ptLayer = L.layerGroup(); if (S.ov.favs !== false) ptLayer.addTo(map);
+const emoIcon = e => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin emo"><span>${esc(e)}</span></div>` });
+const EMOS = ['🏡','🏘️','🏠','🏢','🏛️','🏭','🏗️','🚧','🍀','🌳','🌲','🌊','💧','🍄‍🟫','⛰️','🏕️','🚜','⛏️','🔧','⚠️','🔥','⭐','❤️','🚩','📍','📦','🅿️','⛽','🍴','☕','🛒','🏥','⛪','🏫','⚡','🚰'];
+let peI = -1, peIc = '';
+function ptEdit(i){ const p = points[i]; if (!p) return; peI = i; peIc = p.ic || '';
+  $('#peNom').value = p.nom; $('#peNote').value = p.note || ''; $('#peW').textContent = '///' + p.mots; peGrid(); $('#ptedit').classList.add('on'); }
+function peGrid(){ $('#peIc').innerHTML = `<button class="${peIc ? '' : 'on'}" data-e="" title="Épingle par défaut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>`
+  + EMOS.map(e => `<button class="${peIc === e ? 'on' : ''}" data-e="${e}">${e}</button>`).join(''); }
+$('#peIc').onclick = e => { const b = e.target.closest('[data-e]'); if (!b) return; peIc = b.dataset.e; peGrid(); };
+$('#peOk').onclick = () => { const p = points[peI]; if (!p) return; p.nom = $('#peNom').value.trim() || p.nom; const n = $('#peNote').value.trim(); if (n) p.note = n; else delete p.note; if (peIc) p.ic = peIc; else delete p.ic;
+  $('#ptedit').classList.remove('on'); changed(); toast('Point mis à jour'); };
+$('#ptedit').onclick = e => { if (e.target.id === 'ptedit' || e.target.closest('#peX')) $('#ptedit').classList.remove('on'); };
+function setMine(k, on){ S.ov[k] = on; saveSettings(); const l = k === 'favs' ? ptLayer : ADR_GRP; if (on) l.addTo(map); else map.removeLayer(l); syncOv(); toast((k === 'favs' ? 'Points favoris' : 'Domicile, travail & carnet') + (on ? ' affichés' : ' masqués')); }
 function renderPoints(){
   ptLayer.clearLayers();
-  points.forEach(p => L.marker([p.lat, p.lon], { icon: pinIcon() }).bindTooltip(`${esc(p.nom)}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(p.mots)}</span>`, { className:'pt-tip', direction:'top', offset:[0,-26] })
+  points.forEach(p => L.marker([p.lat, p.lon], { icon: p.ic ? emoIcon(p.ic) : pinIcon() }).bindTooltip(`<b>${esc(p.nom)}</b>${p.note ? `<br><span class="ptn">${esc(p.note).replace(/\n/g, '<br>')}</span>` : ''}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(p.mots)}</span>`, { className:'pt-tip', direction:'top', offset:[0, p.ic ? -36 : -26] })
     .on('click', () => { const r = MM3.cellOfWords(p.mots.split('.')); if (r.cell) select(r.cell); }).addTo(ptLayer));
   $('#ptCount').textContent = points.length ? `(${points.length})` : '';
-  $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><div class="m"><div class="n">${esc(p.nom)}</div><div class="w">///${esc(p.mots)}</div></div>
+  $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><span class="ic emo">${p.ic ? esc(p.ic) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'}</span><div class="m"><div class="n">${esc(p.nom)}</div>${p.note ? `<div class="lb">${esc(p.note.split('\n')[0])}</div>` : ''}<div class="w">///${esc(p.mots)}</div></div>
     <button class="ib" data-nav="${i}" title="Guidage">${NAV_IC}</button>
-    <button class="ib" data-ren="${i}" title="Renommer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
+    <button class="ib" data-ren="${i}" title="Modifier (titre, note, icône)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
     <button class="ib" data-del="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`).join('')
     : `<div class="empty">Aucun point favori pour l'instant.</div>`;
 }
@@ -1468,7 +1505,7 @@ $('#ptList').onclick = e => {
   const d = e.target.closest('[data-del]'), r = e.target.closest('[data-ren]'), it = e.target.closest('.pt'), g = e.target.closest('[data-nav]');
   if (g) { const p = points[+g.dataset.nav]; toggleDrawer('#dPoints'); return guideTo(p.lat, p.lon, p.nom); }
   if (d) { const p = points[+d.dataset.del]; if (confirm(`Supprimer le point « ${p.nom} » ?`)) { points.splice(+d.dataset.del, 1); changed(); } return; }
-  if (r) { const p = points[+r.dataset.ren], n = prompt('Nouveau nom :', p.nom); if (n && n.trim()) { p.nom = n.trim(); changed(); } return; }
+  if (r) return ptEdit(+r.dataset.ren);
   if (it) { const p = points[+it.dataset.i]; map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 18), { duration: .6 }); }
 };
 $('#cNav').onclick = () => { if (!sel) return; const x = MM3.bounds(sel); guideTo((x.s + x.n) / 2, (x.w + x.e) / 2, '///' + selInfo.words.join('.')); };
@@ -1508,14 +1545,16 @@ $('#adrbox').onclick = e => { if (e.target.id === 'adrbox' || e.target.closest('
 $('#abName').onkeydown = e => { if (e.key === 'Enter') $('#adrbox [data-k="list"]').click(); };
 $('#pkSave').onclick = () => { if (!place) return; adrAsk(place.lat, place.lon, $('#pkName').textContent, $('#pkCtx').textContent, place.label); };
 function adrStore(){ store('adr', ADR); renderAdr(); }
-const ADR_GRP = L.layerGroup().addTo(map);
+const ADR_GRP = L.layerGroup(); if (S.ov.adr !== false) ADR_GRP.addTo(map);
 const ADR_MAP = { home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/><path d="M16 6V4h2v3.6"/>',
-  work: '<path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/>' };
+  work: '<path d="M3 20V11l5 3v-3l5 3v-3l5 3V4h3v16z"/><path d="M6.5 17h1.5M11 17h1.5M15.5 17h1.5"/>', list: '<path d="M6 3h12v18l-6-4-6 4z"/>' };
 const adrIcon = k => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ADR_MAP[k]}</svg></div>` });
 function renderAdrMap(){ ADR_GRP.clearLayers();
   ['home', 'work'].forEach(k => { const a = ADR[k]; if (!a) return; const nom = k === 'home' ? 'Domicile' : 'Travail';
     L.marker([a.lat, a.lon], { icon: adrIcon(k), zIndexOffset: 500 }).bindTooltip(`<b>${nom}</b><br>${esc(a.label || '')}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(triw(a.lat, a.lon))}</span>`, { className: 'pt-tip', direction: 'top', offset: [0, -36] })
-      .on('click', () => adrGo({ ...a, nom })).addTo(ADR_GRP); }); }
+      .on('click', () => adrGo({ ...a, nom })).addTo(ADR_GRP); });
+  ADR.list.forEach(a => L.marker([a.lat, a.lon], { icon: adrIcon('list') }).bindTooltip(`<b>${esc(a.nom)}</b><br>${esc(a.label || '')}<br><span style="color:var(--acc);font-family:var(--mono)">///${esc(triw(a.lat, a.lon))}</span>`, { className: 'pt-tip', direction: 'top', offset: [0, -36] })
+    .on('click', () => adrGo(a)).addTo(ADR_GRP)); }
 const triw = (lat, lon) => { try { return MM3.wordsOfCell(MM3.cellAt(lat, lon)).words.join('.'); } catch(e){ return ''; } };
 function renderAdr(){ renderAdrMap();
   const row = (e, k, i) => { const set = !!e, d = set ? e : { nom: k === 'home' ? 'Domicile' : 'Travail' };
@@ -2601,7 +2640,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:26';
+const APP_VER = '15/11/2026 12:38';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
