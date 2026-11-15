@@ -413,6 +413,14 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #gCenter.on{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
 #gCenter svg{width:17px;height:17px}
 .momo{width:52px;height:78px;pointer-events:none;--sp:.42s}
+.mo-torch{position:absolute;left:32px;top:-2px;width:36px;height:53px;overflow:visible}
+.mo-torch .tfl{transform-origin:19px 16px;animation:flame .18s ease-in-out infinite alternate}
+.mo-torch .tglow{animation:glow .3s ease-in-out infinite alternate}
+@keyframes flame{from{transform:scale(.92,1.04) rotate(-4deg)}to{transform:scale(1.06,.95) rotate(4deg)}}
+@keyframes glow{from{opacity:.7}to{opacity:1}}
+#torchFog{position:absolute;inset:0;z-index:2;pointer-events:none;display:none;--x:50%;--y:60%;--r:200px;
+  background:radial-gradient(circle var(--r) at var(--x) var(--y),rgba(255,175,70,.24) 0,rgba(255,155,50,.12) 30%,rgba(255,130,30,.04) 58%,rgba(12,13,22,.38) 82%,rgba(8,9,15,.6) 100%);mix-blend-mode:normal}
+#torchFog.on{display:block}
 .mo{position:relative;width:52px;height:78px;filter:drop-shadow(0 0 1px rgba(0,0,0,.45))}
 .mo img{position:absolute;left:0;width:52px;display:block}
 .mo-body{position:absolute;left:0;top:0;width:52px;height:46px;transform-origin:50% 100%}
@@ -772,7 +780,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:53</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 12:56</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -820,6 +828,7 @@ setTimeout(done,4700);
 <!-- Vue 3D / GPS -->
 <div id="v3d">
   <div id="v3map"></div>
+  <div id="torchFog"></div>
   <div id="gTop"><div class="gmain"><div id="gIco"></div><div class="gt"><b id="gDist"></b><span id="gTxt"></span><span id="gInfo"></span></div></div><div id="gNext"></div></div>
   <div id="vside"><button id="vTab" title="Afficher / masquer les commandes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
   <div class="vctl">
@@ -2313,8 +2322,9 @@ const hatOf = id => HATS.find(h => h[0] === id) || HATS[0];
 function momoHead(id){ const h = hatOf(id), d = h[3];
   if (typeof d === 'object') return `<img class="mb-cap" alt="" src="${MO_BODY}"${d.f ? ` style="filter:${d.f}"` : ''}>`;
   return `<img class="mb-eyes" alt="" src="${MO_EYES}">${d ? `<svg class="mb-hat" viewBox="-1 -60 252 168">${d}</svg>` : ''}`; }
-const momoHTML = id => `<div class="mo"><div class="mo-sh"></div><img class="mo-leg" alt="" src="${MO_LEG}"><div class="mo-body">${momoHead(id || S.hat)}</div></div>`;
-function setHat(id){ S.hat = id; saveSettings(); renderStudio(); renderStOpen(); if (momoMk) momoMk.getElement().innerHTML = momoHTML(); }
+const MO_TORCH = `<svg class="mo-torch" viewBox="0 0 30 44"><defs><radialGradient id="tg"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#ff9a2a" stop-opacity="0"/></radialGradient></defs><circle class="tglow" cx="19" cy="11" r="11" fill="url(#tg)"/><path d="M2 38 Q9 37 13 31" stroke="#14161b" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M2 38 Q9 37 13 31" stroke="#c9c9c9" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 34 L18 16" stroke="#14161b" stroke-width="5.5" stroke-linecap="round"/><path d="M12 34 L18 16" stroke="#8a5424" stroke-width="3.5" stroke-linecap="round"/><path d="M15.8 19.5 l5 1.6" stroke="#5a5f6a" stroke-width="3" stroke-linecap="round"/><g class="tfl"><path d="M18.5 16 C12.5 12.5 15 6.5 18.8 1.5 C19.6 6 25 8 21.6 14.2 Z" fill="#ff7a00" stroke="#14161b" stroke-width="1.2"/><path d="M19 15 C16.5 12.5 17.6 9.2 19.3 6.6 C20 9.4 22.4 10.6 20.8 13.8 Z" fill="#ffe14a"/></g></svg>`;
+const momoHTML = (id, torch) => `<div class="mo"><div class="mo-sh"></div><img class="mo-leg" alt="" src="${MO_LEG}"><div class="mo-body">${momoHead(id || S.hat)}</div>${torch ? MO_TORCH : ''}</div>`;
+function setHat(id){ S.hat = id; saveSettings(); renderStudio(); renderStOpen(); if (momoMk) momoMk.getElement().innerHTML = momoHTML(null, !!S.ov.quest); }
 document.addEventListener('click', e => { const b = e.target.closest('#studio [data-hat]'); if (b) setHat(b.dataset.hat); });
 function renderStOpen(){ const m = $('#stOpen .st-mini'); if (!m) return; m.innerHTML = `<div class="momo">${momoHTML()}</div>`; $('#stHat').textContent = hatOf(S.hat)[1]; }
 $('#stOpen').onclick = () => { renderStudio(); $('#stbox').classList.add('on'); };
@@ -2469,8 +2479,8 @@ function startGuide(){ wakeOn();
   LIM.v = null; LIM.at = null; renderLimit(); prepRoute(); set3DData(); loadRadarsRoute(); g3.on = true; g3.onRoute = false; g3.follow = true; g3.along = g3.target = 0; g3.brg = bearingAt(0);
   const a = pointAt(0); g3.pos = { ...a }; g3.tpos = null;
   $('#gBar').classList.add('on'); $('#gTop').classList.add('on'); gCenterUI(false); $('#gInfo').textContent = '';
-  if (!momoMk) { const el = document.createElement('div'); el.className = 'momo'; el.innerHTML = momoHTML(); momoMk = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }); }
-  momoMk.setLngLat([a.lng, a.lat]).addTo(v3);
+  if (!momoMk) { const el = document.createElement('div'); el.className = 'momo'; el.innerHTML = momoHTML(null, !!S.ov.quest); momoMk = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }); }
+  momoMk.getElement().innerHTML = momoHTML(null, !!S.ov.quest); momoMk.setLngLat([a.lng, a.lat]).addTo(v3); torchUI();
   v3.jumpTo({ center: [a.lng, a.lat], zoom: rt.profile === 'car' ? 17.4 : 18.4, pitch: navPitch(), bearing: S.nav.orient === 'north' ? 0 : g3.brg }); g3.lastK = -1; g3.doneT = 0; g3.ui = {};
   updGuideUI(true);
   g3.fixT = 0; g3.offN = 0; g3.lastFix = null;
@@ -2518,6 +2528,7 @@ function navFrame(now, dt){
   const prev = g3.along; g3.along += (g3.target - g3.along) * Math.min(1, dt * (g3.sim ? 30 : 4));
   const p = pointAt(g3.along), moving = Math.abs(g3.along - prev) > .02; g3.pos = p;
   momoMk.setLngLat([p.lng, p.lat]); momoMk.getElement().classList.toggle('walk', moving);
+  if (S.ov.quest) torchLight(now);
   if (moving) momoMk.getElement().style.setProperty('--sp', Math.max(.25, Math.min(.6, 1.2 / Math.max(1, g3.speed))) + 's');
   g3.brg = angLerp(g3.brg, bearingAt(g3.along), Math.min(1, dt * 2.5));
   if (g3.follow && !g3.hold && now - (g3.camT || 0) > 30) { g3.camT = now; v3.jumpTo({ center: [p.lng, p.lat], bearing: S.nav.orient === 'north' ? 0 : g3.brg, padding: { top: S.nav.view === '2d' ? v3.getContainer().clientHeight * .25 : v3.getContainer().clientHeight * .42, bottom: 0, left: 0, right: 0 } }); }
@@ -2540,7 +2551,7 @@ function updGuideUI(first){
   far.forEach((lim, j) => { const key = k + ':' + j; if (dn <= lim && !g3.spoken[key] && dn > (j < 2 ? far[j + 1] : -1)) { g3.spoken[key] = 1; say(j < 2 ? `Dans ${fmtD(dn)}, ${s.t.charAt(0).toLowerCase() + s.t.slice(1)}` : s.t); } });
   if (left < 12 && !g3.spoken.arr) { g3.spoken.arr = 1; $('#gTxt').textContent = 'Vous êtes arrivé'; $('#gDist').textContent = ''; say('Vous êtes arrivé à destination'); simStop(); }
 }
-function stopGuide(){ const was = g3.on; g3.on = false; wakeOff(); if (was) setTimeout(() => $('#rtClear').click(), 0); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
+function stopGuide(){ const was = g3.on; g3.on = false; $('#torchFog').classList.remove('on'); wakeOff(); if (was) setTimeout(() => $('#rtClear').click(), 0); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
   if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
 function simStop(){ g3.sim = false; $('#gBar').classList.remove('sim'); $('#gSim').classList.remove('on'); $('#gSim').title = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
@@ -2669,7 +2680,11 @@ const QuestLayer = L.Layer.extend({
       if (px < -d || py < -d || px > W + d || py > H + d) continue; x.drawImage(QSPR, px - r, py - r, d, d); }
     c.style.opacity = 1; }
 });
-function setQuest(on){ S.ov.quest = on; saveSettings();
+function torchUI(){ const on = !!(g3.on && S.ov.quest); $('#torchFog').classList.toggle('on', on); if (momoMk && g3.on) momoMk.getElement().innerHTML = momoHTML(null, !!S.ov.quest); }
+function torchLight(now){ const el = momoMk && momoMk.getElement(), f = $('#torchFog'); if (!el || !f) return; const r = el.getBoundingClientRect(), b = f.getBoundingClientRect();
+  const fl = 1 + Math.sin(now / 90) * .025 + Math.sin(now / 37 + 1.3) * .018 + Math.sin(now / 211) * .02, R = Math.min(b.width, b.height) * .42 * fl;
+  f.style.setProperty('--x', (r.left + r.width * .75 - b.left).toFixed(1) + 'px'); f.style.setProperty('--y', (r.top + r.height * .3 - b.top).toFixed(1) + 'px'); f.style.setProperty('--r', R.toFixed(1) + 'px'); }
+function setQuest(on){ S.ov.quest = on; saveSettings(); torchUI();
   if (on) { if (!QUEST.layer) QUEST.layer = new QuestLayer(); QUEST.layer.addTo(map); if (!GEO.last && GEO.id == null && navigator.geolocation) geoStart(); }
   else if (QUEST.layer) map.removeLayer(QUEST.layer);
   syncOv(); toast(on ? 'MomoQuest : le brouillard se lève là où vous passez' : 'MomoQuest masqué'); }
@@ -2769,7 +2784,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 12:53';
+const APP_VER = '15/11/2026 12:56';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
