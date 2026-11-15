@@ -780,7 +780,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 13:15</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 15:07</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -1347,7 +1347,7 @@ function placeChoice(lat, lon, label, ctx, z, full){ place = { lat, lon, label: 
 function pickClose(){ $('#pick').classList.remove('on'); }
 $('#pkX').onclick = () => { pickClose(); place = null; if (POI.items.length) $('#poi').classList.add('on'); if (searchMk) { map.removeLayer(searchMk); searchMk = null; } };
 $('#pkSee').onclick = () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); $('#pkSee').style.display = 'none'; };
-$('#pk3d').onclick = async () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); pickClose(); await open3D(false); if (v3) v3.easeTo({ center: [place.lon, place.lat], zoom: 17, pitch: 60, bearing: -20, duration: 1500 }); };
+$('#pk3d').onclick = async () => { if (!place) return; goLatLon(place.lat, place.lon, place.z); pickClose(); await open3D(false); if (v3) v3.easeTo({ freezeElevation: true, center: [place.lon, place.lat], zoom: 17, pitch: 60, bearing: -20, duration: 1500 }); };
 $('#pkNav').onclick = () => { if (place) guideTo(place.lat, place.lon, place.label); };
 async function guideTo(lat, lon, label){
   pickClose(); q.blur();
@@ -2357,7 +2357,7 @@ async function applyNav(k){
   if (k === 'base' || k === undefined) { const key = navStyleKey(); if (key !== g3.curStyle) await setStyleKey(key); }
   if (k === 'relief' || k === undefined) setTerrain(S.nav.relief, true);
   if (k === 'bati' || k === undefined) setBati();
-  if ((k === 'view' || k === 'orient') && g3.on) v3.easeTo({ pitch: navPitch(), bearing: S.nav.orient === 'north' ? 0 : g3.brg, duration: 500 });
+  if ((k === 'view' || k === 'orient') && g3.on) v3.easeTo({ freezeElevation: true, pitch: navPitch(), bearing: S.nav.orient === 'north' ? 0 : g3.brg, duration: 500 });
 }
 function setBati(){ if (!v3 || !v3.getStyle()) return; const on = S.nav.bati && S.nav.view !== '2d';
   v3.getStyle().layers.filter(l => l.type === 'fill-extrusion').forEach(l => v3.setLayoutProperty(l.id, 'visibility', on ? 'visible' : 'none')); }
@@ -2440,9 +2440,9 @@ function close3D(){ stopGuide(); $('#v3d').classList.remove('on'); document.body
   if (v3) { const c = v3.getCenter(); map.setView([c.lat, c.lng], Math.round(v3.getZoom() + 1)); } }
 $('#zTilt').onclick = () => open3D(false);
 $('#vClose').onclick = close3D;
-$('#vCompass').onclick = () => v3.easeTo({ bearing: 0, pitch: v3.getPitch() < 5 ? 55 : v3.getPitch() });
-$('#vRotL').onclick = () => v3.easeTo({ bearing: v3.getBearing() - 30 }); $('#vRotR').onclick = () => v3.easeTo({ bearing: v3.getBearing() + 30 });
-$('#vTiltU').onclick = () => v3.easeTo({ pitch: Math.min(80, v3.getPitch() + 15) }); $('#vTiltD').onclick = () => v3.easeTo({ pitch: Math.max(0, v3.getPitch() - 15) });
+$('#vCompass').onclick = () => v3.easeTo({ freezeElevation: true, bearing: 0, pitch: v3.getPitch() < 5 ? 55 : v3.getPitch() });
+$('#vRotL').onclick = () => v3.easeTo({ freezeElevation: true, bearing: v3.getBearing() - 30 }); $('#vRotR').onclick = () => v3.easeTo({ freezeElevation: true, bearing: v3.getBearing() + 30 });
+$('#vTiltU').onclick = () => v3.easeTo({ freezeElevation: true, pitch: Math.min(80, v3.getPitch() + 15) }); $('#vTiltD').onclick = () => v3.easeTo({ freezeElevation: true, pitch: Math.max(0, v3.getPitch() - 15) });
 $('#vZin').onclick = () => v3.zoomIn(); $('#vZout').onclick = () => v3.zoomOut();
 $('#vRel').onclick = () => g3.on ? setTerrain(!S.nav.relief, true) : setTerrain(!(S.relief3d !== false));
 $('#vSty').onclick = () => { S.nav.base = g3.gpsStyle ? 'current' : 'gps'; saveSettings(); renderNavOpt(); applyNav('base'); };
@@ -2532,7 +2532,8 @@ function navFrame(now, dt){
   if (S.ov.quest) torchLight(now);
   if (moving) momoMk.getElement().style.setProperty('--sp', Math.max(.25, Math.min(.6, 1.2 / Math.max(1, g3.speed))) + 's');
   g3.brg = angLerp(g3.brg, bearingAt(g3.along), Math.min(1, dt * 2.5));
-  if (g3.follow && !g3.hold && now - (g3.camT || 0) > 30) { g3.camT = now; v3.jumpTo({ center: [p.lng, p.lat], bearing: S.nav.orient === 'north' ? 0 : g3.brg, padding: { top: S.nav.view === '2d' ? v3.getContainer().clientHeight * .25 : v3.getContainer().clientHeight * .42, bottom: 0, left: 0, right: 0 } }); }
+  if (g3.follow && !g3.hold && now - (g3.camT || 0) > 30) { g3.camT = now; if (v3._elevationFreeze && !v3.isEasing()) v3._elevationFreeze = false; // sinon l'altitude du centre reste figée et Momo dérive en montagne
+    v3.jumpTo({ center: [p.lng, p.lat], bearing: S.nav.orient === 'north' ? 0 : g3.brg, padding: { top: S.nav.view === '2d' ? v3.getContainer().clientHeight * .25 : v3.getContainer().clientHeight * .42, bottom: 0, left: 0, right: 0 } }); }
   if (now - g3.lastUI > 250) { g3.lastUI = now; updGuideUI(); }
 }
 function updGuideUI(first){
@@ -2554,7 +2555,7 @@ function updGuideUI(first){
 }
 function stopGuide(){ const was = g3.on; g3.on = false; $('#torchFog').classList.remove('on'); wakeOff(); if (was) setTimeout(() => $('#rtClear').click(), 0); setTimeout(() => setSpeed(GEO.spd), 0); cancelAnimationFrame(g3.loop); simStop(); GEO.subs.delete(onFix); if (!S.geoOn) geoStop();
   if (momoMk) momoMk.remove(); if (window.speechSynthesis) speechSynthesis.cancel(); $('#gBar').classList.remove('on'); $('#gTop').classList.remove('on');
-  if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
+  if (v3 && v3.getSource('man')) { v3.getSource('man').setData({ type: 'FeatureCollection', features: [] }); v3.getSource('done').setData({ type: 'FeatureCollection', features: [] }); v3.easeTo({ freezeElevation: true, padding: { top: 0, bottom: 0, left: 0, right: 0 } }); } }
 function simStop(){ g3.sim = false; $('#gBar').classList.remove('sim'); $('#gSim').classList.remove('on'); $('#gSim').title = 'Simulation'; const p = $('#gSim svg path'); if (p) p.setAttribute('d', 'M7 5l12 7-12 7z'); }
 $('#gSim').onclick = () => { if (!g3.on) return; if (g3.sim) return simStop(); if (g3.target >= g3.total - 1) { g3.along = g3.target = 0; g3.spoken = {}; }
   g3.sim = true; g3.follow = true; gCenterUI(false); $('#gSim').classList.add('on'); $('#gSim').title = 'Pause'; $('#gBar').classList.add('sim'); $('#gSim svg path').setAttribute('d', 'M8 5v14M16 5v14'); $('#gInfo').textContent = ''; };
@@ -2562,7 +2563,7 @@ $('#gSpeed').onclick = () => { g3.simSpeed = g3.simSpeed >= 8 ? 1 : g3.simSpeed 
 function gFree(){ if (!g3.follow) return; g3.follow = false; gCenterUI(true); }
 function gCenterUI(on){ $('#gRe').classList.toggle('on', on); $('#gCenter').classList.toggle('on', on); }
 $('#gCenter').onclick = () => $('#gRe').click();
-$('#gRe').onclick = () => { g3.follow = true; gCenterUI(false); v3.easeTo({ pitch: navPitch(), zoom: rt.profile === 'car' ? 17.4 : 18.4, duration: 600 }); };
+$('#gRe').onclick = () => { g3.follow = true; gCenterUI(false); v3.easeTo({ freezeElevation: true, pitch: navPitch(), zoom: rt.profile === 'car' ? 17.4 : 18.4, duration: 600 }); };
 $('#gVoice').onclick = () => { g3.voice = !g3.voice; S.nav.voice = g3.voice; saveSettings(); renderNavOpt(); $('#gVoice').classList.toggle('off', !g3.voice); if (!g3.voice && window.speechSynthesis) speechSynthesis.cancel(); };
 $('#gStop').onclick = () => close3D();
 function vSide(h){ S.vHid = h; saveSettings(); $('#vside').classList.toggle('hid', h); $('#v3d').classList.toggle('vhid', h); }
@@ -2791,7 +2792,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 13:15';
+const APP_VER = '15/11/2026 15:07';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
