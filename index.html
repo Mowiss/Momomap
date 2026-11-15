@@ -305,10 +305,10 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #v3d{position:fixed;inset:0;z-index:1800;background:#0b0d11;display:none}
 #v3d.on{display:block}
 #v3map{position:absolute;inset:0}
-#vside{position:absolute;right:0;top:12px;z-index:5;display:flex;align-items:flex-start;transition:transform .25s ease}
+#vside{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:5;display:flex;align-items:center;transition:transform .25s ease}
 #vside .vctl{margin-right:10px}
-#vside.hid{transform:translateX(calc(100% - 26px))}
-#vTab{width:26px;height:56px;margin-top:8px;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;padding:0}
+#vside.hid{transform:translateY(-50%) translateX(calc(100% - 26px))}
+#vTab{width:26px;height:64px;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;padding:0}
 #vTab svg{width:16px;height:16px;transform:rotate(180deg);transition:transform .25s}
 #vside.hid #vTab svg{transform:none}
 .vctl{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
@@ -342,8 +342,7 @@ textarea.f{background:var(--bg);color:var(--tx);border:1px solid var(--line2);bo
 #gSpeed{font:700 12px var(--ui);display:none}
 #gBar.sim #gSpeed{display:grid}
 #gBar{box-sizing:border-box;overflow:hidden}
-#v3d #gTop{right:90px}
-#v3d.vhid #gTop{right:38px}
+#v3d #gTop{right:12px}
 .gbtn .ib.stop{color:#fff;background:#c62828;border-color:#c62828}
 #gVoice.off{opacity:.45}
 #gRe.on{border-color:var(--acc);color:var(--acc)}
@@ -445,7 +444,8 @@ body.gopt #spd{display:none!important}
   .leaflet-control-attribution{display:none}
   #toast{top:62px;max-width:calc(100% - 24px)}
   .tool{height:44px}
-  #vside{top:8px}
+  #vside{top:calc(50% + 30px)}
+  .vctl #vRotL,.vctl #vRotR,.vctl .vsep:nth-of-type(2){display:none}
   #vside .vctl{margin-right:6px}
   .vctl .ib{width:34px;height:34px}
   .vctl #vZin,.vctl #vZout{display:none}
@@ -455,8 +455,7 @@ body.gopt #spd{display:none!important}
   #gBar{left:6px;right:6px;gap:8px;padding:8px 8px}
   .gsep{display:none}.gs>span{display:flex;flex-direction:column}
   .gs b{font-size:17px}.gs span{font-size:11px;white-space:normal;line-height:1.25}
-  #v3d #gTop{right:84px}
-  #v3d.vhid #gTop{right:32px}
+  #v3d #gTop{right:8px}
   #gBar{gap:6px}.gbtn{gap:3px}.gbtn .ib{width:33px;height:33px}.gbtn .ib svg{width:16px;height:16px}
   .gbtn .ib{width:34px;height:34px}.gcur{width:46px;height:46px}.gcur b{font-size:17px}.glim{width:38px;height:38px}.glim b{font-size:14px}
   input.f,select{font-size:16px}
@@ -582,7 +581,7 @@ setTimeout(done,4700);
       <div class="pk-h"><div class="pk-t"><b id="pkName"></b><span id="pkCtx"></span></div><button class="ib" id="pkX" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="pk-a">
         <button class="btn" id="pkSee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Chercher</button>
-        <button class="btn pri" id="pkNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg>Guidage</button>
+        <button class="btn pri" id="pkNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>Guidage</button>
         <button class="btn" id="pk3d" title="Voir le lieu en 3D" style="flex:none;width:48px"><b style="font:700 12px var(--ui)">3D</b></button>
       </div>
     </div>
@@ -659,7 +658,7 @@ setTimeout(done,4700);
     <div class="seg"><button class="on" data-prof="car">Voiture</button><button data-prof="pedestrian">À pied</button></div>
     <div class="rt-in"><span class="rt-pin s">A</span><input class="f" id="rtA" placeholder="Départ : adresse ou coordonnées"><button class="ib" id="rtPickA" title="Choisir sur la carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></button><button class="ib" id="rtMe" title="Ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></div>
     <div class="rt-in"><span class="rt-pin s">B</span><input class="f" id="rtB" placeholder="Arrivée : adresse ou coordonnées"><button class="ib" id="rtPickB" title="Choisir sur la carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></button><button class="ib" id="rtSwap" title="Inverser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button></div>
-    <div class="acts" style="padding:8px 0"><button class="btn pri" id="rtGo">Calculer</button><button class="btn" id="rtNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg>Guidage</button><button class="btn" id="rtAdd" title="Ajouter l'itinéraire aux calques" style="flex:none;width:40px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L2 8l9 5 9-5z"/><path d="M2 13l9 5 4-2.2"/><path d="M19 14v6M16 17h6"/></svg></button><button class="btn" id="rtClear" style="flex:none;width:40px" title="Effacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>
+    <div class="acts" style="padding:8px 0"><button class="btn pri" id="rtGo">Calculer</button><button class="btn" id="rtNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg>Guidage</button><button class="btn" id="rtAdd" title="Ajouter l'itinéraire aux calques" style="flex:none;width:40px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3L2 8l9 5 9-5z"/><path d="M2 13l9 5 4-2.2"/><path d="M19 14v6M16 17h6"/></svg></button><button class="btn" id="rtClear" style="flex:none;width:40px" title="Effacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>
     <div id="rtRes" class="sb"></div>
   </div>
 </div>
@@ -695,7 +694,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:55</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 10:59</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <div class="lbl">Guidage GPS</div>
     <div class="navopt"></div>
@@ -768,7 +767,7 @@ setTimeout(done,4700);
     <div class="gbtn">
       <button class="ib" id="gSim" title="Simulation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></svg></button>
       <button class="ib" id="gSpeed" title="Vitesse de la simulation">×4</button>
-      <button class="ib" id="gRe" title="Recentrer sur Momo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 19-7-4-7 4z"/></svg></button>
+      <button class="ib" id="gRe" title="Recentrer sur Momo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.4 20.3 12 16.6 4.6 20.3Z" fill="currentColor" stroke-width="1.6"/></svg></button>
       <button class="ib" id="gVoice" title="Annonces vocales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
       <button class="ib stop" id="gStop" title="Arrêter le guidage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
@@ -2385,7 +2384,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 10:55';
+const APP_VER = '15/11/2026 10:59';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
