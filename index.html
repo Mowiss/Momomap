@@ -193,7 +193,7 @@ input[type=range]{accent-color:var(--acc);width:130px}
 .pp-t{display:flex;align-items:center;gap:7px;font-size:15px;padding-right:14px}.pp-t span{font-size:20px}
 .pp-n{margin-top:6px;color:var(--tx);opacity:.85;white-space:normal;word-break:break-word;max-height:40vh;overflow:auto}
 .pp-w{margin-top:6px;font:12px var(--mono);color:var(--acc)}
-.pp-a{display:flex;gap:6px;margin-top:10px}.pp-a .btn{height:34px}.pp-a .btn:last-child{flex:none;width:40px}
+.pp-a{display:flex;gap:6px;margin-top:10px}.pp-a .btn{height:34px}.pp-a .btn:not(.pri){flex:none;width:40px}.pp-a .btn svg{width:17px;height:17px}
 .pt-tip .ptn{color:var(--mut);display:inline-block;max-width:240px;white-space:normal}
 .st-open{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0 4px;padding:8px 12px 8px 8px;border:1px solid var(--line2);border-radius:12px;background:var(--panel2);cursor:pointer;color:var(--tx);text-align:left}
 .st-open:hover{border-color:var(--acc)}
@@ -785,7 +785,7 @@ setTimeout(done,4700);
 </div>
 
 <div class="drawer" id="dSettings">
-  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 16:16</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="dh"><span>Paramètres <span class="ver">v 15/11/2026 16:22</span></span> <button class="ib x" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db">
     <button class="st-open" id="stOpen"><span class="st-mini"></span><span class="st-t"><b>Studio MOMO</b><span id="stHat"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="lbl">Guidage GPS</div>
@@ -933,6 +933,7 @@ setTimeout(done,4700);
   <button data-c="nav">Guidage jusqu'ici</button>
   <button data-c="parcel">Interroger la parcelle ici</button>
   <button data-c="fav">Ajouter aux favoris ici</button>
+  <button data-c="share">Partager ce point</button>
   <button data-c="adr">Enregistrer l'adresse (domicile, travail, carnet)</button>
   <button data-c="words">Trimo de ce point</button>
   <button data-c="xy">Copier les coordonnées</button>
@@ -1547,6 +1548,12 @@ let ptLayer = L.layerGroup(); if (S.ov.favs !== false) ptLayer.addTo(map);
 const emoIcon = e => L.divIcon({ className: '', iconSize: [34, 40], iconAnchor: [17, 38], html: `<div class="adr-pin emo"><span>${esc(e)}</span></div>` });
 const EMOS = ['🏡','🏘️','🏠','🏢','🏛️','🏭','🏗️','🚧','🍀','🌳','🌲','🌊','💧','🍄‍🟫','⛰️','🏕️','🚜','⛏️','🔧','⚠️','🔥','⭐','❤️','🚩','📍','📦','🅿️','⛽','🍴','☕','🛒','🏥','⛪','🏫','⚡','🚰'];
 let peI = -1, peIc = '';
+async function sharePt(nom, note, lat, lon, mots){ const w = mots || triw(lat, lon), base = location.href.split('#')[0].split('?')[0];
+  const url = base + '#///' + encodeURIComponent(w).replace(/%2E/gi, '.'), xy = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+  const text = [nom, note, '///' + w, xy, 'Google Maps : https://maps.google.com/?q=' + lat.toFixed(6) + ',' + lon.toFixed(6)].filter(Boolean).join('\n');
+  if (navigator.share) { try { await navigator.share({ title: nom, text, url }); return; } catch(e){ if (e && e.name === 'AbortError') return; } }
+  const all = text + '\nMomoMAP : ' + url; try { await navigator.clipboard.writeText(all); toast('Point copié : collez-le dans un message'); } catch(e){ prompt('Copier :', all); } }
+function ppShare(i){ const p = points[i]; if (p) sharePt(p.nom, p.note, p.lat, p.lon, p.mots); }
 function ppNav(i){ const p = points[i]; if (p) { map.closePopup(); guideTo(p.lat, p.lon, p.nom); } }
 function ptEdit(i){ map.closePopup(); const p = points[i]; if (!p) return; peI = i; peIc = p.ic || '';
   $('#peNom').value = p.nom; $('#peNote').value = p.note || ''; $('#peW').textContent = '///' + p.mots; peGrid(); $('#ptedit').classList.add('on'); }
@@ -1561,11 +1568,12 @@ function renderPoints(){
   ptLayer.clearLayers();
   points.forEach((p, i) => L.marker([p.lat, p.lon], { icon: p.ic ? emoIcon(p.ic) : pinIcon() })
     .bindPopup(`<div class="pp-t">${p.ic ? `<span>${esc(p.ic)}</span>` : ''}<b>${esc(p.nom)}</b></div>${p.note ? `<div class="pp-n">${esc(p.note).replace(/\n/g, '<br>')}</div>` : ''}<div class="pp-w">///${esc(p.mots)}</div>
-      <div class="pp-a"><button class="btn pri" onclick="ppNav(${i})">${NAV_IC}Guidage</button><button class="btn" onclick="ptEdit(${i})" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`,
+      <div class="pp-a"><button class="btn pri" onclick="ppNav(${i})">${NAV_IC}Guidage</button><button class="btn" onclick="ppShare(${i})" title="Partager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button><button class="btn" onclick="ptEdit(${i})" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button></div>`,
       { className: 'pp', offset: [0, p.ic ? -34 : -24], maxWidth: 280, minWidth: 200, autoPanPadding: [20, 80] }).addTo(ptLayer));
   $('#ptCount').textContent = points.length ? `(${points.length})` : '';
   $('#ptList').innerHTML = points.length ? points.map((p, i) => `<div class="pt" data-i="${i}"><span class="ic emo">${p.ic ? esc(p.ic) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'}</span><div class="m"><div class="n">${esc(p.nom)}</div>${p.note ? '' : ''}<div class="w">///${esc(p.mots)}</div></div>
     <button class="ib" data-nav="${i}" title="Guidage">${NAV_IC}</button>
+    <button class="ib" data-share="${i}" title="Partager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button>
     <button class="ib" data-ren="${i}" title="Modifier (titre, note, icône)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
     <button class="ib" data-del="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>`).join('')
     : `<div class="empty">Aucun point favori pour l'instant.</div>`;
@@ -1573,6 +1581,7 @@ function renderPoints(){
 $('#ptList').onclick = e => {
   const d = e.target.closest('[data-del]'), r = e.target.closest('[data-ren]'), it = e.target.closest('.pt'), g = e.target.closest('[data-nav]');
   if (g) { const p = points[+g.dataset.nav]; toggleDrawer('#dPoints'); return guideTo(p.lat, p.lon, p.nom); }
+  const sh = e.target.closest('[data-share]'); if (sh) { const p = points[+sh.dataset.share]; return sharePt(p.nom, p.note, p.lat, p.lon, p.mots); }
   if (d) { const p = points[+d.dataset.del]; if (confirm(`Supprimer le point « ${p.nom} » ?`)) { points.splice(+d.dataset.del, 1); changed(); } return; }
   if (r) return ptEdit(+r.dataset.ren);
   if (it) { const p = points[+it.dataset.i]; map.flyTo([p.lat, p.lon], Math.max(map.getZoom(), 18), { duration: .6 }); }
@@ -2120,11 +2129,12 @@ $('#pCopy').onclick = () => { if (parcelData && parcelData.ref) copy(parcelData.
 /* ---------- menu clic droit ---------- */
 const cm = $('#ctxm'); let cmAt = null;
 map.on('contextmenu', e => { cmAt = e.latlng; const p = e.containerPoint, sz = map.getSize();
-  cm.style.left = Math.min(p.x, sz.x - 230) + 'px'; cm.style.top = Math.min(p.y, sz.y - 240) + 'px'; cm.classList.add('on'); });
+  cm.style.left = Math.min(p.x, sz.x - 230) + 'px'; cm.style.top = Math.min(p.y, sz.y - 280) + 'px'; cm.classList.add('on'); });
 ['click', 'movestart', 'zoomstart'].forEach(ev => map.on(ev, () => cm.classList.remove('on')));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') cm.classList.remove('on'); });
 cm.onclick = e => { const a = e.target.closest('[data-c]'); if (!a || !cmAt) return; cm.classList.remove('on'); const { lat, lng } = cmAt;
   if (a.dataset.c === 'nav') revAdr(lat, lng).then(r => guideTo(lat, lng, r.label));
+  else if (a.dataset.c === 'share') revAdr(lat, lng).then(r => sharePt(r.label, '', lat, lng));
   else if (a.dataset.c === 'adr') revAdr(lat, lng).then(r => adrAsk(lat, lng, r.l1, r.l2, r.label));
   else if (a.dataset.c === 'parcel') queryParcel(lat, lng);
   else if (a.dataset.c === 'fav') addFav(lat, lng);
@@ -2896,7 +2906,7 @@ if ('launchQueue' in window) window.launchQueue.setConsumer(async params => {
   try { const f = await h.getFile(); applyDoc(JSON.parse(await f.text())); fileHandle = h; fileName = f.name; dirty = false; updFile(); toast('Ouvert : ' + f.name); } catch (e) { toast("Impossible d'ouvrir " + h.name); } });
 
 /* ---------- mises à jour : vérifie la version publiée ---------- */
-const APP_VER = '15/11/2026 16:16';
+const APP_VER = '15/11/2026 16:22';
 async function checkUpdate(){ if (!location.protocol.startsWith('http')) return;
   try { const r = await fetch(location.href.split('#')[0].split('?')[0] + '?nocache=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
     const t = await r.text(), m = t.match(/const APP_VER = '([^']+)'/); if (m && m[1] !== APP_VER) { GEO.newVer = m[1]; $('#upd').classList.add('on'); } } catch(e){} }
